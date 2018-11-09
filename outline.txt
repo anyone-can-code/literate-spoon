@@ -1,0 +1,43 @@
+*** OUTLINE OF CLASS INHERITANCE AND DESCRIPTION ***
+
+Main.java (starts game)
+
+Engine.java (runs game)
+
+Terminal.java (print text to here so easy to change whether use in terminal or jpanel or other)
+
+Thing.java (anything that can appear in a room)
+|_ Item.java (items that can me picked up and used)
+|  |_ Weapon.java (things used to attack)
+|  |_ Consumible.java (things that can be consumed and effect the player)
+|
+|_ Entity.java (things that can hold items and use attacks)
+|  |_ Enemy.java (things the player fights)
+|  |_ Player.java (the player themself)
+|
+|_Readble.java (something that can be read/communicate, like a sign or npc)
+
+Room.java (holds things and allows them to interact inside the room)
+
+*** OUTLINE OF FILE PATH ***
+
+literate-spoon
+|_ LICENSE.md
+|_ README.md
+|_ outline.txt
+|_ src
+   |_ engine (package containing engine, seperate from game)
+   |  |_ Engine.java
+   |  |_ Terminal.java
+   |  |_ Room.java
+   |  |_ things (contains Thing and sub-classes)
+   |     |_ Thing.java
+   |     |_ Item.java
+   |     |_ Weapon.java
+   |     |_ Consumible.java
+   |     |_ Entity.java
+   |     |_ Enemy.java
+   |     |_ Player.java
+   |_ game (package containing game itself)
+      |_ DETERMINE LATER (engine is priority, we do not know what game needs yet
+     
