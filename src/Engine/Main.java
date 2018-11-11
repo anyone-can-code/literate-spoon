@@ -3,6 +3,7 @@ package engine;
 import engine.words.Direction;
 import engine.words.Verb;
 import engine.words.Word;
+import engine.Terminal;
 
 public class Main {
 	
@@ -12,7 +13,7 @@ public class Main {
 		game = new Engine();
 		game.addWord(new Verb("move go walk run climb jog strut", (Word w, Engine t) -> {
 			if (w.getClass() != Direction.class) {
-				System.out.println("Please specify a direction");
+				Terminal.println("Please specify a direction");
 				return;
 			}
 			

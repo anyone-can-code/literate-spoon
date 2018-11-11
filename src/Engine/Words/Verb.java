@@ -15,7 +15,7 @@ public class Verb extends Word {
 	}
 	
 	public void perform(Word w, Engine t) {
-		//System.out.println(w + " : " + t);
+		//Terminal.println(w + " : " + t);
 		myFunc.accept(w, t);
 	}
 }
