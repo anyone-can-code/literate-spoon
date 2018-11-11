@@ -1,10 +1,10 @@
-package Engine;
+package engine;
 
 import java.util.*;
 
-import Engine.Things.Player;
-import Engine.Words.Verb;
-import Engine.Words.Word;
+import engine.things.Player;
+import engine.words.Verb;
+import engine.words.Word;
 
 
 public class Engine {

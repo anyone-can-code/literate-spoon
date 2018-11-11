@@ -1,8 +1,8 @@
-package Engine.Words;
-import java.util.function.Consumer;
+package engine.words;
+import java.util.function.Consumer; 
 
-import Engine.Engine;
-import Engine.TwoParamFunc;
+import engine.Engine;
+import engine.TwoParamFunc;
 
 public class Verb extends Word {
 	

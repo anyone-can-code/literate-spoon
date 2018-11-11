@@ -1,4 +1,4 @@
-package Engine;
+package engine;
 
 public interface TwoParamFunc<O1, O2> {
 	public void accept(O1 o1, O2 o2);

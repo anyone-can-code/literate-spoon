@@ -1,8 +1,8 @@
-package Engine;
+package engine;
 
-import Engine.Words.Direction;
-import Engine.Words.Verb;
-import Engine.Words.Word;
+import engine.words.Direction;
+import engine.words.Verb;
+import engine.words.Word;
 
 public class Main {
 	
