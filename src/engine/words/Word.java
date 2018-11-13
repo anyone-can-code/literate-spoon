@@ -2,6 +2,7 @@ package engine.words;
 import java.util.*;
 
 import engine.Engine;
+import engine.things.Object;
 
 
 public abstract class Word {
@@ -22,19 +23,20 @@ public abstract class Word {
 		System.out.println(this.getClass());
 	}
 	
+	public void perform(Object o, Engine t) {
+		System.out.println(this.getClass());
+	}
+	
 	public void addSynonyms(String list) {
-		while (list.indexOf(' ') != -1) {
-			synonyms.add(list.substring(0, list.indexOf(' ')));
-			list = list.substring(list.indexOf(' ')+1);
+		String[] s = list.split(" ");
+		for(String str : s) {
+		synonyms.add(str);
 		}
-		
-		synonyms.add(list);
 	}
 	
 	public boolean checkWord(String word) {
-		for (String t: synonyms) {
-			if (t.equals(word))
-				return true;
+		if(synonyms.contains(word)) {
+			return true;
 		}
 		return false;
 	}

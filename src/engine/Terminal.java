@@ -12,6 +12,10 @@ public class Terminal {
 		System.out.println(s.toString());
 	}
 	
+	public static void print(Object s) {
+		System.out.print(s.toString());
+	}
+	
 	public static String readln() {
 		return new Scanner(System.in).nextLine();
 	}

@@ -3,6 +3,7 @@ package engine;
 import engine.words.Direction;
 import engine.words.Verb;
 import engine.words.Word;
+import engine.things.Object;
 import engine.Terminal;
 
 public class Main {
@@ -19,6 +20,9 @@ public class Main {
 			
 			t.protag.changePos(w.value);
 			
+		}, null));
+		game.addWord(new Verb("eat consume", null, (Object o, Engine t) -> {
+			Terminal.println("You ate a " + o.accessor + ". Delicious.");
 		}));
 		
 		game.addWord(new Direction("north forwards", "121"));

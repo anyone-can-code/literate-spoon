@@ -1,8 +1,11 @@
 package engine;
 
+import java.util.ArrayList;
+import engine.things.Object;
+
 public class Room {
 	public int[] coords;//x, y, z
-	
+	public ArrayList<Object> objects = new ArrayList<Object>();
 	
 	public Room(int x, int y, int z) {
 		coords = new int[3];

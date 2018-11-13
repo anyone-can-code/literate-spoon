@@ -1,8 +1,10 @@
 package engine.things;
 
+import engine.Room;
+
 public class Player {
 	private int[] pos;
-	
+	public Room currentRoom;
 	public Player(int x, int y, int z) {
 		pos = new int[3];
 		pos[0] = x;
