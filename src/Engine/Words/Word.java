@@ -1,7 +1,7 @@
-package Engine.Words;
+package engine.words;
 import java.util.*;
 
-import Engine.Engine;
+import engine.Engine;
 
 
 public abstract class Word {

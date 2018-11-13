@@ -1,4 +1,4 @@
-package Engine.Words;
+package engine.words;
 
 public class Direction extends Word {
 	public Direction(String list, String direction) {

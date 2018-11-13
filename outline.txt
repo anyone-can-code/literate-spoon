@@ -17,6 +17,10 @@ Thing.java (anything that can appear in a room)
 |
 |_Readble.java (something that can be read/communicate, like a sign or npc)
 
+Word.java (commands the player can use)
+|_ Verb.java (actions the player can do, like "go", "use")
+|_ Direction.java (up, down, etc.)
+
 Room.java (holds things and allows them to interact inside the room)
 
 *** OUTLINE OF FILE PATH ***
@@ -30,14 +34,20 @@ literate-spoon
    |  |_ Engine.java
    |  |_ Terminal.java
    |  |_ Room.java
+   |  |_ TwoParamFunc.java (interface)
+   |  |_ Main.java
    |  |_ things (contains Thing and sub-classes)
-   |     |_ Thing.java
-   |     |_ Item.java
-   |     |_ Weapon.java
-   |     |_ Consumible.java
-   |     |_ Entity.java
-   |     |_ Enemy.java
-   |     |_ Player.java
+   |  |  |_ Thing.java
+   |  |  |_ Item.java
+   |  |  |_ Weapon.java
+   |  |  |_ Consumible.java
+   |  |  |_ Entity.java
+   |  |  |_ Enemy.java
+   |  |  |_ Player.java
+   |  |_ words
+   |     |_ Direction.java
+   |     |_ Verb.java
+   |     |_ Word.java
    |_ game (package containing game itself)
       |_ DETERMINE LATER (engine is priority, we do not know what game needs yet
      

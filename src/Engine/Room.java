@@ -1,4 +1,4 @@
-package Engine;
+package engine;
 
 public class Room {
 	public int[] coords;//x, y, z

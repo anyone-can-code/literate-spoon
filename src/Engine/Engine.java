@@ -1,10 +1,12 @@
-package Engine;
+package engine;
 
 import java.util.*;
 
-import Engine.Things.Player;
-import Engine.Words.Verb;
-import Engine.Words.Word;
+import engine.things.Player;
+import engine.words.Verb;
+import engine.words.Word;
+
+import engine.Terminal;
 
 
 public class Engine {
@@ -13,7 +15,6 @@ public class Engine {
 	public ArrayList<Room> rooms;//can be accessed by verbs
 	private ArrayList<Word> knownWords;
 	
-	private Scanner input;
 	
 	
 	public Engine()  {
@@ -21,8 +22,6 @@ public class Engine {
 		
 		rooms = new ArrayList<Room>();
 		knownWords = new ArrayList<Word>();
-		
-		input = new Scanner(System.in);
 	}
 	
 	public void addRoom(Room r) {
@@ -34,13 +33,13 @@ public class Engine {
 	}
 	
 	public void update() {
-		System.out.println(protag);
+		Terminal.println(protag);
 		
 		String userText;
 		ArrayList<String> words;
 		
 		while (true) {//repeats until valid comman
-			userText = input.nextLine();
+			userText = Terminal.readln();
 			userText = userText.toLowerCase();
 			
 			
@@ -53,7 +52,7 @@ public class Engine {
 			words.add(userText);//user text goes to array of words
 			
 			if (words.size() != 2) {
-				System.out.println("All commands must be 2 words");
+				Terminal.println("All commands must be 2 words");
 				continue;
 			}
 			
@@ -70,12 +69,12 @@ public class Engine {
 			}//finds word in array
 			
 			if (!found) {
-				System.out.println("I don't know what '" + words.get(0) + "' means");
+				Terminal.println("I don't know what '" + words.get(0) + "' means");
 				continue;
 			}
 			
 			if (w0.getClass() != Verb.class) {
-				System.out.println("Commands always start with a verb");
+				Terminal.println("Commands always start with a verb");
 				continue;
 			}
 			
@@ -89,12 +88,12 @@ public class Engine {
 			}
 			
 			if (!found) {
-				System.out.println("I don't know what '" + words.get(1) + "' means");
+				Terminal.println("I don't know what '" + words.get(1) + "' means");
 				continue;
 			}
 			
 			if (w1.getClass() == Verb.class) {
-				System.out.println("Commands never end with a verb");
+				Terminal.println("Commands never end with a verb");
 				continue;
 			}
 			

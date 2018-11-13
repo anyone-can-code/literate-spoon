@@ -1,4 +1,4 @@
-package Engine.Things;
+package engine.things;
 
 public class Player {
 	private int[] pos;
