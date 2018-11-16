@@ -44,6 +44,7 @@ literate-spoon
    |  |  |_ Entity.java
    |  |  |_ Enemy.java
    |  |  |_ Player.java
+   |  |  |_ Effect.java
    |  |_ words
    |     |_ Direction.java
    |     |_ Verb.java
