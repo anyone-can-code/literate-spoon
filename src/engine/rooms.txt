@@ -1,0 +1,29 @@
+
+sample rooms below. use carrot brackets to designate new tag (not case sensitive).
+use ::: as divider instead of commas if a feature takes multiple parameters
+don't have multiple features on the same line
+ending spaces are trimmed
+
+features at the moment include:
+decription (1 param)
+coordinates (2 param)
+object (2 param)
+consumable (3 param)
+
+multiple object / consumable tags can be used
+
+{
+<description>
+You are in a dark cave. Water glistens on the hard limestone walls.
+It slowly drips off the stalactites and puddles at your feet. There cave extends in front of you.
+<coordinates> 0:::0
+<consumable> hard obsidian [rock] ::: submerged in a puddle ::: -5
+<consumable> broken rat [skull] ::: under your right foot ::: -2
+
+}
+{
+<description>
+The walls are still made of rock.
+<coordinates> 0:::1
+
+}
