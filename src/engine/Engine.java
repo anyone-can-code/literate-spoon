@@ -39,12 +39,14 @@ public class Engine {
 		
 		o = Consumable("dead [corpse]", "lying on", null, 10);
 		o.injury = Object.type.bruises;
+		o.holdable = null;
 		reference = new Object("the [floor]", o, null);
 		o.reference = reference;
 		rooms.get(0).objects.add(o);
 		
 		o = new Object("old wooden [bookshelf]", "on", null);
 		o.injury = Object.type.shatters;
+		o.holdable = null;
 		o.container.addAll(Arrays.asList(new Object("dusty old [book]", o, null), new Object("trigonometry [textbook]", o, null), new Object("[jar] full of candy", o, null)));
 		reference = new Object("the [floor]", o, null);
 		reference.consumability = null;
@@ -61,11 +63,15 @@ public class Engine {
 				if(obj.reference != null) {
 					references.add(obj.reference);
 				}
+				if(!obj.container.isEmpty()) {
+					references.addAll(obj.container);
+				}
 			}
 		}
 		for(Room r : rooms) {
 			r.objects.addAll(references);
 		}
+		
 		vocabulary = new ArrayList<Word>();
 	}
 
@@ -201,8 +207,16 @@ public class Engine {
 					found = true;
 				}
 			}
-
+			
+			
 			for (Object o : protag.currentRoom.objects) {
+				if (o.accessor.equals(words.get(1))) {
+					o1 = o;
+					foundObject = true;
+				}
+			}
+			
+			for (Object o : protag.inventory) {
 				if (o.accessor.equals(words.get(1))) {
 					o1 = o;
 					foundObject = true;

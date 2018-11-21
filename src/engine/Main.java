@@ -46,11 +46,10 @@ public class Main {
 				if(o.container.size() == 1) {
 					Terminal.print(t.randOf(new String[] {"Upon inspection, you observe that there is a " + o.container.get(0).compSub, "It looks like there is a " + o.container.get(0).compSub, 
 							"You now can see that there is a " + o.container.get(0).compSub}));
-					Terminal.print(" inside the " + o.accessor);
 				} else if(o.container.size() == 2) {
 					Terminal.print(t.randOf(new String[] {"Upon inspection, you observe that there is a " + o.container.get(0).compSub, "It looks like there is a " + o.container.get(0).compSub, 
 							"You now can see that there is a " + o.container.get(0).compSub}));
-					Terminal.print(" as well as a " + o.container.get(1).compSub + " inside the " + o.accessor);
+					Terminal.print(" as well as a " + o.container.get(1).compSub);
 				} else {
 					Terminal.print(t.randOf(new String[] {"Upon inspection, you observe that there is a " + o.container.get(0).compSub, "It looks like there is a " + o.container.get(0).compSub, 
 							"You now can see that there is a " + o.container.get(0).compSub}));
@@ -58,8 +57,9 @@ public class Main {
 						Terminal.print(", a ");
 						Terminal.print(o.container.get(i).compSub);
 					}
-					Terminal.print(", and a " + o.container.get(o.container.size() - 1).compSub + " inside the " + o.accessor);
+					Terminal.print(", and a " + o.container.get(o.container.size() - 1).compSub);
 				}
+				Terminal.print(" inside the " + o.accessor);
 			}
 			Terminal.println(".");
 		}));
@@ -75,7 +75,31 @@ public class Main {
 			Terminal.println("You took the " + o.accessor + ".");
 		}));
 
-
+		game.addWord(new Verb("open", (Word n, Engine t) -> {
+			if(n.represents == t.protag.inventory) {
+				if(t.protag.inventory.isEmpty()) {
+					Terminal.print("You have nothing in your inventory");
+				} else {
+				Terminal.print("You have a ");
+				if(t.protag.inventory.size() == 1) {
+					Terminal.print(t.protag.inventory.get(0).compSub);
+				} else if(t.protag.inventory.size() == 2) {
+					Terminal.print(t.protag.inventory.get(0).compSub);
+					Terminal.print(" as well as a " + t.protag.inventory.get(1).compSub);
+				} else {
+					Terminal.print(t.protag.inventory.get(0).compSub);
+					for(int i = 1; i < t.protag.inventory.size() - 1; i++) {
+						Terminal.print(", a ");
+						Terminal.print(t.protag.inventory.get(i).compSub);
+					}
+					Terminal.print(", and a " + t.protag.inventory.get(t.protag.inventory.size() - 1).compSub);
+				}
+				}Terminal.println(".");
+			}
+		}, null));
+		
+		game.addWord(new Word("inventory", game.protag.inventory));
+		
 		game.addWord(new Direction("north forwards", "121"));
 		game.addWord(new Direction("south backwards", "101"));
 		game.addWord(new Direction("east right", "211"));
