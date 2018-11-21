@@ -1,3 +1,4 @@
+
 package engine;
 
 import java.util.*;
@@ -23,9 +24,48 @@ public class Engine {
 
 		rooms = new ArrayList<Room>();
 		rooms.add(new Room(0, 0, 0));
-		rooms.get(0).objects.add(new Object("red [brick]", "on a nice hand-knitted carpet"));
-		rooms.get(0).objects.add(new Object("soft and tender [spider]", "on your face"));
-		rooms.get(0).objects.add(Consumable("small [baby] wearing a wool sweater", "sitting on a chair", 10));
+		
+		Object o = new Object("red [brick]", "on a", null);
+		o.injury = Object.type.shatters;
+		Object reference = new Object("nice hand-knitted [carpet]", o, null);
+		o.reference = reference;
+		rooms.get(0).objects.add(o);
+		
+		o = new Object("soft and tender [spider]", "on", null);
+		o.injury = Object.type.squishes;
+		reference = new Object("your [face]", o, null);
+		o.reference = reference;
+		rooms.get(0).objects.add(o);
+		
+		o = Consumable("dead [corpse]", "lying on", null, 10);
+		o.injury = Object.type.bruises;
+		reference = new Object("the [floor]", o, null);
+		o.reference = reference;
+		rooms.get(0).objects.add(o);
+		
+		o = new Object("old wooden [bookshelf]", "on", null);
+		o.injury = Object.type.shatters;
+		o.container.addAll(Arrays.asList(new Object("dusty old [book]", o, null), new Object("trigonometry [textbook]", o, null), new Object("[jar] full of candy", o, null)));
+		reference = new Object("the [floor]", o, null);
+		reference.consumability = null;
+		reference.holdable = null;
+		reference.setHealth(null);
+		o.reference = reference;
+		rooms.get(0).objects.add(o);
+		
+		ArrayList<Object> references = new ArrayList<Object>();
+		for(Room r : rooms) {
+			Iterator<Object> it = r.objects.iterator();
+			while(it.hasNext()) {
+				Object obj = it.next();
+				if(obj.reference != null) {
+					references.add(obj.reference);
+				}
+			}
+		}
+		for(Room r : rooms) {
+			r.objects.addAll(references);
+		}
 		vocabulary = new ArrayList<Word>();
 	}
 
@@ -37,8 +77,8 @@ public class Engine {
 		vocabulary.add(v);
 	}
 
-	public Object Consumable(String accessor, String descriptor, int consumability) {
-		Object o = new Object(accessor, descriptor);
+	public Object Consumable(String accessor, String descriptor, String inspection, int consumability) {
+		Object o = new Object(accessor, descriptor, inspection);
 		o.consumability = consumability;
 		return o;
 	}
@@ -87,10 +127,33 @@ public class Engine {
 									? "You think that you might have some injuries, but you've forgotten where."
 									: "You feel slightly dead, but you aren't sure.");
 			for (Object o : protag.currentRoom.objects) {
-				Terminal.print(randOf(new String[] { "There is a " + o.compSub + " " + o.description,
-						o.description + ", there is a " + o.compSub,
-						"You notice a " + o.compSub + " " + o.description }));
-				System.out.print(". ");
+				if(o.health != null && o.health < o.maxHealth) {
+					int p = (int)(((float)o.health/(float)o.maxHealth) * 4);
+					switch (o.injury) {
+						case crumples :
+							o.compSub = (p == 3 ? "dented " : p == 2 ? "bent " : p == 1 ? "crumpled-up " : "crushed ")  + o.accessor;
+							break;
+						case shatters :
+							o.compSub = (p == 3 ? "fractured " : p > 0 ? "cracked " : "shattered ") + o.accessor;
+							break;
+						case squishes :
+							o.compSub = (p == 3 ? "bruised " : p == 2 ? "squashed " : p == 1 ? "compressed " : "trampled ") + o.accessor;
+							break;
+						case bruises :
+							o.compSub = (p == 3 ? "bruised " : p == 2 ? "damaged " : p == 1 ? "beaten-up " : "pulverized ") + o.accessor;
+							break;
+					}
+				}
+				try {
+					Object r = o.reference;
+					Terminal.print(randOf(new String[] { "There is a " + o.compSub + " " + o.description + " " + r.compSub,
+						o.description + " " + r.compSub + ", there is a " + o.compSub,
+						"You notice a " + o.compSub + " " + o.description + " " + r.compSub }));
+					Terminal.print(". ");
+				} catch(NullPointerException e) {
+					
+				}
+				
 			}
 			Terminal.print("\n");
 

@@ -13,6 +13,7 @@ public class Player {
 	public int maxHealth = 0;
 	public int hunger = 0;
 	public int thirst = 0;
+	public int basicAttack = 5;
 
 	public Player(int x, int y, int z) {
 		pos = new int[3];
