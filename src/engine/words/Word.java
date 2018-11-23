@@ -10,8 +10,7 @@ public class Word {
 
 	public String value; // for use of verbs
 	public java.lang.Object represents;
-	
-	
+
 	public Word() {
 		synonyms = new ArrayList<String>();
 	}
@@ -20,7 +19,7 @@ public class Word {
 		synonyms = new ArrayList<String>();
 		addSynonyms(list);
 	}
-	
+
 	public Word(String list, java.lang.Object o) {
 		synonyms = new ArrayList<String>();
 		addSynonyms(list);

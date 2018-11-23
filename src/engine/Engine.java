@@ -24,54 +24,55 @@ public class Engine {
 
 		rooms = new ArrayList<Room>();
 		rooms.add(new Room(0, 0, 0));
-		
+
 		Object o = new Object("red [brick]", "on a", null);
 		o.injury = Object.type.shatters;
 		Object reference = new Object("nice hand-knitted [carpet]", o, null);
 		o.reference = reference;
 		rooms.get(0).objects.add(o);
-		
-		o = new Object("soft and tender [spider]", "on", null);
+
+		o = new Object("deformed [spider]", "on", null);
 		o.injury = Object.type.squishes;
 		reference = new Object("your [face]", o, null);
+		reference.abstractNoun();
 		o.reference = reference;
 		rooms.get(0).objects.add(o);
-		
+
 		o = Consumable("dead [corpse]", "lying on", null, 10);
 		o.injury = Object.type.bruises;
 		o.holdable = null;
 		reference = new Object("the [floor]", o, null);
+		reference.abstractNoun();
 		o.reference = reference;
 		rooms.get(0).objects.add(o);
-		
-		o = new Object("old wooden [bookshelf]", "on", null);
+
+		o = new Object("old wooden [bookshelf]", "in", null);
 		o.injury = Object.type.shatters;
 		o.holdable = null;
-		o.container.addAll(Arrays.asList(new Object("dusty old [book]", o, null), new Object("trigonometry [textbook]", o, null), new Object("[jar] full of candy", o, null)));
-		reference = new Object("the [floor]", o, null);
-		reference.consumability = null;
-		reference.holdable = null;
-		reference.setHealth(null);
+		o.container.addAll(Arrays.asList(new Object("dusty old [book]", o, null),
+				new Object("trigonometry [textbook]", o, null), new Object("[jar] full of candy", o, null)));
+		reference = new Object("the back of the [room]", o, null);
+		reference.abstractNoun();
 		o.reference = reference;
 		rooms.get(0).objects.add(o);
-		
+
 		ArrayList<Object> references = new ArrayList<Object>();
-		for(Room r : rooms) {
+		for (Room r : rooms) {
 			Iterator<Object> it = r.objects.iterator();
-			while(it.hasNext()) {
+			while (it.hasNext()) {
 				Object obj = it.next();
-				if(obj.reference != null) {
+				if (obj.reference != null) {
 					references.add(obj.reference);
 				}
-				if(!obj.container.isEmpty()) {
+				if (!obj.container.isEmpty()) {
 					references.addAll(obj.container);
 				}
 			}
 		}
-		for(Room r : rooms) {
+		for (Room r : rooms) {
 			r.objects.addAll(references);
 		}
-		
+
 		vocabulary = new ArrayList<Word>();
 	}
 
@@ -89,9 +90,31 @@ public class Engine {
 		return o;
 	}
 
-	public String randOf(String[] s) {
+	public String uRandOf(String[] s) {
 		int x = rand.nextInt(s.length);
+
+		// Convert 'a's to 'an's
+		for (int i = 2; i < s[x].length(); i++) {
+			ArrayList<Character> vowels = new ArrayList<Character>(Arrays.asList('a', 'e', 'i', 'o', 'u'));
+			if (vowels.contains(s[x].charAt(i)) && s[x].charAt(i - 2) == 'a' && s[x].charAt(i - 1) == ' '
+					&& s[x].charAt(i - 3) == ' ') {
+				s[x] = s[x].substring(0, i - 2) + "an" + s[x].substring(i - 1, s[x].length());
+			}
+		}
 		return s[x].substring(0, 1).toUpperCase() + s[x].substring(1, s[x].length());
+	}
+
+	public String lRandOf(String[] s) {
+		int x = rand.nextInt(s.length);
+		// Convert 'a's to 'an's
+		for (int i = 2; i < s[x].length(); i++) {
+			ArrayList<Character> vowels = new ArrayList<Character>(Arrays.asList('a', 'e', 'i', 'o', 'u'));
+			if (vowels.contains(s[x].charAt(i)) && s[x].charAt(i - 2) == 'a' && s[x].charAt(i - 1) == ' '
+					&& s[x].charAt(i - 3) == ' ') {
+				s[x] = s[x].substring(0, i - 2) + "an" + s[x].substring(i - 1, s[x].length());
+			}
+		}
+		return s[x].toLowerCase();
 	}
 
 	public void updatePlayerState() {
@@ -114,8 +137,6 @@ public class Engine {
 	}
 
 	public void update() {
-		Terminal.println(protag);
-
 		String userText;
 		ArrayList<String> words;
 
@@ -133,33 +154,114 @@ public class Engine {
 									? "You think that you might have some injuries, but you've forgotten where."
 									: "You feel slightly dead, but you aren't sure.");
 			for (Object o : protag.currentRoom.objects) {
-				if(o.health != null && o.health < o.maxHealth) {
-					int p = (int)(((float)o.health/(float)o.maxHealth) * 4);
+				if (o.health != null && o.health <= 0) {
+					for (Object obj : o.container) {
+						obj.reference = new Object("the [floor]", o, null);
+						obj.description = lRandOf(new String[] { "lying", "sitting", "resting" }) + " on the";
+
+					}
+					o.container.clear();
+				}
+			}
+			int x1 = 0;
+			int x2 = 0;
+			for (int i = 0; i < protag.currentRoom.objects.size(); i++) {
+				Object o = protag.currentRoom.objects.get(i);
+				String compSub = o.compSub;
+				if (o.health != null && o.health < o.maxHealth) {
+					int p = (int) (((float) o.health / (float) o.maxHealth) * 4);
 					switch (o.injury) {
-						case crumples :
-							o.compSub = (p == 3 ? "dented " : p == 2 ? "bent " : p == 1 ? "crumpled-up " : "crushed ")  + o.accessor;
-							break;
-						case shatters :
-							o.compSub = (p == 3 ? "fractured " : p > 0 ? "cracked " : "shattered ") + o.accessor;
-							break;
-						case squishes :
-							o.compSub = (p == 3 ? "bruised " : p == 2 ? "squashed " : p == 1 ? "compressed " : "trampled ") + o.accessor;
-							break;
-						case bruises :
-							o.compSub = (p == 3 ? "bruised " : p == 2 ? "damaged " : p == 1 ? "beaten-up " : "pulverized ") + o.accessor;
-							break;
+					case crumples:
+						compSub = (p == 3 ? "dented " : p == 2 ? "bent " : p == 1 ? "crumpled-up " : "crushed ")
+								+ o.accessor;
+						break;
+					case shatters:
+						compSub = (p == 3 ? "fractured " : p > 0 ? "cracked " : "shattered ") + o.accessor;
+						break;
+					case squishes:
+						compSub = (p == 3 ? "bruised " : p == 2 ? "squashed " : p == 1 ? "compressed " : "trampled ")
+								+ o.accessor;
+						break;
+					case bruises:
+						compSub = (p == 3 ? "bruised " : p == 2 ? "damaged " : p == 1 ? "beaten-up " : "pulverized ")
+								+ o.accessor;
+						break;
 					}
 				}
-				try {
-					Object r = o.reference;
-					Terminal.print(randOf(new String[] { "There is a " + o.compSub + " " + o.description + " " + r.compSub,
-						o.description + " " + r.compSub + ", there is a " + o.compSub,
-						"You notice a " + o.compSub + " " + o.description + " " + r.compSub }));
-					Terminal.print(". ");
-				} catch(NullPointerException e) {
-					
+				if(protag.hunger > 0) {
+					if(rand.nextInt(101 - protag.hunger) < 5 && o.reference != null) {
+						compSub = lRandOf(new String[] { "possibly edible", "juicy and tender", "appetizing", "delicious-looking", "scrumptious"}) + " " + compSub;
+					}
 				}
 				
+				int n = i + 1;
+				String s = null;
+				while (s == null) {
+					try {
+					s = protag.currentRoom.objects.get(n).reference.accessor;
+						if (s.equals(o.reference.accessor)) {
+							x1 = 2;
+						}
+						break;
+					} catch (NullPointerException e) {
+						
+					} catch(IndexOutOfBoundsException e) {
+						break;
+					}
+					n++;
+				}
+				n = i - 1;
+				s = null;
+				while (s == null) {
+					try {
+					s = protag.currentRoom.objects.get(n).reference.accessor;
+						if (s.equals(o.reference.accessor)) {
+							x2 = 1;
+						}
+						break;
+					} catch (NullPointerException e) {
+						
+					} catch(IndexOutOfBoundsException e) {
+						break;
+					}
+					n--;
+				}
+
+				try {
+					Object r = o.reference;
+					if (x1 == 1) {
+						if(x2 == 0) {
+						Terminal.print(lRandOf(
+								new String[] { " as well as a " + compSub + " " + o.description + " " + r.compSub,
+										" and a " + compSub + " " + o.description + " " + r.compSub }));
+						} else {
+							Terminal.print(", and a " + compSub + " " + o.description + " " + r.compSub);
+						}
+					} else if (x1 == 2) {
+						if(x2 == 0) {
+						Terminal.print(
+								uRandOf(new String[] { "there is a " + compSub, "You notice a " + compSub }));
+						} else {
+							Terminal.print(", a " + compSub);
+						}
+					} else {
+						Terminal.print(uRandOf(
+								new String[] { "there is a " + compSub + " " + o.description + " " + r.compSub,
+										o.description + " " + r.compSub + ", there is a " + compSub,
+										"You notice a " + compSub + " " + o.description + " " + r.compSub }));
+					}
+					if (x1 > 0) {
+						x1--;
+					}
+					if (x1 == 0) {
+						x2 = 0;
+						Terminal.print(". ");
+					}
+
+				} catch (NullPointerException e) {
+
+				}
+
 			}
 			Terminal.print("\n");
 
@@ -172,7 +274,7 @@ public class Engine {
 				words.add(str);// user text goes to array of words
 			}
 			if (words.size() != 2) {
-				Terminal.println("All commands must be 2 words");
+				Terminal.println("All commands must be 2 words.");
 				continue;
 			}
 
@@ -207,15 +309,14 @@ public class Engine {
 					found = true;
 				}
 			}
-			
-			
+
 			for (Object o : protag.currentRoom.objects) {
 				if (o.accessor.equals(words.get(1))) {
 					o1 = o;
 					foundObject = true;
 				}
 			}
-			
+
 			for (Object o : protag.inventory) {
 				if (o.accessor.equals(words.get(1))) {
 					o1 = o;

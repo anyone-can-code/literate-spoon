@@ -14,25 +14,32 @@ public class Object {
 	public Boolean holdable = true;
 	public Integer health = 10;
 	public Integer maxHealth = 10;
-	public enum type { crumples, shatters, squishes, bruises};
+
+	public enum type {
+		crumples, shatters, squishes, bruises
+	};
+
 	public type injury;
-	
+
 	public Object(String compSub, String description, String inspection) {
 		this.accessor = compSub.substring(compSub.indexOf("[") + 1, compSub.indexOf("]"));
 		this.compSub = compSub.replace("[", "").replace("]", "");
 		this.description = description;
 		this.inspection = inspection != null ? inspection : "it's just a " + accessor;
 	}
+
 	public Object(String compSub, Object referenced, String inspection) {
 		this.accessor = compSub.substring(compSub.indexOf("[") + 1, compSub.indexOf("]"));
 		this.compSub = compSub.replace("[", "").replace("]", "");
 		referencer = referenced;
 		this.inspection = inspection != null ? inspection : "it's just a " + accessor;
 	}
+
 	public void setHealth(Integer i) {
 		health = i;
 		maxHealth = health;
 	}
+
 	public void abstractNoun() {
 		setHealth(null);
 		consumability = null;

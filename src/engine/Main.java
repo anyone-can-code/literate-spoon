@@ -13,7 +13,7 @@ public class Main {
 
 	public static void main(String args[]) {
 		game = new Engine();
-		game.addWord(new Verb("move go walk run climb jog strut", (Word w, Engine t) -> {
+		game.addWord(new Verb("move go walk run climb jog travel journey venture", (Word w, Engine t) -> {
 			if (w.getClass() != Direction.class) {
 				Terminal.println("Please specify a direction");
 				return;
@@ -32,28 +32,25 @@ public class Main {
 			}
 			t.protag.currentRoom.objects.remove(o);
 			try {
-			o.referencer.reference.compSub = t.randOf(new String[] {"floor", "ground"}).toLowerCase();
-			o.referencer.description = o.referencer.description.replace(" a", " the");
+				o.referencer.reference.compSub = t.lRandOf(new String[] { "floor", "ground" });
+				o.referencer.description = o.referencer.description.replace(" a", " the");
 			} catch (Exception e) {
-				
+
 			}
 		}));
 		game.addWord(new Verb("inspect investigate examine scrutinize study observe", null, (Object o, Engine t) -> {
-			if(o.container.isEmpty()) {
-			Terminal.print(t.randOf(new String[] {"Upon inspection, you realize that " + o.inspection, "It looks like " + o.inspection, 
-					"You now can see that " + o.inspection}));
+			if (o.container.isEmpty()) {
+				Terminal.print(t.uRandOf(new String[] { "Upon inspection, you realize that " + o.inspection,
+						"It looks like " + o.inspection, "You now can see that " + o.inspection }));
 			} else {
-				if(o.container.size() == 1) {
-					Terminal.print(t.randOf(new String[] {"Upon inspection, you observe that there is a " + o.container.get(0).compSub, "It looks like there is a " + o.container.get(0).compSub, 
-							"You now can see that there is a " + o.container.get(0).compSub}));
-				} else if(o.container.size() == 2) {
-					Terminal.print(t.randOf(new String[] {"Upon inspection, you observe that there is a " + o.container.get(0).compSub, "It looks like there is a " + o.container.get(0).compSub, 
-							"You now can see that there is a " + o.container.get(0).compSub}));
+				Terminal.print(t.uRandOf(
+							new String[] { "Upon inspection, you observe that there is a " + o.container.get(0).compSub,
+									"It looks like there is a " + o.container.get(0).compSub,
+									"You now can see that there is a " + o.container.get(0).compSub }));
+				if (o.container.size() == 2) {
 					Terminal.print(" as well as a " + o.container.get(1).compSub);
-				} else {
-					Terminal.print(t.randOf(new String[] {"Upon inspection, you observe that there is a " + o.container.get(0).compSub, "It looks like there is a " + o.container.get(0).compSub, 
-							"You now can see that there is a " + o.container.get(0).compSub}));
-					for(int i = 1; i < o.container.size() - 1; i++) {
+				} else if(o.container.size() > 2){
+					for (int i = 1; i < o.container.size() - 1; i++) {
 						Terminal.print(", a ");
 						Terminal.print(o.container.get(i).compSub);
 					}
@@ -63,7 +60,7 @@ public class Main {
 			}
 			Terminal.println(".");
 		}));
-		
+
 		game.addWord(new Verb("attack assault assail punch hit kick pummel strike", null, (Object o, Engine t) -> {
 			o.health -= t.protag.basicAttack;
 			Terminal.println("You attacked the " + o.accessor + ".");
@@ -76,30 +73,27 @@ public class Main {
 		}));
 
 		game.addWord(new Verb("open", (Word n, Engine t) -> {
-			if(n.represents == t.protag.inventory) {
-				if(t.protag.inventory.isEmpty()) {
+			if (n.represents == t.protag.inventory) {
+				if (t.protag.inventory.isEmpty()) {
 					Terminal.print("You have nothing in your inventory");
 				} else {
-				Terminal.print("You have a ");
-				if(t.protag.inventory.size() == 1) {
-					Terminal.print(t.protag.inventory.get(0).compSub);
-				} else if(t.protag.inventory.size() == 2) {
-					Terminal.print(t.protag.inventory.get(0).compSub);
-					Terminal.print(" as well as a " + t.protag.inventory.get(1).compSub);
-				} else {
-					Terminal.print(t.protag.inventory.get(0).compSub);
-					for(int i = 1; i < t.protag.inventory.size() - 1; i++) {
-						Terminal.print(", a ");
-						Terminal.print(t.protag.inventory.get(i).compSub);
+					Terminal.print("You have a " + t.protag.inventory.get(0).compSub);
+					if (t.protag.inventory.size() == 2) {
+						Terminal.print(" as well as a " + t.protag.inventory.get(1).compSub);
+					} else if(t.protag.inventory.size() > 2){
+						for (int i = 1; i < t.protag.inventory.size() - 1; i++) {
+							Terminal.print(", a ");
+							Terminal.print(t.protag.inventory.get(i).compSub);
+						}
+						Terminal.print(", and a " + t.protag.inventory.get(t.protag.inventory.size() - 1).compSub);
 					}
-					Terminal.print(", and a " + t.protag.inventory.get(t.protag.inventory.size() - 1).compSub);
 				}
-				}Terminal.println(".");
+				Terminal.println(".");
 			}
 		}, null));
-		
+
 		game.addWord(new Word("inventory", game.protag.inventory));
-		
+
 		game.addWord(new Direction("north forwards", "121"));
 		game.addWord(new Direction("south backwards", "101"));
 		game.addWord(new Direction("east right", "211"));
