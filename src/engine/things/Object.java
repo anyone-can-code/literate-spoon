@@ -3,6 +3,7 @@ package engine.things;
 import java.util.ArrayList;
 
 public class Object {
+	public boolean alive = false;
 	public String accessor;
 	public String compSub = "";
 	public String description;

@@ -4,6 +4,7 @@ import engine.words.Direction;
 import engine.words.Verb;
 import engine.words.Word;
 import engine.things.Effect;
+import engine.things.Entity;
 import engine.things.Object;
 import engine.Terminal;
 
@@ -60,9 +61,14 @@ public class Main {
 			}
 			Terminal.println(".");
 		}));
-
+		game.addWord(new Verb("interact", null, (Object o, Engine t) -> {
+			if(o.alive) {
+				Entity e = (Entity)o;
+				e.interaction.accept(t.protag, t);
+			}
+		}));
 		game.addWord(new Verb("attack assault assail punch hit kick pummel strike", null, (Object o, Engine t) -> {
-			o.health -= t.protag.basicAttack;
+			o.health -= t.protag.strength;
 			Terminal.println("You attacked the " + o.accessor + ".");
 		}));
 		game.addWord(new Verb("take steal grab seize apprehend liberate", null, (Object o, Engine t) -> {
@@ -72,7 +78,7 @@ public class Main {
 			Terminal.println("You took the " + o.accessor + ".");
 		}));
 
-		game.addWord(new Verb("open", (Word n, Engine t) -> {
+		game.addWord(new Verb("open check", (Word n, Engine t) -> {
 			if (n.represents == t.protag.inventory) {
 				if (t.protag.inventory.isEmpty()) {
 					Terminal.print("You have nothing in your inventory");

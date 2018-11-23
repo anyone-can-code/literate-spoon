@@ -5,6 +5,7 @@ import java.util.*;
 
 import engine.things.Player;
 import engine.things.Effect;
+import engine.things.Entity;
 import engine.things.Object;
 import engine.words.Verb;
 import engine.words.Word;
@@ -16,6 +17,7 @@ public class Engine {
 
 	public ArrayList<Room> rooms;// can be accessed by verbs
 	private ArrayList<Word> vocabulary;
+	public ArrayList<Object> eventQueue = new ArrayList<Object>();
 	Random rand = new Random();
 
 	public Engine() {
@@ -55,6 +57,25 @@ public class Engine {
 		reference.abstractNoun();
 		o.reference = reference;
 		rooms.get(0).objects.add(o);
+		
+		Entity e = new Entity("an old [man]", "standing in front of", 
+				(Player p, Engine e1) -> {
+					Terminal.print("The old man says hi.");
+					}, 
+				(Engine e2) -> {
+					Terminal.println("The old man dies. He leaves you a corpse as a parting gift.");
+					Object obj = Consumable("dead [corpse]", "lying on", null, 10);
+					obj.injury = Object.type.bruises;
+					obj.holdable = null;
+					Object ref = new Object("the [floor]", obj, null);
+					ref.abstractNoun();
+					obj.reference = ref;
+					eventQueue.add(obj);
+					});
+		reference = new Object("[you]", o, null);
+		reference.abstractNoun();
+		e.reference = reference;
+		rooms.get(0).objects.add(e);
 
 		ArrayList<Object> references = new ArrayList<Object>();
 		for (Room r : rooms) {
@@ -141,6 +162,7 @@ public class Engine {
 		ArrayList<String> words;
 
 		while (true) {// repeats until valid command
+			eventQueue.clear();
 			for (Room r : rooms) {
 				if (r.toString().equals(protag.toString())) {
 					protag.currentRoom = r;
@@ -165,6 +187,24 @@ public class Engine {
 			}
 			int x1 = 0;
 			int x2 = 0;
+			Iterator<Object> objectIt = protag.currentRoom.objects.iterator();
+			while(objectIt.hasNext()) {
+				Object o = objectIt.next();
+				if(o.alive && o.health <= 0) {
+					if(o.getClass().getSimpleName().equals("Entity")) {
+						Entity e = (Entity)o;
+						e.death.accept(this);
+						for(Object obj : e.inventory) {
+							Object ref = new Object("the [floor]", obj, null);
+							ref.abstractNoun();
+							obj.reference = ref; 
+							eventQueue.add(obj);
+						}
+						objectIt.remove();
+					}
+				}
+			}
+			protag.currentRoom.objects.addAll(eventQueue);
 			for (int i = 0; i < protag.currentRoom.objects.size(); i++) {
 				Object o = protag.currentRoom.objects.get(i);
 				String compSub = o.compSub;
@@ -257,11 +297,9 @@ public class Engine {
 						x2 = 0;
 						Terminal.print(". ");
 					}
-
 				} catch (NullPointerException e) {
 
 				}
-
 			}
 			Terminal.print("\n");
 
@@ -343,12 +381,12 @@ public class Engine {
 			}
 
 			updatePlayerState();
-			Iterator<Effect> it = protag.effects.iterator();
-			while (it.hasNext()) {
-				Effect e = it.next();
+			Iterator<Effect> effectIt = protag.effects.iterator();
+			while (effectIt.hasNext()) {
+				Effect e = effectIt.next();
 				e.affect(protag);
 				if (e.lifetime == 0) {
-					it.remove();
+					effectIt.remove();
 				}
 			}
 			break;
