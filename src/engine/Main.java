@@ -6,6 +6,9 @@ import engine.words.Word;
 import engine.things.Effect;
 import engine.things.Entity;
 import engine.things.Object;
+
+import java.io.File;
+
 import engine.Terminal;
 
 public class Main {
@@ -14,7 +17,16 @@ public class Main {
 
 	public static void main(String args[]) {
 		game = new Engine();
+
 		game.addWord(new Verb("move go walk run climb jog travel journey venture", (Word w, Engine t) -> {
+
+		
+		File f = new File("src/engine/rooms.txt");
+		game.readFile(f);
+		
+		
+		game.addWord(new Verb("move go walk run climb jog strut", (Word w, Engine t) -> {
+
 			if (w.getClass() != Direction.class) {
 				Terminal.println("Please specify a direction");
 				return;
@@ -78,6 +90,7 @@ public class Main {
 			Terminal.println("You took the " + o.accessor + ".");
 		}));
 
+
 		game.addWord(new Verb("open check", (Word n, Engine t) -> {
 			if (n.represents == t.protag.inventory) {
 				if (t.protag.inventory.isEmpty()) {
@@ -100,12 +113,10 @@ public class Main {
 
 		game.addWord(new Word("inventory", game.protag.inventory));
 
-		game.addWord(new Direction("north forwards", "121"));
-		game.addWord(new Direction("south backwards", "101"));
-		game.addWord(new Direction("east right", "211"));
-		game.addWord(new Direction("west left", "011"));
-		game.addWord(new Direction("up skyward", "112"));
-		game.addWord(new Direction("down groundward", "110"));
+		game.addWord(new Direction("north forwards", "12"));
+		game.addWord(new Direction("south backwards", "10"));
+		game.addWord(new Direction("east right", "21"));
+		game.addWord(new Direction("west left", "01"));
 
 		while (true) {
 			game.update();

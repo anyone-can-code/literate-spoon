@@ -29,13 +29,16 @@ literate-spoon
 |_ LICENSE.md
 |_ README.md
 |_ outline.txt
+|_ CONTRIBUTING.md
 |_ src
    |_ engine (package containing engine, seperate from game)
    |  |_ Engine.java
    |  |_ Terminal.java
    |  |_ Room.java
+   |  |_ OneParamFunction.java (interface)
    |  |_ TwoParamFunc.java (interface)
    |  |_ Main.java
+   |  |_rooms.txt
    |  |_ things (contains Thing and sub-classes)
    |  |  |_ Thing.java
    |  |  |_ Item.java
@@ -44,6 +47,7 @@ literate-spoon
    |  |  |_ Entity.java
    |  |  |_ Enemy.java
    |  |  |_ Player.java
+   |  |  |_ Effect.java
    |  |_ words
    |     |_ Direction.java
    |     |_ Verb.java

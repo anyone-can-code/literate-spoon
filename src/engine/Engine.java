@@ -1,6 +1,7 @@
 
 package engine;
 
+import java.io.File;
 import java.util.*;
 
 import engine.things.Player;
@@ -21,10 +22,11 @@ public class Engine {
 	Random rand = new Random();
 
 	public Engine() {
-		protag = new Player(0, 0, 0);
+		protag = new Player(0, 0);
 		protag.setHealth(100);
 
 		rooms = new ArrayList<Room>();
+
 		rooms.add(new Room(0, 0, 0));
 
 		Object o = new Object("red [brick]", "on a", null);
@@ -94,7 +96,82 @@ public class Engine {
 			r.objects.addAll(references);
 		}
 
+
 		vocabulary = new ArrayList<Word>();
+	}
+	
+	public void readFile(File f) {
+		Scanner sc;
+		try {
+			sc = new Scanner(f);
+		} catch(Exception exc) {
+			exc.printStackTrace();
+			return;
+		}
+		
+		String ln, type;
+		ArrayList<String> strs;
+		
+		while(true) {
+			if (!sc.hasNextLine()) {
+				break;
+			}
+			
+			
+			ln = sc.nextLine();
+			if (ln.indexOf("{") == -1)
+				continue;
+			
+			Room r = new Room();
+			
+			ln = ln.substring(ln.indexOf("{") + 1).trim();
+			
+			while (true) {
+				if (ln.indexOf("}") != -1)
+					break;
+				
+				while(ln.indexOf("<") == -1 || ln.indexOf(">") < ln.indexOf("<"))
+					ln = sc.nextLine();
+				
+				type = ln.substring(ln.indexOf("<") + 1, ln.indexOf(">")).toLowerCase();
+				
+				//System.out.println(type);
+				
+				strs = new ArrayList<String>();
+				strs.add(ln.substring(ln.indexOf(">") + 1));
+				
+				ln = sc.nextLine();
+				
+				while ((ln.indexOf("<") == -1 || ln.indexOf(">") < ln.indexOf("<")) && ln.indexOf("}") == -1) {
+					strs.set(0, strs.get(0) + ln);
+					ln = sc.nextLine();
+				}
+				
+				while (strs.get(0).indexOf(":::") != -1) {
+					strs.add(strs.get(0).substring(0, strs.get(0).indexOf(":::")).trim());
+					strs.set(0, strs.get(0).substring(strs.get(0).indexOf(":::") + 3));
+				}
+				
+				strs.add(strs.get(0).trim());
+				strs.remove(0);
+				
+				//System.out.println(strs);
+				
+				if (type.equals("coordinates")) {
+					r.coords[0] = Integer.parseInt(strs.get(0));
+					r.coords[1] = Integer.parseInt(strs.get(1));
+				} else if(type.equals("description")) {
+					r.description = strs.get(0);
+				} else if(type.equals("object")) {
+					r.addObject(new Object(strs.get(0), strs.get(1)));
+				} else if(type.equals("consumable")) {
+					r.addObject(Consumable(strs.get(0), strs.get(1), Integer.parseInt(strs.get(2))));
+				}
+			}
+			
+			addRoom(r);
+		}
+		sc.close();
 	}
 
 	public void addRoom(Room r) {
@@ -104,6 +181,7 @@ public class Engine {
 	public void addWord(Word v) {
 		vocabulary.add(v);
 	}
+
 
 	public Object Consumable(String accessor, String descriptor, String inspection, int consumability) {
 		Object o = new Object(accessor, descriptor, inspection);
@@ -162,20 +240,29 @@ public class Engine {
 		ArrayList<String> words;
 
 		while (true) {// repeats until valid command
+
 			eventQueue.clear();
+
 			for (Room r : rooms) {
 				if (r.toString().equals(protag.toString())) {
 					protag.currentRoom = r;
-				} else {
-					System.out.println("Currently not in any room");
+					foundRoom = true;
 				}
 			}
+			
 			Terminal.println(protag.health > 90 ? "You are feeling fine."
 					: protag.health > 50 ? "You are feeling slightly injured."
 							: protag.health > 0
 									? "You think that you might have some injuries, but you've forgotten where."
 									: "You feel slightly dead, but you aren't sure.");
+			
+			if (foundRoom)
+				Terminal.println(protag.currentRoom.description);
+			else
+				Terminal.println("Currently not in any room!");
+			
 			for (Object o : protag.currentRoom.objects) {
+
 				if (o.health != null && o.health <= 0) {
 					for (Object obj : o.container) {
 						obj.reference = new Object("the [floor]", o, null);
@@ -300,6 +387,7 @@ public class Engine {
 				} catch (NullPointerException e) {
 
 				}
+
 			}
 			Terminal.print("\n");
 
