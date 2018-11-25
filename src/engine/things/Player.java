@@ -20,17 +20,15 @@ public class Player {
 	public int charisma = 10;
 	public Object rightHand;
 
-	public Player(int x, int y, int z) {
-		pos = new int[3];
+	public Player(int x, int y) {
+		pos = new int[2];
 		pos[0] = x;
 		pos[1] = y;
-		pos[2] = z;
 	}
 
 	public void changePos(String amt) {// amt example in Direction class
 		pos[0] += Integer.parseInt(amt.substring(0, 1)) - 1;
 		pos[1] += Integer.parseInt(amt.substring(1, 2)) - 1;
-		pos[2] += Integer.parseInt(amt.substring(2)) - 1;
 	}
 
 	public void setHealth(int health) {
@@ -39,6 +37,6 @@ public class Player {
 	}
 
 	public String toString() {
-		return pos[0] + ", " + pos[1] + ", " + pos[2];
+		return pos[0] + ", " + pos[1];
 	}
 }

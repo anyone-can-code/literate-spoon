@@ -1,6 +1,7 @@
 
 package engine;
 
+import java.io.File;
 import java.util.*;
 
 import engine.things.Player;
@@ -21,32 +22,33 @@ public class Engine {
 	Random rand = new Random();
 
 	public Engine() {
-		protag = new Player(0, 0, 0);
+		protag = new Player(0, 0);
 		protag.setHealth(100);
 
 		rooms = new ArrayList<Room>();
-		rooms.add(new Room(0, 0, 0));
-
+		/*
+		rooms.add(new Room(0, 0, "A regular room"));
+		
 		Object o = new Object("red [brick]", "on a", null);
 		o.injury = Object.type.shatters;
 		Object reference = new Object("nice hand-knitted [carpet]", o, null);
 		o.reference = reference;
 		rooms.get(0).objects.add(o);
-
+		
 		o = new Object("deformed [spider]", "on", null);
 		o.injury = Object.type.squishes;
 		reference = new Object("your [face]", o, null);
 		reference.abstractNoun();
 		o.reference = reference;
 		rooms.get(0).objects.add(o);
-
+		
 		o = Consumable("dead [corpse]", "lying on", null, 10);
 		o.injury = Object.type.bruises;
 		o.holdable = null;
 		reference = rooms.get(0).floor;
 		o.reference = reference;
 		rooms.get(0).objects.add(o);
-
+		
 		o = new Object("old wooden [bookshelf]", "in", null);
 		o.injury = Object.type.shatters;
 		o.holdable = null;
@@ -75,7 +77,7 @@ public class Engine {
 		reference.abstractNoun();
 		e.reference = reference;
 		rooms.get(0).objects.add(e);
-
+		*/
 		ArrayList<Object> references = new ArrayList<Object>();
 		for (Room r : rooms) {
 			Iterator<Object> it = r.objects.iterator();
@@ -94,6 +96,79 @@ public class Engine {
 		}
 
 		vocabulary = new ArrayList<Word>();
+	}
+
+	public void readFile(File f) {
+		Scanner sc;
+		try {
+			sc = new Scanner(f);
+		} catch (Exception exc) {
+			exc.printStackTrace();
+			return;
+		}
+
+		String ln, type;
+		ArrayList<String> strs;
+
+		while (true) {
+			if (!sc.hasNextLine()) {
+				break;
+			}
+
+			ln = sc.nextLine();
+			if (ln.indexOf("{") == -1)
+				continue;
+
+			Room r = new Room();
+
+			ln = ln.substring(ln.indexOf("{") + 1).trim();
+
+			while (true) {
+				if (ln.indexOf("}") != -1)
+					break;
+
+				while (ln.indexOf("<") == -1 || ln.indexOf(">") < ln.indexOf("<"))
+					ln = sc.nextLine();
+
+				type = ln.substring(ln.indexOf("<") + 1, ln.indexOf(">")).toLowerCase();
+
+				// System.out.println(type);
+
+				strs = new ArrayList<String>();
+				strs.add(ln.substring(ln.indexOf(">") + 1));
+
+				ln = sc.nextLine();
+
+				while ((ln.indexOf("<") == -1 || ln.indexOf(">") < ln.indexOf("<")) && ln.indexOf("}") == -1) {
+					strs.set(0, strs.get(0) + ln);
+					ln = sc.nextLine();
+				}
+
+				while (strs.get(0).indexOf(":::") != -1) {
+					strs.add(strs.get(0).substring(0, strs.get(0).indexOf(":::")).trim());
+					strs.set(0, strs.get(0).substring(strs.get(0).indexOf(":::") + 3));
+				}
+
+				strs.add(strs.get(0).trim());
+				strs.remove(0);
+
+				// System.out.println(strs);
+
+				if (type.equals("coordinates")) {
+					r.coords[0] = Integer.parseInt(strs.get(0));
+					r.coords[1] = Integer.parseInt(strs.get(1));
+				} else if (type.equals("description")) {
+					r.description = strs.get(0);
+				} else if (type.equals("object")) {
+					r.addObject(new Object(strs.get(0), strs.get(1), strs.get(3)));
+				} else if (type.equals("consumable")) {
+					r.addObject(Consumable(strs.get(0), strs.get(1), strs.get(2), Integer.parseInt(strs.get(2))));
+				}
+			}
+
+			addRoom(r);
+		}
+		sc.close();
 	}
 
 	public void addRoom(Room r) {
@@ -161,19 +236,27 @@ public class Engine {
 		ArrayList<String> words;
 
 		while (true) {// repeats until valid command
+
 			eventQueue.clear();
+			boolean foundRoom = false;
 			for (Room r : rooms) {
 				if (r.toString().equals(protag.toString())) {
 					protag.currentRoom = r;
-				} else {
-					System.out.println("Currently not in any room");
+					foundRoom = true;
 				}
 			}
+
 			Terminal.println(protag.health > 90 ? "You are feeling fine."
 					: protag.health > 50 ? "You are feeling slightly injured."
 							: protag.health > 0
 									? "You think that you might have some injuries, but you've forgotten where."
 									: "You feel slightly dead, but you aren't sure.");
+
+			if (foundRoom)
+				Terminal.println(protag.currentRoom.description);
+			else
+				Terminal.println("Currently not in any room!");
+
 			for (Object o : protag.currentRoom.objects) {
 				if (o.health != null && o.health <= 0) {
 					for (Object obj : o.container) {
@@ -187,16 +270,16 @@ public class Engine {
 			int x1 = 0;
 			int x2 = 0;
 			Iterator<Object> objectIt = protag.currentRoom.objects.iterator();
-			while(objectIt.hasNext()) {
+			while (objectIt.hasNext()) {
 				Object o = objectIt.next();
-				if(o.alive && o.health <= 0) {
-					if(o.getClass().getSimpleName().equals("Entity")) {
-						Entity e = (Entity)o;
+				if (o.alive && o.health <= 0) {
+					if (o.getClass().getSimpleName().equals("Entity")) {
+						Entity e = (Entity) o;
 						e.death.accept(this);
-						for(Object obj : e.inventory) {
+						for (Object obj : e.inventory) {
 							Object ref = new Object("the [floor]", obj, null);
 							ref.abstractNoun();
-							obj.reference = ref; 
+							obj.reference = ref;
 							eventQueue.add(obj);
 						}
 						objectIt.remove();
@@ -227,24 +310,25 @@ public class Engine {
 						break;
 					}
 				}
-				if(protag.hunger > 0) {
-					if(rand.nextInt(101 - protag.hunger) < 5 && o.reference != null) {
-						compSub = lRandOf(new String[] { "possibly edible", "juicy and tender", "appetizing", "delicious-looking", "scrumptious"}) + " " + compSub;
+				if (protag.hunger > 0) {
+					if (rand.nextInt(101 - protag.hunger) < 5 && o.reference != null) {
+						compSub = lRandOf(new String[] { "possibly edible", "juicy and tender", "appetizing",
+								"delicious-looking", "scrumptious" }) + " " + compSub;
 					}
 				}
-				
+
 				int n = i + 1;
 				String s = null;
 				while (s == null) {
 					try {
-					s = protag.currentRoom.objects.get(n).reference.accessor;
+						s = protag.currentRoom.objects.get(n).reference.accessor;
 						if (s.equals(o.reference.accessor)) {
 							x1 = 2;
 						}
 						break;
 					} catch (NullPointerException e) {
-						
-					} catch(IndexOutOfBoundsException e) {
+
+					} catch (IndexOutOfBoundsException e) {
 						break;
 					}
 					n++;
@@ -253,14 +337,14 @@ public class Engine {
 				s = null;
 				while (s == null) {
 					try {
-					s = protag.currentRoom.objects.get(n).reference.accessor;
+						s = protag.currentRoom.objects.get(n).reference.accessor;
 						if (s.equals(o.reference.accessor)) {
 							x2 = 1;
 						}
 						break;
 					} catch (NullPointerException e) {
-						
-					} catch(IndexOutOfBoundsException e) {
+
+					} catch (IndexOutOfBoundsException e) {
 						break;
 					}
 					n--;
@@ -269,23 +353,23 @@ public class Engine {
 				try {
 					Object r = o.reference;
 					if (x1 == 1) {
-						if(x2 == 0) {
-						Terminal.print(lRandOf(
-								new String[] { " as well as a " + compSub + " " + o.description + " " + r.compSub,
-										" and a " + compSub + " " + o.description + " " + r.compSub }));
+						if (x2 == 0) {
+							Terminal.print(lRandOf(
+									new String[] { " as well as a " + compSub + " " + o.description + " " + r.compSub,
+											" and a " + compSub + " " + o.description + " " + r.compSub }));
 						} else {
 							Terminal.print(", and a " + compSub + " " + o.description + " " + r.compSub);
 						}
 					} else if (x1 == 2) {
-						if(x2 == 0) {
-						Terminal.print(
-								uRandOf(new String[] { "there is a " + compSub, "You notice a " + compSub }));
+						if (x2 == 0) {
+							Terminal.print(
+									uRandOf(new String[] { "there is a " + compSub, "You notice a " + compSub }));
 						} else {
 							Terminal.print(", a " + compSub);
 						}
 					} else {
-						Terminal.print(uRandOf(
-								new String[] { "there is a " + compSub + " " + o.description + " " + r.compSub,
+						Terminal.print(
+								uRandOf(new String[] { "there is a " + compSub + " " + o.description + " " + r.compSub,
 										o.description + " " + r.compSub + ", there is a " + compSub,
 										"You notice a " + compSub + " " + o.description + " " + r.compSub }));
 					}
@@ -299,6 +383,7 @@ public class Engine {
 				} catch (NullPointerException e) {
 
 				}
+
 			}
 			Terminal.print("\n");
 
