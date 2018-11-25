@@ -21,11 +21,12 @@ public class Engine {
 	public ArrayList<Object> objectQueue = new ArrayList<Object>();
 	Random rand = new Random();
 
-	public Engine() {
+	public Engine(String roomGenerator) {
 		protag = new Player(0, 0);
 		protag.setHealth(100);
 
 		rooms = new ArrayList<Room>();
+		readFile(new File(roomGenerator));
 		/*
 		rooms.add(new Room(0, 0, "A regular room"));
 		
@@ -35,9 +36,9 @@ public class Engine {
 		o.reference = reference;
 		rooms.get(0).objects.add(o);
 		
-		o = new Object("deformed [spider]", "on", null);
+		o = new Object("deformed [spider]", "on your", null);
 		o.injury = Object.type.squishes;
-		reference = new Object("your [face]", o, null);
+		reference = new Object("[face]", o, null);
 		reference.abstractNoun();
 		o.reference = reference;
 		rooms.get(0).objects.add(o);
@@ -122,7 +123,7 @@ public class Engine {
 			Room r = new Room();
 
 			ln = ln.substring(ln.indexOf("{") + 1).trim();
-
+			Object lastObject = new Object("[]", (String)null, null);
 			while (true) {
 				if (ln.indexOf("}") != -1)
 					break;
@@ -154,15 +155,26 @@ public class Engine {
 
 				// System.out.println(strs);
 
+				for(int i = 0; i < strs.size(); i++) {
+					if(strs.get(i).equals("null")) {
+						strs.set(i, null);
+					}
+					}
+				
 				if (type.equals("coordinates")) {
 					r.coords[0] = Integer.parseInt(strs.get(0));
 					r.coords[1] = Integer.parseInt(strs.get(1));
 				} else if (type.equals("description")) {
 					r.description = strs.get(0);
 				} else if (type.equals("object")) {
-					r.addObject(new Object(strs.get(0), strs.get(1), strs.get(3)));
+					r.addObject(new Object(strs.get(0), strs.get(1), strs.get(2)));
+					lastObject = r.objects.get(r.objects.size() - 1);
 				} else if (type.equals("consumable")) {
-					r.addObject(Consumable(strs.get(0), strs.get(1), strs.get(2), Integer.parseInt(strs.get(2))));
+					r.addObject(Consumable(strs.get(0), strs.get(1), strs.get(2), Integer.parseInt(strs.get(3))));
+					lastObject = r.objects.get(r.objects.size() - 1);
+				} else if(type.equals("reference")) {
+					Object o = new Object(strs.get(0), lastObject, strs.get(1));
+					lastObject.reference = o;
 				}
 			}
 

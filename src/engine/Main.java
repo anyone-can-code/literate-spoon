@@ -7,8 +7,6 @@ import engine.things.Effect;
 import engine.things.Entity;
 import engine.things.Object;
 
-import java.io.File;
-
 import engine.Terminal;
 
 public class Main {
@@ -16,14 +14,7 @@ public class Main {
 	public static Engine game;
 
 	public static void main(String args[]) {
-		game = new Engine();
-
-		
-
-		
-		File f = new File("src/engine/rooms.txt");
-		game.readFile(f);
-		
+		game = new Engine("src/engine/rooms.txt");
 		
 		game.addWord(new Verb("move go walk run climb jog travel journey venture", (Word w, Engine t) -> {
 			if (w.getClass() != Direction.class) {
@@ -90,7 +81,7 @@ public class Main {
 			t.protag.currentRoom.objects.remove(o);
 			Terminal.println("You are now holding a " + o.accessor + ".");
 		}));
-		game.addWord(new Verb("take steal grab seize apprehend liberate", null, (Object o, Engine t) -> {
+		game.addWord(new Verb("take steal grab seize apprehend liberate collect", null, (Object o, Engine t) -> {
 			boolean b = o.holdable;
 			t.protag.inventory.add(o);
 			t.protag.currentRoom.objects.remove(o);
@@ -148,8 +139,8 @@ public class Main {
 	}
 	public static void removal(Object o, Engine t) {
 		try {
-			o.referencer.reference.compSub = t.lRandOf(new String[] { "floor", "ground" });
-			o.referencer.description = o.referencer.description.replace(" a", " the");
+			o.referencer.reference = t.protag.currentRoom.floor;
+			o.referencer.description = t.lRandOf(new String[] { "lying", "sitting", "resting" }) + " on";
 		} catch (Exception e) {
 
 		}
