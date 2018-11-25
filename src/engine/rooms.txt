@@ -15,7 +15,7 @@ multiple object / consumable tags can be used
 {
 <description>
 You are in a dark cave. Water glistens on the hard limestone walls.
-It slowly drips off the stalactites and puddles at your feet. There cave extends in front of you.
+It slowly drips off the stalactites and puddles at your feet. The cave extends in front of you.
 <coordinates> 0:::0
 <consumable> hard obsidian [rock] ::: submerged in a puddle ::: -5
 <consumable> broken rat [skull] ::: under your right foot ::: -2

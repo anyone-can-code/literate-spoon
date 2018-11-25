@@ -18,7 +18,7 @@ public class Engine {
 
 	public ArrayList<Room> rooms;// can be accessed by verbs
 	private ArrayList<Word> vocabulary;
-	public ArrayList<Object> eventQueue = new ArrayList<Object>();
+	public ArrayList<Object> objectQueue = new ArrayList<Object>();
 	Random rand = new Random();
 
 	public Engine() {
@@ -71,7 +71,7 @@ public class Engine {
 					Object ref = new Object("the [floor]", obj, null);
 					ref.abstractNoun();
 					obj.reference = ref;
-					eventQueue.add(obj);
+					objectQueue.add(obj);
 					});
 		reference = new Object("[you]", o, null);
 		reference.abstractNoun();
@@ -140,7 +140,7 @@ public class Engine {
 				ln = sc.nextLine();
 
 				while ((ln.indexOf("<") == -1 || ln.indexOf(">") < ln.indexOf("<")) && ln.indexOf("}") == -1) {
-					strs.set(0, strs.get(0) + ln);
+					strs.set(0, strs.get(0) + "\n" + ln);
 					ln = sc.nextLine();
 				}
 
@@ -237,7 +237,7 @@ public class Engine {
 
 		while (true) {// repeats until valid command
 
-			eventQueue.clear();
+			objectQueue.clear();
 			boolean foundRoom = false;
 			for (Room r : rooms) {
 				if (r.toString().equals(protag.toString())) {
@@ -280,13 +280,13 @@ public class Engine {
 							Object ref = new Object("the [floor]", obj, null);
 							ref.abstractNoun();
 							obj.reference = ref;
-							eventQueue.add(obj);
+							objectQueue.add(obj);
 						}
 						objectIt.remove();
 					}
 				}
 			}
-			protag.currentRoom.objects.addAll(eventQueue);
+			protag.currentRoom.objects.addAll(objectQueue);
 			for (int i = 0; i < protag.currentRoom.objects.size(); i++) {
 				Object o = protag.currentRoom.objects.get(i);
 				String compSub = o.compSub;

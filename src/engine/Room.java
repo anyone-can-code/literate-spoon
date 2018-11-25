@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import engine.things.Object;
 
 public class Room {
-	public int[] coords;// x, y, z
+	public int[] coords;// x and y
 	public ArrayList<Object> objects = new ArrayList<Object>();
 	Object floor = new Object("the [floor]", (String)null, null);
 	public String description;	
