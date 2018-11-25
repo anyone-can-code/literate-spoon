@@ -3,6 +3,7 @@ package engine.things;
 import java.util.ArrayList;
 
 import engine.Room;
+import engine.things.Object;
 
 public class Player {
 	private int[] pos;
@@ -17,6 +18,7 @@ public class Player {
 	public int intelligence = 10;
 	public int agility = 10;
 	public int charisma = 10;
+	public Object rightHand;
 
 	public Player(int x, int y, int z) {
 		pos = new int[3];

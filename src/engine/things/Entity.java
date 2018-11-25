@@ -1,8 +1,12 @@
 package engine.things;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
 import engine.Engine;
 import engine.OneParamFunc;
+import engine.Terminal;
 import engine.TwoParamFunc;
 import engine.things.Object;
 
@@ -20,8 +24,9 @@ public class Entity extends Object {
 	public ArrayList<Object> inventory = new ArrayList<Object>();
 	public OneParamFunc<Engine> death;
 	public TwoParamFunc<Player, Engine> interaction;
-	
-	public Entity(String compSub, String description, TwoParamFunc<Player, Engine> interaction, OneParamFunc<Engine> death) {
+
+	public Entity(String compSub, String description, TwoParamFunc<Player, Engine> interaction,
+			OneParamFunc<Engine> death) {
 		super(compSub, description, null);
 		this.accessor = compSub.substring(compSub.indexOf("[") + 1, compSub.indexOf("]"));
 		this.compSub = compSub.replace("[", "").replace("]", "");
@@ -31,5 +36,17 @@ public class Entity extends Object {
 		alive = true;
 		injury = type.bruises;
 		setHealth(20);
+	}
+
+	public void Dialogue(String statement, HashMap<String, TwoParamFunc<Entity, Player>> options, Entity e, Player p) {
+		while (true) {
+			String str = Terminal.readln();
+			for (Map.Entry<String, TwoParamFunc<Entity, Player>> entry : options.entrySet()) {
+				if(entry.getKey().equalsIgnoreCase(str)) {
+					entry.getValue().accept(e, p);
+					break;
+				}
+			}
+		}
 	}
 }

@@ -15,6 +15,7 @@ public class Object {
 	public Boolean holdable = true;
 	public Integer health = 10;
 	public Integer maxHealth = 10;
+	public boolean poisonous = false;
 
 	public enum type {
 		crumples, shatters, squishes, bruises

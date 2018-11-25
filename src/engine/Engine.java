@@ -43,8 +43,7 @@ public class Engine {
 		o = Consumable("dead [corpse]", "lying on", null, 10);
 		o.injury = Object.type.bruises;
 		o.holdable = null;
-		reference = new Object("the [floor]", o, null);
-		reference.abstractNoun();
+		reference = rooms.get(0).floor;
 		o.reference = reference;
 		rooms.get(0).objects.add(o);
 
@@ -178,8 +177,8 @@ public class Engine {
 			for (Object o : protag.currentRoom.objects) {
 				if (o.health != null && o.health <= 0) {
 					for (Object obj : o.container) {
-						obj.reference = new Object("the [floor]", o, null);
-						obj.description = lRandOf(new String[] { "lying", "sitting", "resting" }) + " on the";
+						obj.reference = protag.currentRoom.floor;
+						obj.description = lRandOf(new String[] { "lying", "sitting", "resting" }) + " on";
 
 					}
 					o.container.clear();
