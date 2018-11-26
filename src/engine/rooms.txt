@@ -15,11 +15,12 @@ multiple object / consumable tags can be used
 {
 <description>
 You are in a dark cave. Water glistens on the hard limestone walls.
-It slowly drips off the stalactites and puddles at your feet. There cave extends in front of you.
+It slowly drips off the stalactites and puddles at your feet. The cave extends in front of you.
 <coordinates> 0:::0
-<consumable> hard obsidian [rock] ::: submerged in a puddle ::: -5
-<consumable> broken rat [skull] ::: under your right foot ::: -2
-
+<consumable> hard obsidian [rock] ::: lying in a ::: it has some old, dried blood on it ::: -5
+<reference> [puddle] ::: null
+<consumable> broken rat [skull] ::: on a ::: someone picked all the meat of this rat a long time ago ::: -2
+<reference> small [stone] ::: null
 }
 {
 <description>

@@ -4,9 +4,10 @@ import java.util.ArrayList;
 import engine.things.Object;
 
 public class Room {
-	public int[] coords;// x, y, z
+	public int[] coords;// x and y
 	public ArrayList<Object> objects = new ArrayList<Object>();
-	public String description;
+	Object floor = new Object("the [floor]", (String)null, null);
+	public String description;	
 	
 	public Room() {
 		coords = new int[2];
@@ -16,6 +17,7 @@ public class Room {
 		coords = new int[2];
 		coords[0] = x;
 		coords[1] = y;
+		floor.abstractNoun();
 		this.description = description;
 	}
 	
