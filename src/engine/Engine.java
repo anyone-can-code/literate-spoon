@@ -1,7 +1,6 @@
 
 package engine;
 
-import java.io.File;
 import java.util.*;
 
 import engine.things.Player;
@@ -21,7 +20,7 @@ public class Engine {
 	public ArrayList<Object> objectQueue = new ArrayList<Object>();
 	Random rand = new Random();
 
-	public Engine(String roomGenerator) {
+	public Engine() {
 		protag = new Player(0, 0);
 		protag.setHealth(100);
 

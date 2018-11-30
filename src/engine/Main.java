@@ -14,7 +14,7 @@ public class Main {
 	public static Engine game;
 
 	public static void main(String args[]) {
-		game = new Engine("src/engine/rooms.txt");
+		game = new Engine();
 		
 		game.addWord(new Verb("move go walk run climb jog travel journey venture", (Word w, Engine t) -> {
 			if (w.getClass() != Direction.class) {
@@ -40,6 +40,7 @@ public class Main {
 				Terminal.println("You ate a " + o.accessor + ". Delicious.");
 			}
 			t.protag.currentRoom.objects.remove(o);
+			t.protag.inventory.remove(o);
 			removal(o, t);
 		}));
 		game.addWord(new Verb("inspect investigate examine scrutinize study observe", null, (Object o, Engine t) -> {
@@ -70,23 +71,31 @@ public class Main {
 				e.interaction.accept(t.protag, t);
 			}
 		}));
-		game.addWord(new Verb("attack assault assail punch hit kick pummel strike", null, (Object o, Engine t) -> {
+		game.addWord(new Verb("attack assault assail punch hit kick pummel strike kill", null, (Object o, Engine t) -> {
 			o.health -= t.protag.strength;
 			Terminal.println("You attacked the " + o.accessor + ".");
 		}));
 		game.addWord(new Verb("hold", null, (Object o, Engine t) -> {
 			boolean b = o.holdable;
+			if(!t.protag.inventory.contains(o)) {
 			t.protag.rightHand = o;
 			t.protag.inventory.add(o);
 			t.protag.currentRoom.objects.remove(o);
 			Terminal.println("You are now holding a " + o.accessor + ".");
+			} else {
+				b = (Boolean)null;
+			}
 		}));
-		game.addWord(new Verb("take steal grab seize apprehend liberate collect", null, (Object o, Engine t) -> {
+		game.addWord(new Verb("take get steal grab seize apprehend liberate collect", null, (Object o, Engine t) -> {
 			boolean b = o.holdable;
+			if(!t.protag.inventory.contains(o)) {
 			t.protag.inventory.add(o);
 			t.protag.currentRoom.objects.remove(o);
 			removal(o, t);
 			Terminal.println("You took the " + o.accessor + ".");
+			} else {
+				b = (Boolean)null;
+			}
 		}));
 		game.addWord(new Verb("drop leave", null, (Object o, Engine t) -> {
 			if(t.protag.inventory.contains(o)) {
