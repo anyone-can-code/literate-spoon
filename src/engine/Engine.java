@@ -20,6 +20,7 @@ public class Engine {
 	public ArrayList<Object> objectQueue = new ArrayList<Object>();
 	Random rand = new Random();
 
+	
 	public Engine() {
 		protag = new Player(0, 0);
 		protag.setHealth(100);
@@ -33,7 +34,7 @@ public class Engine {
 			Iterator<Object> it = r.objects.iterator();
 			while (it.hasNext()) {
 				Object obj = it.next();
-				if (obj.reference != null) {
+				if (obj.reference != null && !obj.reference.abstractObj) {
 					references.add(obj.reference);
 				}
 				if (!obj.container.isEmpty()) {

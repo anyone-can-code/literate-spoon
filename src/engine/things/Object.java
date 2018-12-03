@@ -15,6 +15,7 @@ public class Object {
 	public Boolean holdable = true;
 	public Integer health = 10;
 	public Integer maxHealth = 10;
+	public boolean abstractObj = false;
 	public boolean poisonous = false;
 
 	public enum type {
@@ -44,6 +45,7 @@ public class Object {
 
 	public void abstractNoun() {
 		setHealth(null);
+		abstractObj = true;
 		consumability = null;
 		holdable = null;
 		injury = null;
