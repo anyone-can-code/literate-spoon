@@ -1,7 +1,6 @@
 
 package engine;
 
-import java.io.File;
 import java.util.*;
 
 import engine.things.Player;
@@ -16,7 +15,11 @@ import engine.Terminal;
 public class Engine {
 	public Player protag;
 
-	public ArrayList<Room> rooms;// can be accessed by verbs
+	//public ArrayList<Room> rooms;// can be accessed by verbs
+	public Room worldMap;
+	public final String worldName = "Azaroth";//just a random name (thank Liam)
+	
+	
 	private ArrayList<Word> vocabulary;
 	public ArrayList<Object> objectQueue = new ArrayList<Object>();
 	Random rand = new Random();
@@ -25,34 +28,16 @@ public class Engine {
 		protag = new Player(0, 0);
 		protag.setHealth(100);
 
-		rooms = new ArrayList<Room>();
+		//rooms = new ArrayList<Room>();
+		worldMap = new Room(0, 0, "The World of " + worldName);
 		
-		RoomGen.gen(rooms, objectQueue);
+		protag.currentRoom = RoomGen.gen(worldMap, objectQueue);//returns starting room
 		
-		ArrayList<Object> references = new ArrayList<Object>();
-		for (Room r : rooms) {
-			Iterator<Object> it = r.objects.iterator();
-			while (it.hasNext()) {
-				Object obj = it.next();
-				if (obj.reference != null) {
-					references.add(obj.reference);
-				}
-				if (!obj.container.isEmpty()) {
-					references.addAll(obj.container);
-				}
-			}
-		}
-		for (Room r : rooms) {
-			r.objects.addAll(references);
-		}
+		
 
 		vocabulary = new ArrayList<Word>();
 	}
-
-	public void addRoom(Room r) {
-		rooms.add(r);
-	}
-
+	
 	public void addWord(Word v) {
 		vocabulary.add(v);
 	}
@@ -116,13 +101,6 @@ public class Engine {
 		while (true) {// repeats until valid command
 
 			objectQueue.clear();
-			boolean foundRoom = false;
-			for (Room r : rooms) {
-				if (r.toString().equals(protag.toString())) {
-					protag.currentRoom = r;
-					foundRoom = true;
-				}
-			}
 
 			Terminal.println(protag.health > 90 ? "You are feeling fine."
 					: protag.health > 50 ? "You are feeling slightly injured."
@@ -130,9 +108,16 @@ public class Engine {
 									? "You think that you might have some injuries, but you've forgotten where."
 									: "You feel slightly dead, but you aren't sure.");
 
-			if (foundRoom)
-				Terminal.println(protag.currentRoom.description);
-			else
+			if (protag.currentRoom != null) {
+				Room holder = protag.currentRoom;
+				String desc = holder.description;
+				while (holder.fatherRoom != null) {
+					holder = holder.fatherRoom;
+					desc = holder.description + ": " + desc;
+				}
+					
+				Terminal.println(desc);
+			} else
 				Terminal.println("Currently not in any room!");
 
 			for (Object o : protag.currentRoom.objects) {
@@ -256,7 +241,7 @@ public class Engine {
 					}
 					if (x1 == 0) {
 						x2 = 0;
-						Terminal.print(". ");
+						Terminal.println(".");
 					}
 				} catch (NullPointerException e) {
 
