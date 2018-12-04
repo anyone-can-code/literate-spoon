@@ -25,6 +25,7 @@ public class Main {
 			t.protag.changePos(w.value);
 		}, null));
 		game.addWord(new Verb("eat consume", null, (Object o, Engine t) -> {
+			if(!o.alive) {
 			t.protag.hunger -= o.consumability;
 			if (o.consumability < 0) {
 				if(o.poisonous) {
@@ -42,6 +43,9 @@ public class Main {
 			t.protag.currentRoom.objects.remove(o);
 			t.protag.inventory.remove(o);
 			removal(o, t);
+			} else {
+				boolean b = (Boolean) null;
+			}
 		}));
 		game.addWord(new Verb("inspect investigate examine scrutinize study observe", null, (Object o, Engine t) -> {
 			if (o.container.isEmpty()) {
