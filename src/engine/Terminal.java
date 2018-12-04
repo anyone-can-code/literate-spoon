@@ -10,6 +10,7 @@ public class Terminal {
 
 	public static void println(Object s) {
 		System.out.println(s.toString());
+		
 	}
 
 	public static void print(Object s) {
