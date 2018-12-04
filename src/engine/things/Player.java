@@ -6,7 +6,7 @@ import engine.Room;
 import engine.things.Object;
 
 public class Player {
-	private int[] pos;
+	//private int[] pos;
 	public Room currentRoom;
 	public ArrayList<Effect> effects = new ArrayList<Effect>();
 	public ArrayList<Object> inventory = new ArrayList<Object>();
@@ -21,22 +21,22 @@ public class Player {
 	public Object rightHand;
 
 	public Player(int x, int y) {
-		pos = new int[2];
+		/*pos = new int[2];
 		pos[0] = x;
-		pos[1] = y;
+		pos[1] = y;*/
 	}
 
-	public void changePos(String amt) {// amt example in Direction class
+	/*public void changePos(String amt) {// amt example in Direction class
 		pos[0] += Integer.parseInt(amt.substring(0, 1)) - 1;
 		pos[1] += Integer.parseInt(amt.substring(1, 2)) - 1;
-	}
+	}*/
 
 	public void setHealth(int health) {
 		this.health = health;
 		this.maxHealth = health > maxHealth ? health : maxHealth;
 	}
 
-	public String toString() {
+	/*public String toString() {
 		return pos[0] + ", " + pos[1];
-	}
+	}*/
 }

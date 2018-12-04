@@ -21,8 +21,54 @@ public class Main {
 				Terminal.println("Please specify a direction");
 				return;
 			}
-
-			t.protag.changePos(w.value);
+			
+			int x, y;
+			
+			int dx = Integer.parseInt(w.value.substring(0, 1)) - 1;
+			int dy = Integer.parseInt(w.value.substring(1, 2)) - 1;
+			
+			Room currentRoom = t.protag.currentRoom;
+			
+			while (true) {//recursion without recursion
+				x = t.protag.currentRoom.coords[0];
+				y = t.protag.currentRoom.coords[1];
+				
+				x += dx;
+				y += dy;
+				
+				for (Room r: t.protag.currentRoom.fatherRoom.nestedMap) {
+					if (x == r.coords[0] && y == r.coords[1]) {
+						t.protag.currentRoom = r;
+						
+						if (dx > 0) {//flipped from how you'd think
+							while (t.protag.currentRoom.westEntry != null)
+								t.protag.currentRoom = t.protag.currentRoom.westEntry;
+						} else if (dx < 0) {
+							while (t.protag.currentRoom.eastEntry != null)
+								t.protag.currentRoom = t.protag.currentRoom.eastEntry;
+						} else if (dy > 0) {
+							while (t.protag.currentRoom.southEntry != null)
+								t.protag.currentRoom = t.protag.currentRoom.southEntry;
+						} else if (dy < 0) {
+							while (t.protag.currentRoom.northEntry != null)
+								t.protag.currentRoom = t.protag.currentRoom.northEntry;
+						}
+						
+						
+						return;
+					}
+				}
+				
+				if (t.protag.currentRoom.fatherRoom.fatherRoom != null)//main map only has 1 room, so can't be there either
+					t.protag.currentRoom = t.protag.currentRoom.fatherRoom;
+				else {
+					break;
+				}
+			}
+			t.protag.currentRoom = currentRoom;
+			Terminal.println("You can't move that way.");
+			
+			//t.protag.changePos(w.value);
 		}, null));
 		game.addWord(new Verb("eat consume", null, (Object o, Engine t) -> {
 			t.protag.hunger -= o.consumability;
