@@ -41,8 +41,13 @@ public class Entity extends Object {
 		setHealth(20);
 	}
 
-	public static void Dialogue(String statement, HashMap<String, TwoParamFunc<Entity, Player>> options, Entity e, Player p) {
-		Terminal.println(statement);
+	public void Dialogue(String statement, HashMap<String, TwoParamFunc<Entity, Player>> options, Entity e, Player p) {
+		if(check(p)) {
+		Terminal.print(statement);
+		for(Map.Entry<String, TwoParamFunc<Entity, Player>> entry : options.entrySet()) {
+			Terminal.print(" [" + entry.getKey() + "]");
+		}
+		Terminal.println("");
 		while (true) {
 			String str = Terminal.readln();
 			for (Map.Entry<String, TwoParamFunc<Entity, Player>> entry : options.entrySet()) {
@@ -53,6 +58,15 @@ public class Entity extends Object {
 			}
 			Terminal.println("Not a valid response.");
 		}
+		}
+	}
+	
+	public boolean check(Player p) {
+		if(anger > restraint) {
+			attack(p);
+			return false;
+		}
+		return true;
 	}
 	
 	public void attack(Player p) {

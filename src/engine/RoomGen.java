@@ -63,13 +63,13 @@ public abstract class RoomGen {
 			objectQueue.add(obj);
 		});
 		e.interaction = (Player p, Engine eng) -> {
-			HashMap<String, TwoParamFunc<Entity, Player>> options1 = new HashMap<String, TwoParamFunc<Entity, Player>>();
-			options1.put("yes", (Entity e1, Player p1) -> {
-				HashMap<String, TwoParamFunc<Entity, Player>> options2 = new HashMap<String, TwoParamFunc<Entity, Player>>();
-				options2.put("yes", (Entity e2, Player p2) -> {
+			HashMap<String, TwoParamFunc<Entity, Player>> options1 = new HashMap<String, TwoParamFunc<Entity, Player>>(){{
+			put("yes", (Entity e1, Player p1) -> {
+				HashMap<String, TwoParamFunc<Entity, Player>> options2 = new HashMap<String, TwoParamFunc<Entity, Player>>(){{
+				put("yes", (Entity e2, Player p2) -> {
 					e2.attack(p2);
 				});
-				options2.put("no", (Entity e2, Player p2) -> {
+				put("no", (Entity e2, Player p2) -> {
 					if(p2.agility + rand.nextInt(3) - 1 > 10) {
 						Terminal.println("You dodged the attack.");
 					} else {
@@ -77,10 +77,12 @@ public abstract class RoomGen {
 						e2.attack(p2);
 					}
 				});
-				Entity.Dialogue("The old man tries to kill you. Let him?", options2, e1, p1);
+				}};
+				e.Dialogue("The old man tries to kill you. Let him?", options2, e1, p1);
 			});
-			options1.put("no", (Entity e1, Player p1) -> {});
-			Entity.Dialogue("The old man says hi. Greet him? [yes] [no]", options1, e, p);
+			put("no", (Entity e1, Player p1) -> {});
+			}};
+			e.Dialogue("The old man says hi. Greet him?", options1, e, p);
 		};
 
 		reference = new Object("[you]", o, null);

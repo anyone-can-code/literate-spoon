@@ -123,6 +123,10 @@ public class Main {
 		}));
 		game.addWord(new Verb("attack assault assail punch hit kick pummel strike kill", null, (Object o, Engine t) -> {
 			o.health -= t.protag.strength;
+			if(o.alive) {
+				Entity e = (Entity) o;
+				e.anger += 5;
+			}
 			Terminal.println("You attacked the " + o.accessor + ".");
 		}));
 		game.addWord(new Verb("hold", null, (Object o, Engine t) -> {
