@@ -81,7 +81,8 @@ public abstract class RoomGen {
 				e.Dialogue("The old man tries to kill you. Let him?", options2, e1, p1);
 			});
 			put("no", (Entity e1, Player p1) -> {
-				Terminal.println("You walk away, leaving him slightly confused.");
+				Terminal.println("You walk away, leaving him slightly confused and annoyed.");
+				e1.anger += 20;
 			});
 			}};
 			e.Dialogue("The old man says hi. Greet him?", options1, e, p);

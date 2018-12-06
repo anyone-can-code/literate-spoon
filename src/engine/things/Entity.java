@@ -25,6 +25,7 @@ public class Entity extends Object {
 	public String accessor;
 	public String compSub = "";
 	public String description;
+	public Boolean interactable = true;
 	public ArrayList<Object> inventory = new ArrayList<Object>();
 	public OneParamFunc<Engine> death;
 	public TwoParamFunc<Player, Engine> interaction;
@@ -42,7 +43,7 @@ public class Entity extends Object {
 	}
 
 	public void Dialogue(String statement, HashMap<String, TwoParamFunc<Entity, Player>> options, Entity e, Player p) {
-		if(check(p)) {
+		boolean b = interactable;
 		Terminal.print(statement);
 		for(Map.Entry<String, TwoParamFunc<Entity, Player>> entry : options.entrySet()) {
 			Terminal.print(" [" + entry.getKey() + "]");
@@ -58,13 +59,12 @@ public class Entity extends Object {
 			}
 			Terminal.println("Not a valid response.");
 		}
-		}
 	}
 	
-	public boolean check(Player p) {
-		if(anger > restraint) {
+	public Boolean check(Player p) {
+		if(anger >= restraint) {
 			attack(p);
-			return false;
+			return (Boolean)null;
 		}
 		return true;
 	}

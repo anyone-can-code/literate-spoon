@@ -30,7 +30,7 @@ public class Word {
 		System.out.println(this.getClass());
 	}
 
-	public void perform(Object o, Engine t) {
+	public void perform(Object o, String prepUsed, Engine t) {
 		System.out.println(this.getClass());
 	}
 

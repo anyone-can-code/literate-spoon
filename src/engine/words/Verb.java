@@ -24,12 +24,12 @@ public class Verb extends Word {
 		myFunc.accept(w, t);
 	}
 
-	public void perform(Object o, Engine t) {
+	public void perform(Object o, String prepUsed, Engine t) {
 		// Terminal.println(o + " : " + t);
 		try {
 			myFunc2.accept(o, t);
 		} catch (NullPointerException e) {
-			Terminal.println("You cannot " + synonyms.get(0) + " the " + o.accessor + ".");
+			Terminal.println("You cannot " + synonyms.get(0) + " " + prepUsed + " the " + o.accessor + ".");
 		}
 	}
 }

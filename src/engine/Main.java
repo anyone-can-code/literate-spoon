@@ -84,7 +84,7 @@ public class Main {
 					}, 3, "That was painful to eat."));
 				}
 			} else {
-				Terminal.println("You ate a " + o.accessor + ". Delicious.");
+				Terminal.println("You ate the " + o.accessor + ". Delicious.");
 			}
 			t.protag.currentRoom.objects.remove(o);
 			t.protag.inventory.remove(o);
@@ -125,7 +125,7 @@ public class Main {
 			o.health -= t.protag.strength;
 			if(o.alive) {
 				Entity e = (Entity) o;
-				e.anger += 5;
+				if(e.anger < e.restraint) e.anger = e.restraint;
 			}
 			Terminal.println("You attacked the " + o.accessor + ".");
 		}));
