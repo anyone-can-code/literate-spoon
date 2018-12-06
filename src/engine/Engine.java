@@ -263,8 +263,8 @@ public class Engine {
 			userText = userText.toLowerCase();
 			String prepositionUsed = "";
 			for (String str : prepositions) {
-				if (userText.contains(str)) {
-					prepositionUsed = str;
+				if (userText.contains(" " + str + " ")) {
+					prepositionUsed = " " + str;
 				}
 				userText = userText.replace(" " + str + " ", " ");
 			}
@@ -310,6 +310,9 @@ public class Engine {
 			for (Word w : vocabulary) {
 				if (w.checkWord(words.get(1))) {
 					try {
+						if(w.represents == null) {
+							boolean b = (Boolean) null;
+						}
 						o1 = (Object) w.represents;
 						foundObject = true;
 					} catch (Exception e) {
