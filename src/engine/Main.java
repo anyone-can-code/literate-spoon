@@ -124,8 +124,10 @@ public class Main {
 		game.addWord(new Verb("attack assault assail punch hit kick pummel strike kill", null, (Object o, Engine t) -> {
 			o.health -= t.protag.strength;
 			if(o.alive) {
+				try {
 				Entity e = (Entity) o;
 				if(e.anger < e.restraint) e.anger = e.restraint;
+				} catch(Exception e) {};
 			}
 			Terminal.println("You attacked the " + o.accessor + ".");
 		}));
@@ -142,6 +144,9 @@ public class Main {
 		}));
 		game.addWord(new Verb("take get steal grab seize apprehend liberate collect", null, (Object o, Engine t) -> {
 			boolean b = o.holdable;
+			if(o.alive) {
+				b = (Boolean)null;
+			}
 			if(!t.protag.inventory.contains(o)) {
 			t.protag.inventory.add(o);
 			t.protag.currentRoom.objects.remove(o);

@@ -29,7 +29,7 @@ public class Verb extends Word {
 		try {
 			myFunc2.accept(o, t);
 		} catch (NullPointerException e) {
-			Terminal.println("You cannot " + synonyms.get(0) + " " + prepUsed + " the " + o.accessor + ".");
+			Terminal.println("You cannot " + synonyms.get(0) + prepUsed + " the " + o.accessor + ".");
 		}
 	}
 }

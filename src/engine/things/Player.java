@@ -19,10 +19,11 @@ public class Player extends Object {
 	public Object rightHand;
 
 	public Player(int x, int y) {
+		super("[player]", (String)null, null);
 		/*pos = new int[2];
 		pos[0] = x;
 		pos[1] = y;*/
-		super("[player]", (String)null, null);
+		alive = true;
 	}
 
 	/*public void changePos(String amt) {// amt example in Direction class
