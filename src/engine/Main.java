@@ -71,6 +71,7 @@ public class Main {
 			//t.protag.changePos(w.value);
 		}, null));
 		game.addWord(new Verb("eat consume", null, (Object o, Engine t) -> {
+			if(!o.alive) {
 			t.protag.hunger -= o.consumability;
 			if (o.consumability < 0) {
 				if(o.poisonous) {
@@ -83,10 +84,14 @@ public class Main {
 					}, 3, "That was painful to eat."));
 				}
 			} else {
-				Terminal.println("You ate a " + o.accessor + ". Delicious.");
+				Terminal.println("You ate the " + o.accessor + ". Delicious.");
 			}
 			t.protag.currentRoom.objects.remove(o);
+			t.protag.inventory.remove(o);
 			removal(o, t);
+			} else {
+				boolean b = (Boolean) null;
+			}
 		}));
 		game.addWord(new Verb("inspect investigate examine scrutinize study observe", null, (Object o, Engine t) -> {
 			if (o.container.isEmpty()) {
@@ -110,29 +115,41 @@ public class Main {
 			}
 			Terminal.println(".");
 		}));
-		game.addWord(new Verb("interact", null, (Object o, Engine t) -> {
+		game.addWord(new Verb("interact talk speak converse negotiate chat gossip", null, (Object o, Engine t) -> {
 			if(o.alive) {
 				Entity e = (Entity)o;
 				e.interaction.accept(t.protag, t);
 			}
 		}));
-		game.addWord(new Verb("attack assault assail punch hit kick pummel strike", null, (Object o, Engine t) -> {
+		game.addWord(new Verb("attack assault assail punch hit kick pummel strike kill", null, (Object o, Engine t) -> {
 			o.health -= t.protag.strength;
+			if(o.alive) {
+				Entity e = (Entity) o;
+				if(e.anger < e.restraint) e.anger = e.restraint;
+			}
 			Terminal.println("You attacked the " + o.accessor + ".");
 		}));
 		game.addWord(new Verb("hold", null, (Object o, Engine t) -> {
 			boolean b = o.holdable;
+			if(!t.protag.inventory.contains(o)) {
 			t.protag.rightHand = o;
 			t.protag.inventory.add(o);
 			t.protag.currentRoom.objects.remove(o);
 			Terminal.println("You are now holding a " + o.accessor + ".");
+			} else {
+				b = (Boolean)null;
+			}
 		}));
-		game.addWord(new Verb("take steal grab seize apprehend liberate collect", null, (Object o, Engine t) -> {
+		game.addWord(new Verb("take get steal grab seize apprehend liberate collect", null, (Object o, Engine t) -> {
 			boolean b = o.holdable;
+			if(!t.protag.inventory.contains(o)) {
 			t.protag.inventory.add(o);
 			t.protag.currentRoom.objects.remove(o);
 			removal(o, t);
 			Terminal.println("You took the " + o.accessor + ".");
+			} else {
+				b = (Boolean)null;
+			}
 		}));
 		game.addWord(new Verb("drop leave", null, (Object o, Engine t) -> {
 			if(t.protag.inventory.contains(o)) {

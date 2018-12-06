@@ -18,20 +18,24 @@ public class Entity extends Object {
 	public int concealsEmotions = 10;
 	public int kindness = 10;
 	public int talkativity = 5;
+	public int strength = 5;
+	public int intelligence = 10;
+	public int agility = 10;
+	public int charisma = 10;
 	public String accessor;
 	public String compSub = "";
 	public String description;
+	public Boolean interactable = true;
 	public ArrayList<Object> inventory = new ArrayList<Object>();
 	public OneParamFunc<Engine> death;
 	public TwoParamFunc<Player, Engine> interaction;
 
-	public Entity(String compSub, String description, TwoParamFunc<Player, Engine> interaction,
+	public Entity(String compSub, String description,
 			OneParamFunc<Engine> death) {
 		super(compSub, description, null);
 		this.accessor = compSub.substring(compSub.indexOf("[") + 1, compSub.indexOf("]"));
 		this.compSub = compSub.replace("[", "").replace("]", "");
 		this.description = description;
-		this.interaction = interaction;
 		this.death = death;
 		alive = true;
 		injury = type.bruises;
@@ -39,14 +43,34 @@ public class Entity extends Object {
 	}
 
 	public void Dialogue(String statement, HashMap<String, TwoParamFunc<Entity, Player>> options, Entity e, Player p) {
+		boolean b = interactable;
+		Terminal.print(statement);
+		for(Map.Entry<String, TwoParamFunc<Entity, Player>> entry : options.entrySet()) {
+			Terminal.print(" [" + entry.getKey() + "]");
+		}
+		Terminal.println("");
 		while (true) {
 			String str = Terminal.readln();
 			for (Map.Entry<String, TwoParamFunc<Entity, Player>> entry : options.entrySet()) {
 				if(entry.getKey().equalsIgnoreCase(str)) {
 					entry.getValue().accept(e, p);
-					break;
+					return;
 				}
 			}
+			Terminal.println("Not a valid response.");
 		}
+	}
+	
+	public Boolean check(Player p) {
+		if(anger >= restraint) {
+			attack(p);
+			return (Boolean)null;
+		}
+		return true;
+	}
+	
+	public void attack(Player p) {
+		Terminal.println("The " + accessor + " attacks you.");
+		p.health -= strength;
 	}
 }

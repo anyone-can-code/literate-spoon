@@ -15,12 +15,12 @@ import engine.Terminal;
 public class Engine {
 	public Player protag;
 
-	//public ArrayList<Room> rooms;// can be accessed by verbs
+	// public ArrayList<Room> rooms;// can be accessed by verbs
 	public Room worldMap;
-	public final String worldName = "Azaroth";//just a random name (thank Liam)
-	
-	
+	public final String worldName = "Azaroth";// just a random name (thank Liam)
+
 	private ArrayList<Word> vocabulary;
+	private ArrayList<String> prepositions;
 	public ArrayList<Object> objectQueue = new ArrayList<Object>();
 	Random rand = new Random();
 
@@ -28,16 +28,18 @@ public class Engine {
 		protag = new Player(0, 0);
 		protag.setHealth(100);
 
-		//rooms = new ArrayList<Room>();
+		// rooms = new ArrayList<Room>();
 		worldMap = new Room(0, 0, "The World of " + worldName);
-		
-		protag.currentRoom = RoomGen.gen(worldMap, objectQueue);//returns starting room
-		
-		
+
+		protag.currentRoom = RoomGen.gen(worldMap, objectQueue);// returns starting room
 
 		vocabulary = new ArrayList<Word>();
+		prepositions = new ArrayList<String>(
+				Arrays.asList(new String[] { "aboard", "about", "above", "across", "after", "against", "along", "amid",
+						"among", "around", "as", "at", "before", "behind", "below", "beside", "between", "by", "down",
+						"in", "inside", "into", "near", "on", "through", "to", "toward", "towards", "under", "with" }));
 	}
-	
+
 	public void addWord(Word v) {
 		vocabulary.add(v);
 	}
@@ -98,11 +100,44 @@ public class Engine {
 		String userText;
 		ArrayList<String> words;
 
+		objectQueue.clear();
+		for (Object o : protag.currentRoom.objects) {
+			if (o.health != null && o.health <= 0) {
+				for (Object obj : o.container) {
+					obj.reference = protag.currentRoom.floor;
+					obj.description = lRandOf(new String[] { "lying", "sitting", "resting" }) + " on";
+
+				}
+				o.container.clear();
+			}
+		}
+		Iterator<Object> objectIt = protag.currentRoom.objects.iterator();
+		while (objectIt.hasNext()) {
+			Object o = objectIt.next();
+			if (o.alive && o.health <= 0) {
+				if (o.getClass().getSimpleName().equals("Entity")) {
+					Entity e = (Entity) o;
+					e.death.accept(this);
+					for (Object obj : e.inventory) {
+						Object ref = new Object("the [floor]", obj, null);
+						ref.abstractNoun();
+						obj.reference = ref;
+						objectQueue.add(obj);
+					}
+					objectIt.remove();
+				}
+			}
+		}
+		for (Object o : protag.currentRoom.objects) {
+			try {
+				Entity e = (Entity) o;
+				e.interactable = e.check(protag);
+			} catch (Exception e) {
+			}
+		}
 		while (true) {// repeats until valid command
 
-			objectQueue.clear();
-
-			Terminal.println(protag.health > 90 ? "You are feeling fine."
+			Terminal.println(protag.health > 90 ? ""
 					: protag.health > 50 ? "You are feeling slightly injured."
 							: protag.health > 0
 									? "You think that you might have some injuries, but you've forgotten where."
@@ -115,40 +150,14 @@ public class Engine {
 					holder = holder.fatherRoom;
 					desc = holder.description + ": " + desc;
 				}
-					
+
 				Terminal.println(desc);
 			} else
 				Terminal.println("Currently not in any room!");
 
-			for (Object o : protag.currentRoom.objects) {
-				if (o.health != null && o.health <= 0) {
-					for (Object obj : o.container) {
-						obj.reference = protag.currentRoom.floor;
-						obj.description = lRandOf(new String[] { "lying", "sitting", "resting" }) + " on";
-
-					}
-					o.container.clear();
-				}
-			}
 			int x1 = 0;
 			int x2 = 0;
-			Iterator<Object> objectIt = protag.currentRoom.objects.iterator();
-			while (objectIt.hasNext()) {
-				Object o = objectIt.next();
-				if (o.alive && o.health <= 0) {
-					if (o.getClass().getSimpleName().equals("Entity")) {
-						Entity e = (Entity) o;
-						e.death.accept(this);
-						for (Object obj : e.inventory) {
-							Object ref = new Object("the [floor]", obj, null);
-							ref.abstractNoun();
-							obj.reference = ref;
-							objectQueue.add(obj);
-						}
-						objectIt.remove();
-					}
-				}
-			}
+
 			protag.currentRoom.objects.addAll(objectQueue);
 			for (int i = 0; i < protag.currentRoom.objects.size(); i++) {
 				Object o = protag.currentRoom.objects.get(i);
@@ -246,18 +255,28 @@ public class Engine {
 				} catch (NullPointerException e) {
 
 				}
-
 			}
+
 			Terminal.print("\n");
 
 			userText = Terminal.readln();
 			userText = userText.toLowerCase();
+			String prepositionUsed = "";
+			for (String str : prepositions) {
+				if (userText.contains(str)) {
+					prepositionUsed = str;
+				}
+				userText = userText.replace(" " + str + " ", " ");
+			}
 			words = new ArrayList<String>();
 
 			String[] s = userText.split(" ");
 			for (String str : s) {
-				words.add(str);// user text goes to array of words
+				if (!str.isEmpty()) {
+					words.add(str);// user text goes to array of words
+				}
 			}
+
 			if (words.size() != 2) {
 				Terminal.println("All commands must be 2 words.");
 				continue;
@@ -290,8 +309,13 @@ public class Engine {
 
 			for (Word w : vocabulary) {
 				if (w.checkWord(words.get(1))) {
-					w1 = w;
-					found = true;
+					try {
+						o1 = (Object) w.represents;
+						foundObject = true;
+					} catch (Exception e) {
+						w1 = w;
+						found = true;
+					}
 				}
 			}
 
@@ -324,7 +348,7 @@ public class Engine {
 			if (found) {
 				w0.perform(w1, this);// fills out word's function
 			} else if (foundObject) {
-				w0.perform(o1, this);
+				w0.perform(o1, prepositionUsed, this);
 			}
 
 			updatePlayerState();
