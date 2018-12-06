@@ -113,16 +113,14 @@ public abstract class RoomGen {
 		
 		mainArea.setEntries();
 		
-		
-		ArrayList<Object> references = new ArrayList<Object>();
-		compileReferences(map, references);
-		addToRooms(map, references);
+		compileReferences(map);
 		
 		return start;
 	}
 	
-	public static void compileReferences(Room map, ArrayList<Object> references) {
+	public static void compileReferences(Room map) {
 		for (Room r : map.nestedMap) {
+			ArrayList<Object> references = new ArrayList<Object>();
 			Iterator<Object> it = r.objects.iterator();
 			while (it.hasNext()) {
 				Object obj = it.next();
@@ -133,8 +131,9 @@ public abstract class RoomGen {
 					references.addAll(obj.container);
 				}
 			}
+			r.objects.addAll(references);
 			if (r.nestedMap.size() > 0)
-				compileReferences(r, references);
+				compileReferences(r);
 		}
 	}
 	
