@@ -21,6 +21,7 @@ public class Engine {
 	
 	
 	private ArrayList<Word> vocabulary;
+	private ArrayList<String> prepositions;
 	public ArrayList<Object> objectQueue = new ArrayList<Object>();
 	Random rand = new Random();
 
@@ -35,6 +36,9 @@ public class Engine {
 		protag.currentRoom = RoomGen.gen(worldMap, objectQueue);//returns starting room
 
 		vocabulary = new ArrayList<Word>();
+		prepositions = new ArrayList<String>(Arrays.asList(new String[]{
+				"aboard", "about", "above", "across", "after", "against", "along", "amid", "among", "around", "as", "at", "before", "behind", "below", "beside", "between", "by", "down", "in", "inside", "into", "near", "on", "through", "to", "toward", "towards", "under", "with"
+				}));
 	}
 	
 	public void addWord(Word v) {
@@ -101,8 +105,7 @@ public class Engine {
 
 			objectQueue.clear();
 
-			Terminal.println(protag.health > 90 ? "You are feeling fine."
-					: protag.health > 50 ? "You are feeling slightly injured."
+			Terminal.println(protag.health < 90 && protag.health > 50 ? "You are feeling slightly injured."
 							: protag.health > 0
 									? "You think that you might have some injuries, but you've forgotten where."
 									: "You feel slightly dead, but you aren't sure.");
@@ -251,12 +254,18 @@ public class Engine {
 
 			userText = Terminal.readln();
 			userText = userText.toLowerCase();
+			for(String str : prepositions) {
+				userText = userText.replace(" " + str + " ", " ");
+			}
 			words = new ArrayList<String>();
 
 			String[] s = userText.split(" ");
 			for (String str : s) {
-				words.add(str);// user text goes to array of words
+				if(!str.isEmpty()) {
+					words.add(str);// user text goes to array of words
+				}
 			}
+			
 			if (words.size() != 2) {
 				Terminal.println("All commands must be 2 words.");
 				continue;

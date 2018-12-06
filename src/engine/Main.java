@@ -115,7 +115,7 @@ public class Main {
 			}
 			Terminal.println(".");
 		}));
-		game.addWord(new Verb("interact", null, (Object o, Engine t) -> {
+		game.addWord(new Verb("interact talk speak converse negotiate chat gossip", null, (Object o, Engine t) -> {
 			if(o.alive) {
 				Entity e = (Entity)o;
 				e.interaction.accept(t.protag, t);
