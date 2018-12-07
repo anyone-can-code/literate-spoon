@@ -135,6 +135,7 @@ public class Engine {
 			} catch (Exception e) {
 			}
 		}
+		outerloop:
 		while (true) {// repeats until valid command
 
 			Terminal.println(protag.health > 90 ? ""
@@ -310,7 +311,7 @@ public class Engine {
 			for (Word w : vocabulary) {
 				if (w.checkWord(words.get(1))) {
 					try {
-						if(w.represents == null) {
+						if (w.represents == null) {
 							boolean b = (Boolean) null;
 						}
 						o1 = (Object) w.represents;
@@ -337,6 +338,23 @@ public class Engine {
 			}
 
 			if (!found && !foundObject) {
+				String str = (" " + protag.currentRoom.description.replace(".", " ").replace(",", " ").replace(";", " ").replace(":", " ") + " ").toLowerCase();
+				if (str.contains(" " + words.get(1) + " ")) {
+					
+					Terminal.println("No.");
+					continue;
+				}
+				
+				for (Object o : protag.currentRoom.objects) {
+					try {
+						if (o.reference.abstractObj && o.reference.accessor.equalsIgnoreCase(words.get(1))) {
+							Terminal.println("No.");
+							continue outerloop;
+						}
+					} catch (Exception e) {
+					}
+				}
+
 				Terminal.println("I don't know what '" + words.get(1) + "' means.");
 				continue;
 			}
