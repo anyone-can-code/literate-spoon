@@ -19,7 +19,7 @@ public abstract class RoomGen {
 		Room mainArea = new Room(0, 0, "Colossal Cave");
 		map.addRoom(mainArea);
 		
-		Room start = new Room(0, 0, "A Dark Cavern\nThe ceiling is too high for you to make out in the darkness. Cold, rough stone lies under your feet. A light wind passes over you.");
+		Room start = new Room(0, 0, "A Dark Cavern\nThe ceiling is too high for you to make out in the darkness. Cold, rough stone lies under your feet. A light wind passes over you.(1000)");
 		mainArea.addRoom(start);
 
 		Object o = new Object("red [brick]", "on a", null);
@@ -62,10 +62,21 @@ public abstract class RoomGen {
 			obj.reference = ref;
 			objectQueue.add(obj);
 		});
+		
+		/* Template for choices
+		 	e.Dialogue("Statement", new HashMap<String, TwoParamFunc<Entity, Player>>(){{
+				put("option1", (Entity e1, Player p1) -> {
+				
+				});
+				put("option2", (Entity e1, Player p1) -> {
+					
+				});
+			}}, e, p);
+		 */
 		e.interaction = (Player p, Engine eng) -> {
-			HashMap<String, TwoParamFunc<Entity, Player>> options1 = new HashMap<String, TwoParamFunc<Entity, Player>>(){{
+			e.Dialogue("The old man says hi. Greet him?", new HashMap<String, TwoParamFunc<Entity, Player>>(){{
 			put("yes", (Entity e1, Player p1) -> {
-				HashMap<String, TwoParamFunc<Entity, Player>> options2 = new HashMap<String, TwoParamFunc<Entity, Player>>(){{
+				e.Dialogue("The old man tries to kill you. Let him?", new HashMap<String, TwoParamFunc<Entity, Player>>(){{
 				put("yes", (Entity e2, Player p2) -> {
 					e2.attack(p2);
 				});
@@ -77,15 +88,13 @@ public abstract class RoomGen {
 						e2.attack(p2);
 					}
 				});
-				}};
-				e.Dialogue("The old man tries to kill you. Let him?", options2, e1, p1);
+				}}, e1, p1);
 			});
 			put("no", (Entity e1, Player p1) -> {
 				Terminal.println("You walk away, leaving him slightly confused and annoyed.");
 				e1.anger += 20;
 			});
-			}};
-			e.Dialogue("The old man says hi. Greet him?", options1, e, p);
+			}}, e, p);
 		};
 
 		reference = new Object("[you]", o, null);
@@ -134,14 +143,6 @@ public abstract class RoomGen {
 			r.objects.addAll(references);
 			if (r.nestedMap.size() > 0)
 				compileReferences(r);
-		}
-	}
-	
-	public static void addToRooms(Room map, ArrayList<Object> aL) {
-		for (Room r : map.nestedMap) {
-			r.objects.addAll(aL);
-			if (r.nestedMap.size() > 0)
-				addToRooms(r, aL);
 		}
 	}
 }
