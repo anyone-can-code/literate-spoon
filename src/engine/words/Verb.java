@@ -19,9 +19,13 @@ public class Verb extends Word {
 		myFunc2 = func2;
 	}
 
-	public void perform(Word w, Engine t) {
+	public void perform(Word w, String prepUsed, Engine t) {
 		// Terminal.println(w + " : " + t);
+		try {
 		myFunc.accept(w, t);
+		} catch (NullPointerException e) {
+			Terminal.println("You cannot " + synonyms.get(0) + prepUsed + " the " + w.synonyms.get(0) + ".");
+		}
 	}
 
 	public void perform(Object o, String prepUsed, Engine t) {

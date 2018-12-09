@@ -26,7 +26,7 @@ public class Word {
 		represents = o;
 	}
 
-	public void perform(Word w, Engine t) {
+	public void perform(Word w, String prepUsed, Engine t) {
 		System.out.println(this.getClass());
 	}
 
