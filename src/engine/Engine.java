@@ -117,12 +117,16 @@ public class Engine {
 			if (o.alive && o.health <= 0) {
 				if (o.getClass().getSimpleName().equals("Entity")) {
 					Entity e = (Entity) o;
+					int s = objectQueue.size();
 					e.death.accept(this);
 					for (Object obj : e.inventory) {
-						Object ref = new Object("the [floor]", obj, null);
-						ref.abstractNoun();
-						obj.reference = ref;
+						if(objectQueue.size() != s) {
+							objectQueue.get(s).container.addAll(e.inventory);
+						} else {
+						obj.reference = protag.currentRoom.floor;
+						obj.description = "on";
 						objectQueue.add(obj);
+						}
 					}
 					objectIt.remove();
 				}
@@ -184,7 +188,7 @@ public class Engine {
 					}
 				}
 				if (protag.hunger > 0) {
-					if (rand.nextInt(101 - protag.hunger) < 5 && o.reference != null) {
+					if (rand.nextInt(101 - protag.hunger) < 2 && o.reference != null) {
 						compSub = lRandOf(new String[] { "possibly edible", "juicy and tender", "appetizing",
 								"delicious-looking", "scrumptious" }) + " " + compSub;
 					}
@@ -328,12 +332,24 @@ public class Engine {
 					o1 = o;
 					foundObject = true;
 				}
+				for(Object obj : o.container) {
+					if (obj.accessor.equals(words.get(1))) {
+						o1 = obj;
+						foundObject = true;
+					}
+				}
 			}
 
 			for (Object o : protag.inventory) {
 				if (o.accessor.equals(words.get(1))) {
 					o1 = o;
 					foundObject = true;
+				}
+				for(Object obj : o.container) {
+					if (obj.accessor.equals(words.get(1))) {
+						o1 = obj;
+						foundObject = true;
+					}
 				}
 			}
 
