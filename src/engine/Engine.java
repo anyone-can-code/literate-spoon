@@ -115,7 +115,7 @@ public class Engine {
 		while (objectIt.hasNext()) {
 			Object o = objectIt.next();
 			if (o.alive && o.health <= 0) {
-				if (o.getClass().getSimpleName().equals("Entity")) {
+				if(o.getClass().getSimpleName().equals("Entity")) {
 					Entity e = (Entity) o;
 					int s = objectQueue.size();
 					e.death.accept(this);
@@ -139,6 +139,7 @@ public class Engine {
 			} catch (Exception e) {
 			}
 		}
+		protag.currentRoom.objects.addAll(objectQueue);
 		outerloop:
 		while (true) {// repeats until valid command
 
@@ -163,7 +164,7 @@ public class Engine {
 			int x1 = 0;
 			int x2 = 0;
 
-			protag.currentRoom.objects.addAll(objectQueue);
+			
 			for (int i = 0; i < protag.currentRoom.objects.size(); i++) {
 				Object o = protag.currentRoom.objects.get(i);
 				String compSub = o.compSub;
@@ -215,7 +216,7 @@ public class Engine {
 				while (s == null) {
 					try {
 						s = protag.currentRoom.objects.get(n).reference.accessor;
-						if (s.equals(o.reference.accessor)) {
+						if (s.equals(o.reference.accessor) && x1 == 2) {
 							x2 = 1;
 						}
 						break;
@@ -315,7 +316,7 @@ public class Engine {
 			for (Word w : vocabulary) {
 				if (w.checkWord(words.get(1))) {
 					try {
-						if (w.represents == null) {
+						if(w.represents == null) {
 							boolean b = (Boolean) null;
 						}
 						o1 = (Object) w.represents;

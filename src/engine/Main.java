@@ -166,14 +166,10 @@ public class Main {
 		game.addWord(new Verb("drop leave", null, (Object o, Engine t) -> {
 			if(t.protag.inventory.contains(o)) {
 			t.protag.inventory.remove(o);
+			o.description = "on";
+			o.reference = t.protag.currentRoom.floor;
 			t.protag.currentRoom.objects.add(o);
 			Terminal.println("You dropped the " + o.accessor + ".");
-			try {
-				o.reference.compSub = t.lRandOf(new String[] { "floor", "ground" });
-				o.reference.description = o.referencer.description.replace(" a", " the");
-			} catch (Exception e) {
-
-			}
 			} else {
 				Terminal.println("You don't have a " + o.accessor + " to drop.");
 			}

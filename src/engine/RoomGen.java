@@ -24,24 +24,15 @@ public abstract class RoomGen {
 				"A Dark Cavern\nThe ceiling is too high for you to make out in the darkness. Cold, rough stone lies under your feet. A light wind passes over you.(1000)");
 		mainArea.addRoom(start);
 
-		Object o = new Object("red [brick]", "on a", null) {
-			{
-				injury = type.shatters;
-				reference = new Object("nice hand-knitted [carpet]", this, null);
-			}
-		};
+		Object o = new Object("red [brick]", "on a", null);
+		o.injury = Object.type.shatters;
+		o.reference = new Object("nice hand-knitted [carpet]", o, null);
 		start.objects.add(o);
 
-		o = new Object("deformed [spider]", "on your", null) {
-			{
-				injury = type.bruises;
-				reference = new Object("[face]", this, null) {
-					{
-						abstractNoun();
-					}
-				};
-			}
-		};
+		o = new Object("deformed [spider]", "on your", null);
+		o.injury = Object.type.bruises;
+		o.reference = new Object("[face]", o, null);
+		o.reference.abstractNoun();
 		start.objects.add(o);
 		/*
 		o = Engine.Consumable("dead [corpse]", "lying on", null, 10);
@@ -70,73 +61,55 @@ public abstract class RoomGen {
 			ref.abstractNoun();
 			obj.reference = ref;
 			objectQueue.add(obj);
-		}) {
-			{
-				interaction = (Player p, Engine eng) -> {
-					Dialogue("The old man says hi. Greet him?", new HashMap<String, OneParamFunc<Player>>() {
-						{
-							put("yes", (Player p1) -> {
-								Dialogue("The old man tries to kill you. Let him?",
-										new HashMap<String, OneParamFunc<Player>>() {
-											{
-												put("yes", (Player p2) -> {
-													attack(p2);
-												});
-												put("no", (Player p2) -> {
-													if (p2.agility + rand.nextInt(3) - 1 >= agility) {
-														Terminal.println("You dodged the attack.");
-													} else {
-														Terminal.println("You failed to dodge his attack.");
-														attack(p2);
-													}
-												});
-											}
-										}, p1);
-							});
-							put("no", (Player p1) -> {
-								Terminal.println("You walk away, leaving him slightly confused and annoyed.");
-								anger += 20;
-							});
-						}
-					}, p);
-				};
-				inventory.add(new Object("water [bottle]", (String) null, null) {
-					{
-						consumability = 5;
+		});
+		e.reference = new Object("[you]", e, null);
+		e.reference.abstractNoun();
+		e.interaction = (Player p, Engine eng) -> {
+			HashMap<String, OneParamFunc<Player>> h = new HashMap<String, OneParamFunc<Player>>();
+			h.put("yes", (Player p1) -> {
+				HashMap<String, OneParamFunc<Player>> h1 = new HashMap<String, OneParamFunc<Player>>();
+				h1.put("yes", (Player p2) -> {
+					e.attack(p2);
+				});
+				h1.put("no", (Player p2) -> {
+					if (p2.agility + rand.nextInt(3) - 1 >= e.agility) {
+						Terminal.println("You dodged the attack.");
+					} else {
+						Terminal.println("You failed to dodge his attack.");
+						e.attack(p2);
 					}
 				});
-				reference = new Object("[you]", this, null) {
-					{
-						abstractNoun();
-					}
-				};
-			}
+				e.Dialogue("The old man tries to kill you. Let him?", h1, p1);
+			});
+			h.put("no", (Player p1) -> {
+				Terminal.println("You walk away, leaving him slightly confused and annoyed.");
+				e.anger += 20;
+			});
+			e.Dialogue("The old man says hi. Greet him?", h, p);
 		};
+		o = new Object("water [bottle]", (String) null, null);
+		o.consumability = 5;
+		e.inventory.add(o);
+
 		start.objects.add(e);
 		/* Template for choices
-		 	e.Dialogue("Statement", new HashMap<String, OneParamFunc<Player>>(){{
-				put("option1", (Player p1) -> {
+		 	HashMap<String, OneParamFunc<Player>> h = new HashMap<String, OneParamFunc<Player>>();
+			h.put("option 1", (Player p1) -> {
 				
-				});
-				put("option2", (Player p1) -> {
-					
-				});
-			}}, p);
+			});
+			h.put("option 2", (Player p1) -> {
+				
+			});
+			e.Dialogue("statement", h, p);
 		 */
 
 		Room r = new Room(0, 1, "A Dark Stone Passageway");
 		mainArea.addRoom(r);
 
-		o = new Object("chunk of [obsidian]", "in a", null) {
-			{
-				injury = type.shatters;
-				reference = new Object("small [puddle]", this, null) {
-					{
-						holdable = null;
-					}
-				};
-			}
-		};
+		o = new Object("chunk of [obsidian]", "in a", null);
+		o.injury = Object.type.shatters;
+		o.reference = new Object("small [puddle]", o, null);
+		o.reference.holdable = null;
 		r.objects.add(o);
 
 		mainArea.setEntries();// to be called after mainArea completely defined
