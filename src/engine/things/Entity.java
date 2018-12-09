@@ -42,18 +42,18 @@ public class Entity extends Object {
 		setHealth(20);
 	}
 
-	public void Dialogue(String statement, HashMap<String, TwoParamFunc<Entity, Player>> options, Entity e, Player p) {
+	public void Dialogue(String statement, HashMap<String, OneParamFunc<Player>> options, Player p) {
 		boolean b = interactable;
 		Terminal.print(statement);
-		for(Map.Entry<String, TwoParamFunc<Entity, Player>> entry : options.entrySet()) {
+		for(Map.Entry<String, OneParamFunc<Player>> entry : options.entrySet()) {
 			Terminal.print(" [" + entry.getKey() + "]");
 		}
 		Terminal.println("");
 		while (true) {
 			String str = Terminal.readln();
-			for (Map.Entry<String, TwoParamFunc<Entity, Player>> entry : options.entrySet()) {
+			for (Map.Entry<String, OneParamFunc<Player>> entry : options.entrySet()) {
 				if(entry.getKey().equalsIgnoreCase(str)) {
-					entry.getValue().accept(e, p);
+					entry.getValue().accept(p);
 					return;
 				}
 			}

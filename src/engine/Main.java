@@ -133,11 +133,18 @@ public class Main {
 		}));
 		game.addWord(new Verb("hold", null, (Object o, Engine t) -> {
 			boolean b = o.holdable;
-			if(!t.protag.inventory.contains(o)) {
-			t.protag.rightHand = o;
-			t.protag.inventory.add(o);
-			t.protag.currentRoom.objects.remove(o);
-			Terminal.println("You are now holding a " + o.accessor + ".");
+			if(t.protag.inventory.contains(o)) {
+				if(t.protag.rightHand != null)
+					t.protag.inventory.add(t.protag.rightHand);
+				t.protag.rightHand = o;
+				t.protag.inventory.remove(o);
+				Terminal.println("You are now holding a " + o.accessor + ".");
+			} else if(t.protag.currentRoom.objects.contains(o)) {
+				if(t.protag.rightHand != null)
+					t.protag.inventory.add(t.protag.rightHand);
+				t.protag.rightHand = o;
+				removal(o, t);
+				Terminal.println("You are now holding a " + o.accessor + ".");
 			} else {
 				b = (Boolean)null;
 			}
@@ -173,7 +180,7 @@ public class Main {
 		}));
 
 
-		game.addWord(new Verb("open check", (Word n, Engine t) -> {
+		game.addWord(new Verb("view open check", (Word n, Engine t) -> {
 			if (n.represents == t.protag.inventory) {
 				if (t.protag.inventory.isEmpty()) {
 					Terminal.print("You have nothing in your inventory");
