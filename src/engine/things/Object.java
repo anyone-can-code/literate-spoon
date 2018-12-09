@@ -12,6 +12,7 @@ public class Object {
 	public Object reference;
 	public Object referencer;
 	public Integer consumability = -5;
+	public Integer drinkability = null;
 	public Boolean holdable = true;
 	public Integer health = 10;
 	public Integer maxHealth = 10;

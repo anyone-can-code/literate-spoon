@@ -27,6 +27,7 @@ public abstract class RoomGen {
 		Object o = new Object("red [brick]", "on a", null);
 		o.injury = Object.type.shatters;
 		o.reference = new Object("nice hand-knitted [carpet]", o, null);
+		o.reference.injury = Object.type.squishes;
 		start.objects.add(o);
 
 		o = new Object("deformed [spider]", "on your", null);
@@ -88,7 +89,9 @@ public abstract class RoomGen {
 			e.Dialogue("The old man says hi. Greet him?", h, p);
 		};
 		o = new Object("water [bottle]", (String) null, null);
-		o.consumability = 5;
+		o.consumability = -5;
+		o.drinkability = 5;
+		o.injury = Object.type.crumples;
 		e.inventory.add(o);
 
 		start.objects.add(e);
@@ -110,6 +113,8 @@ public abstract class RoomGen {
 		o.injury = Object.type.shatters;
 		o.reference = new Object("small [puddle]", o, null);
 		o.reference.holdable = null;
+		o.reference.drinkability = 5;
+		o.reference.consumability = null;
 		r.objects.add(o);
 
 		mainArea.setEntries();// to be called after mainArea completely defined

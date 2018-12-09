@@ -115,17 +115,17 @@ public class Engine {
 		while (objectIt.hasNext()) {
 			Object o = objectIt.next();
 			if (o.alive && o.health <= 0) {
-				if(o.getClass().getSimpleName().equals("Entity")) {
+				if (o.getClass().getSimpleName().equals("Entity")) {
 					Entity e = (Entity) o;
 					int s = objectQueue.size();
 					e.death.accept(this);
 					for (Object obj : e.inventory) {
-						if(objectQueue.size() != s) {
+						if (objectQueue.size() != s) {
 							objectQueue.get(s).container.addAll(e.inventory);
 						} else {
-						obj.reference = protag.currentRoom.floor;
-						obj.description = "on";
-						objectQueue.add(obj);
+							obj.reference = protag.currentRoom.floor;
+							obj.description = "on";
+							objectQueue.add(obj);
 						}
 					}
 					objectIt.remove();
@@ -140,8 +140,7 @@ public class Engine {
 			}
 		}
 		protag.currentRoom.objects.addAll(objectQueue);
-		outerloop:
-		while (true) {// repeats until valid command
+		outerloop: while (true) {// repeats until valid command
 
 			Terminal.println(protag.health > 90 ? ""
 					: protag.health > 50 ? "You are feeling slightly injured."
@@ -164,11 +163,10 @@ public class Engine {
 			int x1 = 0;
 			int x2 = 0;
 
-			
 			for (int i = 0; i < protag.currentRoom.objects.size(); i++) {
 				Object o = protag.currentRoom.objects.get(i);
 				String compSub = o.compSub;
-				if (o.health != null && o.health < o.maxHealth) {
+				if (o.health != null && o.health < o.maxHealth && o.injury != null) {
 					int p = (int) (((float) o.health / (float) o.maxHealth) * 4);
 					switch (o.injury) {
 					case crumples:
@@ -316,7 +314,7 @@ public class Engine {
 			for (Word w : vocabulary) {
 				if (w.checkWord(words.get(1))) {
 					try {
-						if(w.represents == null) {
+						if (w.represents == null) {
 							boolean b = (Boolean) null;
 						}
 						o1 = (Object) w.represents;
@@ -333,7 +331,7 @@ public class Engine {
 					o1 = o;
 					foundObject = true;
 				}
-				for(Object obj : o.container) {
+				for (Object obj : o.container) {
 					if (obj.accessor.equals(words.get(1))) {
 						o1 = obj;
 						foundObject = true;
@@ -346,7 +344,7 @@ public class Engine {
 					o1 = o;
 					foundObject = true;
 				}
-				for(Object obj : o.container) {
+				for (Object obj : o.container) {
 					if (obj.accessor.equals(words.get(1))) {
 						o1 = obj;
 						foundObject = true;
@@ -355,13 +353,14 @@ public class Engine {
 			}
 
 			if (!found && !foundObject) {
-				String str = (" " + protag.currentRoom.description.replace(".", " ").replace(",", " ").replace(";", " ").replace(":", " ") + " ").toLowerCase();
+				String str = (" " + protag.currentRoom.description.replace(".", " ").replace(",", " ").replace(";", " ")
+						.replace(":", " ") + " ").toLowerCase();
 				if (str.contains(" " + words.get(1) + " ")) {
-					
+
 					Terminal.println("No.");
 					continue;
 				}
-				
+
 				for (Object o : protag.currentRoom.objects) {
 					try {
 						if (o.reference.abstractObj && o.reference.accessor.equalsIgnoreCase(words.get(1))) {
@@ -384,7 +383,7 @@ public class Engine {
 			}
 
 			if (found) {
-				w0.perform(w1, this);// fills out word's function
+				w0.perform(w1, prepositionUsed, this);// fills out word's function
 			} else if (foundObject) {
 				w0.perform(o1, prepositionUsed, this);
 			}
