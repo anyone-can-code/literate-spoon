@@ -130,6 +130,11 @@ public class Engine {
 					}
 					objectIt.remove();
 				}
+			} else if (!o.alive && o.health <= 0) {
+				for (Object obj : o.container) {
+					objectQueue.add(obj);
+				}
+				o.container.clear();
 			}
 		}
 		for (Object o : protag.currentRoom.objects) {
@@ -186,6 +191,34 @@ public class Engine {
 						break;
 					}
 				}
+				String rCompSub = "";
+				if (o.reference != null) {
+					rCompSub = o.reference.compSub;
+					if (o.reference.health != null && o.reference.health < o.reference.maxHealth
+							&& o.reference.injury != null) {
+						int p = (int) (((float) o.reference.health / (float) o.reference.maxHealth) * 4);
+						switch (o.reference.injury) {
+						case crumples:
+							rCompSub = (p == 3 ? "dented " : p == 2 ? "bent " : p == 1 ? "crumpled-up " : "crushed ")
+									+ o.reference.accessor;
+							break;
+						case shatters:
+							rCompSub = (p == 3 ? "fractured " : p > 0 ? "cracked " : "shattered ")
+									+ o.reference.accessor;
+							break;
+						case squishes:
+							rCompSub = (p == 3 ? "bruised "
+									: p == 2 ? "squashed " : p == 1 ? "compressed " : "trampled ")
+									+ o.reference.accessor;
+							break;
+						case bruises:
+							rCompSub = (p == 3 ? "bruised "
+									: p == 2 ? "damaged " : p == 1 ? "beaten-up " : "pulverized ")
+									+ o.reference.accessor;
+							break;
+						}
+					}
+				}
 				if (protag.hunger > 0) {
 					if (rand.nextInt(101 - protag.hunger) < 2 && o.reference != null) {
 						compSub = lRandOf(new String[] { "possibly edible", "juicy and tender", "appetizing",
@@ -226,15 +259,15 @@ public class Engine {
 					n--;
 				}
 
-				try {
-					Object r = o.reference;
+				Object r = o.reference;
+				if (r != null) {
 					if (x1 == 1) {
 						if (x2 == 0) {
 							Terminal.print(lRandOf(
-									new String[] { " as well as a " + compSub + " " + o.description + " " + r.compSub,
-											" and a " + compSub + " " + o.description + " " + r.compSub }));
+									new String[] { " as well as a " + compSub + " " + o.description + " " + rCompSub,
+											" and a " + compSub + " " + o.description + " " + rCompSub }));
 						} else {
-							Terminal.print(", and a " + compSub + " " + o.description + " " + r.compSub);
+							Terminal.print(", and a " + compSub + " " + o.description + " " + rCompSub);
 						}
 					} else if (x1 == 2) {
 						if (x2 == 0) {
@@ -245,9 +278,9 @@ public class Engine {
 						}
 					} else {
 						Terminal.print(
-								uRandOf(new String[] { "there is a " + compSub + " " + o.description + " " + r.compSub,
-										o.description + " " + r.compSub + ", there is a " + compSub,
-										"You notice a " + compSub + " " + o.description + " " + r.compSub }));
+								uRandOf(new String[] { "there is a " + compSub + " " + o.description + " " + rCompSub,
+										o.description + " " + rCompSub + ", there is a " + compSub,
+										"You notice a " + compSub + " " + o.description + " " + rCompSub }));
 					}
 					if (x1 > 0) {
 						x1--;
@@ -256,8 +289,6 @@ public class Engine {
 						x2 = 0;
 						Terminal.println(".");
 					}
-				} catch (NullPointerException e) {
-
 				}
 			}
 
