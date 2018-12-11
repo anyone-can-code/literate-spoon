@@ -162,7 +162,7 @@ public class Main {
 				} catch(Exception e) {};
 			}
 			//Terminal.println("You attacked the " + o.accessor + " with the " + t.protag.weapon.accessor + ".");
-			Terminal.println("Weapon: " + o.accessor);
+			Terminal.println("Weapon: " + t.protag.weapon.accessor);
 		}, (Object o1, Object with, Engine t) -> {
 			t.protag.weapon = with;
 			

@@ -338,6 +338,7 @@ public class Engine {
 			
 			for (int i = 0; i < parts.length; i++) {//probably some of the ugliest code (by me) in my life, but it works
 				prepUsed[i] = "";
+				parts[i] = parts[i].trim();
 				int w = 0;
 				while (true) {
 					for (String str: prepositions) {
