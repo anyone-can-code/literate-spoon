@@ -56,7 +56,7 @@ public abstract class RoomGen {
 		o.reference = reference;
 		start.objects.add(o);
 		
-		Entity e = new Entity("an old [man]", "standing in front of", (Engine e2) -> {
+		Entity e = new Entity("old [man]", "standing in front of", (Engine e2) -> {
 			Terminal.println("The old man dies. He leaves you a corpse as a parting gift.");
 			Object obj = Engine.Consumable("dead [corpse]", "lying on", null, 10);
 			obj.injury = Object.type.bruises;
@@ -78,27 +78,27 @@ public abstract class RoomGen {
 			}}, e, p);
 		 */
 		e.interaction = (Player p, Engine eng) -> {
-			e.Dialogue("The old man says hi. Greet him?", new HashMap<String, TwoParamFunc<Entity, Player>>(){{
-				put("yes", (Entity e1, Player p1) -> {
-					e.Dialogue("The old man tries to kill you. Let him?", new HashMap<String, TwoParamFunc<Entity, Player>>(){{
-						put("yes", (Entity e2, Player p2) -> {
-							e2.attack(p2);
-						});
-						put("no", (Entity e2, Player p2) -> {
-							if(p2.agility + rand.nextInt(3) - 1 >= e2.agility) {
-								Terminal.println("You dodged the attack.");
-							} else {
-								Terminal.println("You failed to dodge his attack.");
-								e2.attack(p2);
-							}
-						});
-					}}, e1, p1);
+			HashMap<String, OneParamFunc<Player>> h = new HashMap<String, OneParamFunc<Player>>();
+			h.put("yes", (Player p1) -> {
+				HashMap<String, OneParamFunc<Player>> h1 = new HashMap<String, OneParamFunc<Player>>();
+				h1.put("yes", (Player p2) -> {
+					e.attack(p2);
 				});
-				put("no", (Entity e1, Player p1) -> {
-					Terminal.println("You walk away, leaving him slightly confused and annoyed.");
-					e1.anger += 20;
+				h1.put("no", (Player p2) -> {
+					if (p2.agility + rand.nextInt(3) - 1 >= e.agility) {
+						Terminal.println("You dodged the attack.");
+					} else {
+						Terminal.println("You failed to dodge his attack.");
+						e.attack(p2);
+					}
 				});
-			}}, e, p);
+				e.Dialogue("The old man tries to kill you. Let him?", h1, p1);
+			});
+			h.put("no", (Player p1) -> {
+				Terminal.println("You walk away, leaving him slightly confused and annoyed.");
+				e.anger += 20;
+			});
+			e.Dialogue("The old man says hi. Greet him?", h, p);
 		};
 
 		reference = new Object("[you]", o, null);
@@ -112,10 +112,10 @@ public abstract class RoomGen {
 		o = new Object("sharp chunk of [obsidian]", "in a", null);
 		o.injury = Object.type.shatters;
 		o.damage = 4;
-		reference = new Object("small [puddle]", o, null);
-		reference.abstractNoun();
-		o.reference = reference;
-		r.objects.add(o);
+		o.reference = new Object("small [puddle]", o, null);
+		o.reference.holdable = null;
+		o.reference.drinkability = 5;
+		o.reference.consumability = null;
 	
 		mainArea.setEntries();//to be called after mainArea completely defined
 		//alternatively, you could pick the entry points directly if you want more control

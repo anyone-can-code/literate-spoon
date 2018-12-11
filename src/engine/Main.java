@@ -79,23 +79,28 @@ public class Main {
 			}
 			
 			if(!o.alive) {
-			t.protag.hunger -= o.consumability;
-			if (o.consumability < 0) {
-				if(o.poisonous) {
-					t.protag.effects.add(new Effect((p) -> {
-						t.protag.health--;
-						}, 30, "That was painful to eat."));
-				} else {
-					t.protag.effects.add(new Effect((p) -> {
-					t.protag.health += o.consumability * 2;
-					}, 3, "That was painful to eat."));
+				t.protag.hunger -= o.consumability;
+				
+				if (o.drinkability != null) {
+					t.protag.thirst -= o.drinkability;
 				}
-			} else {
-				Terminal.println("You ate the " + o.accessor + ". Delicious.");
-			}
-			t.protag.currentRoom.objects.remove(o);
-			t.protag.inventory.remove(o);
-			removal(o, t);
+				
+				if (o.consumability < 0) {
+					if(o.poisonous) {
+						t.protag.effects.add(new Effect((p) -> {
+							t.protag.health--;
+						}, 30, "That was painful to eat."));
+					} else {
+						t.protag.effects.add(new Effect((p) -> {
+							t.protag.health += o.consumability * 2;
+						}, 3, "That was painful to eat."));
+					}
+				} else {
+					Terminal.println("You ate the " + o.accessor + ". Delicious.");
+				}
+				t.protag.currentRoom.objects.remove(o);
+				t.protag.inventory.remove(o);
+				removal(o, t);
 			} else {
 				boolean b = (Boolean) null;
 			}
@@ -214,19 +219,15 @@ public class Main {
 			}
 			
 			if(t.protag.inventory.contains(o)) {
-			t.protag.inventory.remove(o);
+				t.protag.inventory.remove(o);
+				o.description = "on";
+				o.reference = t.protag.currentRoom.floor;
 			
-			if (t.protag.rightHand.equals(o))
-				t.protag.rightHand = t.protag.fist;
-			
-			t.protag.currentRoom.objects.add(o);
-			Terminal.println("You dropped the " + o.accessor + ".");
-			try {
-				o.reference.compSub = t.lRandOf(new String[] { "floor", "ground" });
-				o.reference.description = o.referencer.description.replace(" a", " the");
-			} catch (Exception e) {
-
-			}
+				if (t.protag.rightHand.equals(o))
+					t.protag.rightHand = t.protag.fist;
+				
+				t.protag.currentRoom.objects.add(o);
+				Terminal.println("You dropped the " + o.accessor + ".");
 			} else {
 				Terminal.println("You don't have a " + o.accessor + " to drop.");
 			}

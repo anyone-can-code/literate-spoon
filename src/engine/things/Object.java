@@ -13,6 +13,7 @@ public class Object {
 	public Object reference;
 	public Object referencer;
 	public Integer consumability = -5;
+	public Integer drinkability = null;
 	public Boolean holdable = true;
 	public Integer damage = 1;
 	public Integer playerDamage = 0;
