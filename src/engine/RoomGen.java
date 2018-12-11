@@ -24,33 +24,37 @@ public abstract class RoomGen {
 
 		Object o = new Object("red [brick]", "on a", null);
 		o.injury = Object.type.shatters;
+		o.damage = 3;
 		Object reference = new Object("nice hand-knitted [carpet]", o, null);
 		o.reference = reference;
 		start.objects.add(o);
 
-		o = new Object("deformed [spider]", "on your", null);
+		/*o = new Object("deformed [spider]", "on your", null);
 		o.injury = Object.type.squishes;
+		o.damage = 2;
 		reference = new Object("[face]", o, null);
 		reference.abstractNoun();
 		o.reference = reference;
 		start.objects.add(o);
-		/*
+		
 		o = Engine.Consumable("dead [corpse]", "lying on", null, 10);
 		o.injury = Object.type.bruises;
 		o.holdable = null;
 		reference = map.nestedMap.get(0).floor;
 		o.reference = reference;
-		start.objects.add(o);
+		start.objects.add(o);*/
 		
 		o = new Object("old wooden [bookshelf]", "in", null);
 		o.injury = Object.type.shatters;
 		o.holdable = null;
-		o.container.addAll(Arrays.asList(new Object("dusty old [book]", o, null),
-				new Object("trigonometry [textbook]", o, null), new Object("[jar] full of candy", o, null)));
+		
+		Object o2 = new Object("dusty old [book]", o, null);
+		o2.text = map.description + "\nBy Anonymous";
+		o.container.addAll(Arrays.asList(o2, new Object("[jar] full of candy", o, null)));
 		reference = new Object("the back of the [room]", o, null);
 		reference.abstractNoun();
 		o.reference = reference;
-		start.objects.add(o);*/
+		start.objects.add(o);
 		
 		Entity e = new Entity("an old [man]", "standing in front of", (Engine e2) -> {
 			Terminal.println("The old man dies. He leaves you a corpse as a parting gift.");
@@ -75,25 +79,25 @@ public abstract class RoomGen {
 		 */
 		e.interaction = (Player p, Engine eng) -> {
 			e.Dialogue("The old man says hi. Greet him?", new HashMap<String, TwoParamFunc<Entity, Player>>(){{
-			put("yes", (Entity e1, Player p1) -> {
-				e.Dialogue("The old man tries to kill you. Let him?", new HashMap<String, TwoParamFunc<Entity, Player>>(){{
-				put("yes", (Entity e2, Player p2) -> {
-					e2.attack(p2);
+				put("yes", (Entity e1, Player p1) -> {
+					e.Dialogue("The old man tries to kill you. Let him?", new HashMap<String, TwoParamFunc<Entity, Player>>(){{
+						put("yes", (Entity e2, Player p2) -> {
+							e2.attack(p2);
+						});
+						put("no", (Entity e2, Player p2) -> {
+							if(p2.agility + rand.nextInt(3) - 1 >= e2.agility) {
+								Terminal.println("You dodged the attack.");
+							} else {
+								Terminal.println("You failed to dodge his attack.");
+								e2.attack(p2);
+							}
+						});
+					}}, e1, p1);
 				});
-				put("no", (Entity e2, Player p2) -> {
-					if(p2.agility + rand.nextInt(3) - 1 >= e2.agility) {
-						Terminal.println("You dodged the attack.");
-					} else {
-						Terminal.println("You failed to dodge his attack.");
-						e2.attack(p2);
-					}
+				put("no", (Entity e1, Player p1) -> {
+					Terminal.println("You walk away, leaving him slightly confused and annoyed.");
+					e1.anger += 20;
 				});
-				}}, e1, p1);
-			});
-			put("no", (Entity e1, Player p1) -> {
-				Terminal.println("You walk away, leaving him slightly confused and annoyed.");
-				e1.anger += 20;
-			});
 			}}, e, p);
 		};
 
@@ -105,9 +109,11 @@ public abstract class RoomGen {
 		Room r = new Room(0, 1, "A Dark Stone Passageway");
 		mainArea.addRoom(r);
 		
-		o = new Object("chunk of [obsidian]", "in a", null);
+		o = new Object("sharp chunk of [obsidian]", "in a", null);
 		o.injury = Object.type.shatters;
+		o.damage = 4;
 		reference = new Object("small [puddle]", o, null);
+		reference.abstractNoun();
 		o.reference = reference;
 		r.objects.add(o);
 	
