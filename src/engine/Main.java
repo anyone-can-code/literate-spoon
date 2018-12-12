@@ -285,3 +285,12 @@ public class Main {
 		}
 	}
 }
+//Some say the world will end in fire, some say in ice.
+//I say end it with a comment, and it's really just as nice.
+//So farewell to you my friend, you who have ventured brave and bold
+//through the convoluted forests of Aidan's story, in code, told.
+//What you have read may yet escape you, as it once did for me,
+//but rest assured, the holy Lambda is something men can learn to see.
+//I rest my case with the finality of the ending close paren —
+//And I swear I'll never, EVER set Aidan's lambdas free again.
+// — Nico Mantione, 11 December 2018
