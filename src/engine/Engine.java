@@ -152,7 +152,7 @@ public class Engine {
 							: protag.health > 0
 									? "You think that you might have some injuries, but you've forgotten where."
 									: "You feel slightly dead, but you aren't sure.");
-
+			Terminal.print("(1000)");
 			if (protag.currentRoom != null) {
 				Room holder = protag.currentRoom;
 				String desc = holder.description;
@@ -261,6 +261,7 @@ public class Engine {
 
 				Object r = o.reference;
 				if (r != null) {
+					Terminal.print("(1000)");
 					if (x1 == 1) {
 						if (x2 == 0) {
 							Terminal.print(lRandOf(
@@ -281,6 +282,7 @@ public class Engine {
 								uRandOf(new String[] { "there is a " + compSub + " " + o.description + " " + rCompSub,
 										o.description + " " + rCompSub + ", there is a " + compSub,
 										"You notice a " + compSub + " " + o.description + " " + rCompSub }));
+
 					}
 					if (x1 > 0) {
 						x1--;
@@ -291,8 +293,6 @@ public class Engine {
 					}
 				}
 			}
-
-			Terminal.print("\n");
 
 			userText = Terminal.readln();
 			userText = userText.toLowerCase();

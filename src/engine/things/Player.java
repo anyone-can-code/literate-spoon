@@ -19,7 +19,7 @@ public class Player extends Object {
 	public Object rightHand;
 
 	public Player(int x, int y) {
-		super("[player]", (String)null, null);
+		super("[player]", (String) null, null);
 		/*pos = new int[2];
 		pos[0] = x;
 		pos[1] = y;*/

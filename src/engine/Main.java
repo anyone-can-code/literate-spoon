@@ -6,14 +6,15 @@ import engine.words.Word;
 import engine.things.Effect;
 import engine.things.Entity;
 import engine.things.Object;
-
+import javafx.scene.control.Label;
+import javafx.application.Platform;
 import engine.Terminal;
 
-public class Main {
+public class Main extends Thread {
 
 	public static Engine game;
 
-	public static void main(String args[]) {
+	public Main() {
 		game = new Engine();
 
 		game.addWord(new Verb("move go walk run climb jog travel journey venture", (Word w, Engine t) -> {
@@ -35,10 +36,15 @@ public class Main {
 
 				x += dx;
 				y += dy;
-
+				Platform.runLater(() -> Window.gp.getChildren().clear());
+				Room cR = t.protag.currentRoom;
 				for (Room r : t.protag.currentRoom.fatherRoom.nestedMap) {
 					if (x == r.coords[0] && y == r.coords[1]) {
 						t.protag.currentRoom = r;
+					}
+					
+					if (x == r.coords[0] && y == r.coords[1]) {
+						
 
 						if (dx > 0) {//flipped from how you'd think
 							while (t.protag.currentRoom.westEntry != null)
@@ -54,6 +60,14 @@ public class Main {
 								t.protag.currentRoom = t.protag.currentRoom.northEntry;
 						}
 
+						break;
+					}
+				}
+				for (Room r : t.protag.currentRoom.fatherRoom.nestedMap) {
+					Platform.runLater(() -> Window.gp.add(new Label(t.protag.currentRoom == r ? "@" : "R"), r.coords[0], r.coords[1]));
+				}
+				for (Room r : cR.fatherRoom.nestedMap) {
+					if (x == r.coords[0] && y == r.coords[1]) {
 						return;
 					}
 				}
@@ -218,14 +232,10 @@ public class Main {
 		game.addWord(new Word("inventory", game.protag.inventory));
 		game.addWord(new Word("self me", game.protag));
 
-		game.addWord(new Direction("north forwards", "12"));
-		game.addWord(new Direction("south backwards", "10"));
+		game.addWord(new Direction("north forwards forward ahead onward", "12"));
+		game.addWord(new Direction("south backwards backward back ", "10"));
 		game.addWord(new Direction("east right", "21"));
 		game.addWord(new Direction("west left", "01"));
-
-		while (true) {
-			game.update();
-		}
 	}
 
 	public static void removal(Object o, Engine t) {
@@ -240,6 +250,12 @@ public class Main {
 			o.reference.description = "on";
 		} catch (Exception e) {
 
+		}
+	}
+
+	public void run() {
+		while (true) {
+			game.update();
 		}
 	}
 }

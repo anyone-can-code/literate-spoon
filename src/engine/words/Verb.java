@@ -22,8 +22,8 @@ public class Verb extends Word {
 	public void perform(Word w, String prepUsed, Engine t) {
 		// Terminal.println(w + " : " + t);
 		try {
-		myFunc.accept(w, t);
-		} catch (NullPointerException e) {
+			myFunc.accept(w, t);
+		} catch (Exception e) {
 			Terminal.println("You cannot " + synonyms.get(0) + prepUsed + " the " + w.synonyms.get(0) + ".");
 		}
 	}
@@ -32,7 +32,7 @@ public class Verb extends Word {
 		// Terminal.println(o + " : " + t);
 		try {
 			myFunc2.accept(o, t);
-		} catch (NullPointerException e) {
+		} catch (Exception e) {
 			Terminal.println("You cannot " + synonyms.get(0) + prepUsed + " the " + o.accessor + ".");
 		}
 	}
