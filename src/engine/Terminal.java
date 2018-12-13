@@ -58,15 +58,15 @@ public class Terminal {
 
 	@SuppressWarnings("restriction")
 	public static void printText(String s) {
-		s = s.replace("(", "@").replace(")", "@");
+s = s.replace("(", "∆").replace(")", "∆");
 		boolean b = false;
 		if(s != "") {
-		if(s.charAt(0) == '@') {
+		if(s.charAt(0) == '∆') {
 			s = " " + s;
 			b = true;
 		}
 		}
-		String[] strs = s.split("@");
+		String[] strs = s.split("∆");
 		if(!b) {
 		Platform.runLater(() -> {
 			Text t = new Text(strs[0]);

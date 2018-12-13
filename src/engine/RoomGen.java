@@ -28,39 +28,46 @@ public abstract class RoomGen {
 		o.injury = Object.type.shatters;
 		o.reference = new Object("nice hand-knitted [carpet]", o, null);
 		o.reference.injury = Object.type.squishes;
+		o.damage = 3;
 		start.objects.add(o);
-
 		o = new Object("deformed [spider]", "on your", null);
 		o.injury = Object.type.bruises;
 		o.reference = new Object("[face]", o, null);
 		o.reference.abstractNoun();
+		/*o = new Object("deformed [spider]", "on your", null);
+		o.injury = Object.type.squishes;
+		o.damage = 2;
+		reference = new Object("[face]", o, null);
+		reference.abstractNoun();
+		o.reference = reference;
+>>>>>>> refs/heads/actualMaster
 		start.objects.add(o);
-		/*
+		
 		o = Engine.Consumable("dead [corpse]", "lying on", null, 10);
 		o.injury = Object.type.bruises;
 		o.holdable = null;
 		reference = map.nestedMap.get(0).floor;
 		o.reference = reference;
-		start.objects.add(o);
+		start.objects.add(o);*/
 		
 		o = new Object("old wooden [bookshelf]", "in", null);
 		o.injury = Object.type.shatters;
 		o.holdable = null;
-		o.container.addAll(Arrays.asList(new Object("dusty old [book]", o, null),
-				new Object("trigonometry [textbook]", o, null), new Object("[jar] full of candy", o, null)));
-		reference = new Object("the back of the [room]", o, null);
+		
+		Object o2 = new Object("dusty old [book]", o, null);
+		o2.text = map.description + "\nBy Anonymous";
+		o.container.addAll(Arrays.asList(o2, new Object("[jar] full of candy", o, null)));
+		Object reference = new Object("the back of the [room]", o, null);
 		reference.abstractNoun();
 		o.reference = reference;
-		start.objects.add(o);*/
-
+		start.objects.add(o);
+		
 		Entity e = new Entity("old [man]", "standing in front of", (Engine e2) -> {
 			Terminal.println("The old man dies. He leaves you a corpse as a parting gift.");
 			Object obj = Engine.Consumable("dead [corpse]", "lying on", null, 10);
 			obj.injury = Object.type.bruises;
 			obj.holdable = null;
-			Object ref = new Object("the [floor]", obj, null);
-			ref.abstractNoun();
-			obj.reference = ref;
+			obj.reference = e2.protag.currentRoom.floor;
 			objectQueue.add(obj);
 		});
 		e.reference = new Object("[you]", e, null);
@@ -110,7 +117,10 @@ public abstract class RoomGen {
 		mainArea.addRoom(r);
 
 		o = new Object("chunk of [obsidian]", "in a", null);
+		
+		o = new Object("sharp chunk of [obsidian]", "in a", null);
 		o.injury = Object.type.shatters;
+		o.damage = 4;
 		o.reference = new Object("small [puddle]", o, null);
 		o.reference.holdable = null;
 		o.reference.drinkability = 5;
@@ -120,12 +130,12 @@ public abstract class RoomGen {
 		mainArea.setEntries();// to be called after mainArea completely defined
 		// alternatively, you could pick the entry points directly if you want more
 		// control
-
+		
 		mainArea = new Room(0, 1, "Emerald Forest");
 		map.addRoom(mainArea);
 
 		r = new Room(0, 0,
-				"A Small Grove\nTall, yellow blades of grass sway in the light breeze. The clouds are a dark grey, twisting in turmoil, a storm on its way.");
+				"A Small Grove\n(1000)Tall, yellow blades of grass sway in the light breeze. The clouds are a dark grey, twisting in turmoil, a storm on its way.");
 		mainArea.addRoom(r);
 
 		mainArea.setEntries();

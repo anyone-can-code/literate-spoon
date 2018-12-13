@@ -8,6 +8,7 @@ import engine.things.Entity;
 import engine.things.Object;
 import javafx.scene.control.Label;
 import javafx.application.Platform;
+import java.util.ArrayList;
 import engine.Terminal;
 
 public class Main extends Thread {
@@ -15,11 +16,13 @@ public class Main extends Thread {
 	public static Engine game;
 
 	public Main() {
+		Terminal.print("Loading, please wait");
 		game = new Engine();
 
+		Terminal.print(".");
 		game.addWord(new Verb("move go walk run climb jog travel journey venture", (Word w, Engine t) -> {
 			if (w.getClass() != Direction.class) {
-				Terminal.println("Please specify a direction");
+				Terminal.println("...What?");
 				return;
 			}
 
@@ -29,7 +32,6 @@ public class Main extends Thread {
 			int dy = Integer.parseInt(w.value.substring(1, 2)) - 1;
 
 			Room currentRoom = t.protag.currentRoom;
-
 			while (true) {//recursion without recursion
 				x = t.protag.currentRoom.coords[0];
 				y = t.protag.currentRoom.coords[1];
@@ -42,9 +44,8 @@ public class Main extends Thread {
 					if (x == r.coords[0] && y == r.coords[1]) {
 						t.protag.currentRoom = r;
 					}
-					
+
 					if (x == r.coords[0] && y == r.coords[1]) {
-						
 
 						if (dx > 0) {//flipped from how you'd think
 							while (t.protag.currentRoom.westEntry != null)
@@ -59,15 +60,16 @@ public class Main extends Thread {
 							while (t.protag.currentRoom.northEntry != null)
 								t.protag.currentRoom = t.protag.currentRoom.northEntry;
 						}
-
 						break;
 					}
 				}
 				for (Room r : t.protag.currentRoom.fatherRoom.nestedMap) {
-					Platform.runLater(() -> Window.gp.add(new Label(t.protag.currentRoom == r ? "@" : "R"), r.coords[0], r.coords[1]));
+					Platform.runLater(() -> Window.gp.add(new Label(t.protag.currentRoom == r ? "@" : "R"), r.coords[0],
+							r.coords[1]));
 				}
 				for (Room r : cR.fatherRoom.nestedMap) {
 					if (x == r.coords[0] && y == r.coords[1]) {
+						t.changedSurroundings = true;
 						return;
 					}
 				}
@@ -83,7 +85,14 @@ public class Main extends Thread {
 
 			//t.protag.changePos(w.value);
 		}, null));
+
+		Terminal.print(".");
+
 		game.addWord(new Verb("eat consume", null, (Object o, Engine t) -> {
+			if (o.abstractObj) {
+				Terminal.println("Impossible.");
+				return;
+			}
 			if (!o.alive) {
 				t.protag.hunger -= o.consumability;
 				if (o.drinkability != null) {
@@ -108,7 +117,9 @@ public class Main extends Thread {
 			} else {
 				boolean b = (Boolean) null;
 			}
+
 		}));
+
 		game.addWord(new Verb("drink", null, (Object o, Engine t) -> {
 			if (!o.alive) {
 				t.protag.thirst -= o.drinkability;
@@ -124,7 +135,17 @@ public class Main extends Thread {
 				boolean b = (Boolean) null;
 			}
 		}));
-		game.addWord(new Verb("inspect investigate examine scrutinize study observe", null, (Object o, Engine t) -> {
+
+		Terminal.print(".");
+
+		game.addWord(new Verb("inspect investigate examine scrutinize study observe look", (Word w, Engine t) -> {
+			if (w.represents == t.protag.inventory) {
+				Terminal.println("Try checking your inventory instead.");
+				return;
+			} else if (w.represents == "room") {
+				t.inspectRoom();
+			}
+		}, (Object o, Engine t) -> {
 			if (o.container.isEmpty()) {
 				Terminal.print(t.uRandOf(new String[] { "Upon inspection, you realize that " + o.inspection,
 						"It looks like " + o.inspection, "You now can see that " + o.inspection }));
@@ -146,14 +167,29 @@ public class Main extends Thread {
 			}
 			Terminal.println(".");
 		}));
+
+		Terminal.print(".");
+
 		game.addWord(new Verb("interact talk speak converse negotiate chat gossip", null, (Object o, Engine t) -> {
 			if (o.alive) {
 				Entity e = (Entity) o;
 				e.interaction.accept(t.protag, t);
 			}
 		}));
-		game.addWord(new Verb("attack assault assail punch hit kick pummel strike kill", null, (Object o, Engine t) -> {
-			o.health -= t.protag.strength;
+
+		game.addWord(new Verb("attack assault assail hit pummel strike kill destroy", null, (Object o, Engine t) -> {
+			if (o.equals(t.protag)) {
+				t.protag.health = 0;
+				Terminal.println("You killed yourself. Nice job.");
+				return;
+			}
+
+			o.health -= t.protag.strength * t.protag.weapon.damage;
+			t.protag.health -= t.protag.strength * t.protag.weapon.playerDamage;
+
+			if (!t.protag.weapon.abstractObj)
+				t.protag.weapon.health -= t.protag.strength;
+
 			if (o.alive) {
 				try {
 					Entity e = (Entity) o;
@@ -163,9 +199,39 @@ public class Main extends Thread {
 				}
 				;
 			}
-			Terminal.println("You attacked the " + o.accessor + ".");
+			//Terminal.println("You attacked the " + o.accessor + " with the " + t.protag.weapon.accessor + ".");
+			Terminal.println("Weapon: " + t.protag.weapon.accessor);
+		}, (Object o1, Object with, Engine t) -> {
+			t.protag.weapon = with;
+
+			if (o1.equals(t.protag)) {
+				t.protag.health = 0;
+				Terminal.println("You killed yourself. Nice job.");
+				return;
+			}
+
+			o1.health -= t.protag.strength * t.protag.weapon.damage;
+			t.protag.health -= t.protag.strength * t.protag.weapon.playerDamage;
+
+			if (!t.protag.weapon.abstractObj)
+				t.protag.weapon.health -= t.protag.strength;
+
+			if (o1.alive) {
+				try {
+					Entity e = (Entity) o1;
+					if (e.anger < e.restraint)
+						e.anger = e.restraint;
+				} catch (Exception e) {
+				}
+				;
+			}
+			//Terminal.println("You attacked the " + o1.accessor + " with the " + t.protag.weapon.accessor + ".");
+			Terminal.println("Weapon: " + with.accessor);
 		}));
-		game.addWord(new Verb("hold", null, (Object o, Engine t) -> {
+
+		Terminal.print(".");
+
+		game.addWord(new Verb("hold equip", null, (Object o, Engine t) -> {
 			boolean b = o.holdable;
 			if (t.protag.inventory.contains(o)) {
 				if (t.protag.rightHand != null)
@@ -183,25 +249,45 @@ public class Main extends Thread {
 				b = (Boolean) null;
 			}
 		}));
-		game.addWord(new Verb("take get steal grab seize apprehend liberate collect", null, (Object o, Engine t) -> {
-			boolean b = o.holdable;
-			if (o.alive) {
-				b = (Boolean) null;
+
+		Terminal.print(".");
+
+		game.addWord(
+				new Verb("take get steal grab seize apprehend liberate collect pick", null, (Object o, Engine t) -> {
+					boolean b = o.holdable;
+					if (o.alive) {
+						b = (Boolean) null;
+					}
+					if (!t.protag.inventory.contains(o)) {
+						t.protag.inventory.add(o);
+						t.protag.currentRoom.objects.remove(o);
+						removal(o, t);
+						Terminal.println("You took the " + o.accessor + ".");
+					} else {
+						b = (Boolean) null;
+					}
+				}));
+
+		Terminal.print(".");
+
+		game.addWord(new Verb("drop leave put", null, (Object o, Engine t) -> {
+			if (o.abstractObj) {
+				Terminal.println("Impossible.");
+				return;
 			}
-			if (!t.protag.inventory.contains(o)) {
-				t.protag.inventory.add(o);
-				t.protag.currentRoom.objects.remove(o);
-				removal(o, t);
-				Terminal.println("You took the " + o.accessor + ".");
-			} else {
-				b = (Boolean) null;
+			if (t.protag.rightHand.equals(o)) {
+				t.protag.rightHand = t.protag.fist;
+				o.description = "on";
+				o.reference = t.protag.currentRoom.floor;
+				t.protag.currentRoom.objects.add(o);
+				Terminal.println("You dropped the " + o.accessor + ".");
 			}
-		}));
-		game.addWord(new Verb("drop leave", null, (Object o, Engine t) -> {
-			if (t.protag.inventory.contains(o)) {
+			else if (t.protag.inventory.contains(o)) {
 				t.protag.inventory.remove(o);
 				o.description = "on";
 				o.reference = t.protag.currentRoom.floor;
+
+				
 				t.protag.currentRoom.objects.add(o);
 				Terminal.println("You dropped the " + o.accessor + ".");
 			} else {
@@ -209,33 +295,94 @@ public class Main extends Thread {
 			}
 		}));
 
+		Terminal.print(".");
+
 		game.addWord(new Verb("view open check", (Word n, Engine t) -> {
 			if (n.represents == t.protag.inventory) {
-				if (t.protag.inventory.isEmpty()) {
+				ArrayList<Object> realStuff = (ArrayList<Object>) t.protag.inventory.clone();
+				for (int i = 0; i < realStuff.size(); i++) {
+					if (realStuff.get(i).abstractObj) {
+						realStuff.remove(i);
+						i--;
+					}
+				}
+
+				if (realStuff.isEmpty()) {
 					Terminal.print("You have nothing in your inventory");
 				} else {
-					Terminal.print("You have a " + t.protag.inventory.get(0).compSub);
-					if (t.protag.inventory.size() == 2) {
-						Terminal.print(" as well as a " + t.protag.inventory.get(1).compSub);
-					} else if (t.protag.inventory.size() > 2) {
-						for (int i = 1; i < t.protag.inventory.size() - 1; i++) {
+					Terminal.print("You have a " + realStuff.get(0).compSub);
+					if (realStuff.size() == 2) {
+						Terminal.print(" as well as a " + realStuff.get(1).compSub);
+					} else if (realStuff.size() > 2) {
+						for (int i = 1; i < realStuff.size() - 1; i++) {
 							Terminal.print(", a ");
-							Terminal.print(t.protag.inventory.get(i).compSub);
+							Terminal.print(realStuff.get(i).compSub);
 						}
-						Terminal.print(", and a " + t.protag.inventory.get(t.protag.inventory.size() - 1).compSub);
+						Terminal.print(", and a " + realStuff.get(realStuff.size() - 1).compSub);
 					}
 				}
 				Terminal.println(".");
 			}
 		}, null));
 
+		game.addWord(new Verb("read", null, (Object o, Engine t) -> {
+			if (o.text.length() == 0) {
+				Terminal.println("The " + o.accessor + " says nothing.");
+				return;
+			}
+			String str = o.text;
+			String finalStr = "";
+			String word;
+			int index = 0;
+			while (index != -1) {
+				if (str.substring(index).indexOf(' ') != -1)
+					word = str.substring(index, str.substring(index).indexOf(' ') + index);
+				else
+					word = str.substring(index);
+
+				if (word.length() > t.protag.literacy) {
+					for (int i = 0; i < word.length(); i++) {
+						if (word.charAt(i) != '\n')
+							word = word.substring(0, i)
+									+ t.lRandOf(new String[] { "@", "#", "&", "/", "%", "$", "!", "*", "+" })
+									+ word.substring(i + 1);
+					}
+				}
+
+				finalStr += word + " ";
+
+				if (str.substring(index).indexOf(' ') != -1)
+					index = str.substring(index).indexOf(' ') + index + 1;
+				else
+					break;
+			}
+
+			Terminal.println(finalStr + "\n");
+			Terminal.println(t.protag.literacy < 1 ? "You can't read."
+					: t.protag.literacy < 4 ? "You can barely read."
+							: t.protag.literacy < 6 ? "You're reading skills are so-so."
+									: t.protag.literacy < 8 ? "You can almost read perfectly."
+											: "You're an amazing reader.");
+
+		}));
+
+		Terminal.print(".");
+
 		game.addWord(new Word("inventory", game.protag.inventory));
-		game.addWord(new Word("self me", game.protag));
+
+		Terminal.print(".");
+
+		game.addWord(new Word("self me myself player", game.protag));
+		game.addWord(new Word("room area surroundings place around", "room"));
+
+		Terminal.print(".");
 
 		game.addWord(new Direction("north forwards forward ahead onward", "12"));
 		game.addWord(new Direction("south backwards backward back ", "10"));
 		game.addWord(new Direction("east right", "21"));
 		game.addWord(new Direction("west left", "01"));
+
+		Terminal.print(".");
 	}
 
 	public static void removal(Object o, Engine t) {
@@ -259,3 +406,12 @@ public class Main extends Thread {
 		}
 	}
 }
+//Some say the world will end in fire, some say in ice.
+//I say end it with a comment, and it's really just as nice.
+//So farewell to you my friend, you who have ventured brave and bold
+//through the convoluted forests of Aidan's story, in code, told.
+//What you have read may yet escape you, as it once did for me,
+//but rest assured, the holy Lambda is something men can learn to see.
+//I rest my case with the finality of the ending close paren —
+//And I swear I'll never, EVER set Aidan's lambdas free again.
+// — Nico Mantione, 11 December 2018
