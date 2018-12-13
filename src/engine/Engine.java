@@ -100,7 +100,9 @@ public class Engine {
 				Terminal.println("Intuition tells you that you might want to drink something.");
 			}
 		}
-		protag.health += protag.health < protag.maxHealth && protag.health > 0 ? 1 : 0;
+		if (protag.thirst < 20 && protag.hunger < 20) {
+			protag.health += protag.health < protag.maxHealth && protag.health > 0 ? 1 : 0;
+		}
 	}
 	
 	public void inspectRoom() {
