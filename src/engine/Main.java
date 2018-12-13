@@ -136,7 +136,7 @@ public class Main {
 
 		Terminal.print(".");
             
-        game.addWord(new Verb("inspect investigate examine scrutinize study observe look", (Word w, Engine t) -> {
+        	game.addWord(new Verb("inspect investigate examine scrutinize study observe look", (Word w, Engine t) -> {
 			if (w.represents == t.protag.inventory) {
 				Terminal.println("Try checking your inventory instead.");
 				return;
@@ -175,7 +175,7 @@ public class Main {
 			}
 		}));
         
-        Terminal.print(".");
+        	Terminal.print(".");
         
 		game.addWord(new Verb("attack assault assail hit pummel strike kill destroy", null, (Object o, Engine t) -> {
 			if (o.equals(t.protag)) {
@@ -227,11 +227,18 @@ public class Main {
 
 		game.addWord(new Verb("hold equip", null, (Object o, Engine t) -> {
 			boolean b = o.holdable;
-			if(!t.protag.inventory.contains(o)) {
-			t.protag.rightHand = o;
-			t.protag.inventory.add(o);
-			t.protag.currentRoom.objects.remove(o);
-			Terminal.println("You are now holding a " + o.accessor + ".");
+			if (t.protag.inventory.contains(o)) {
+				if (t.protag.rightHand != null)
+ 					t.protag.inventory.add(t.protag.rightHand);
+ 				t.protag.rightHand = o;
+ 				t.protag.inventory.remove(o);
+ 				Terminal.println("You are now holding a " + o.accessor + ".");
+ 			} else if (t.protag.currentRoom.objects.contains(o)) {
+ 				if (t.protag.rightHand != null)
+ 					t.protag.inventory.add(t.protag.rightHand);
+ 				t.protag.rightHand = o;
+ 				removal(o, t);
+ 				Terminal.println("You are now holding a " + o.accessor + ".");
 			} else {
 				b = (Boolean)null;
 			}
@@ -245,10 +252,10 @@ public class Main {
 				b = (Boolean)null;
 			}
 			if(!t.protag.inventory.contains(o)) {
-			t.protag.inventory.add(o);
-			t.protag.currentRoom.objects.remove(o);
-			removal(o, t);
-			Terminal.println("You took the " + o.accessor + ".");
+				t.protag.inventory.add(o);
+				t.protag.currentRoom.objects.remove(o);
+				removal(o, t);
+				Terminal.println("You took the " + o.accessor + ".");
 			} else {
 				b = (Boolean)null;
 			}
