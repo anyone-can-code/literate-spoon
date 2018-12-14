@@ -102,11 +102,11 @@ public class Main extends Thread {
 					if (o.poisonous) {
 						t.protag.effects.add(new Effect((p) -> {
 							t.protag.health--;
-						}, 30, "That was painful to eat."));
+						}, 30, "That was painful to eat.", "nauseous and feverish"));
 					} else {
 						t.protag.effects.add(new Effect((p) -> {
 							t.protag.health += o.consumability * 2;
-						}, 3, "That was painful to eat."));
+						}, 3, "That was painful to eat.", "like you've eaten some that you shouldn't have"));
 					}
 				} else {
 					Terminal.println("You ate the " + o.accessor + ". Delicious.");
@@ -115,15 +115,21 @@ public class Main extends Thread {
 				t.protag.inventory.remove(o);
 				removal(o, t);
 			} else {
-				boolean b = (Boolean) null;
+				throw new NullPointerException();
 			}
 
 		}));
+		
+		Terminal.print(".");
 
 		game.addWord(new Verb("drink", null, (Object o, Engine t) -> {
 			if (!o.alive) {
 				t.protag.thirst -= o.drinkability;
-				Terminal.println("You drank the " + o.accessor + ". Delicious.");
+				if(o.poisonous) {
+					Terminal.println("An acrid aftertaste fills your mouth.");
+				} else {
+					Terminal.println("You drank the " + o.accessor + ". Delicious.");
+				}
 				if (o.consumability == null) {
 					t.protag.currentRoom.objects.remove(o);
 					t.protag.inventory.remove(o);
@@ -132,7 +138,7 @@ public class Main extends Thread {
 					o.drinkability = null;
 				}
 			} else {
-				boolean b = (Boolean) null;
+				throw new NullPointerException();
 			}
 		}));
 
@@ -177,6 +183,8 @@ public class Main extends Thread {
 			}
 		}));
 
+		Terminal.print(".");
+		
 		game.addWord(new Verb("attack assault assail hit pummel strike kill destroy", null, (Object o, Engine t) -> {
 			if (o.equals(t.protag)) {
 				t.protag.health = 0;
@@ -246,7 +254,7 @@ public class Main extends Thread {
 				removal(o, t);
 				Terminal.println("You are now holding a " + o.accessor + ".");
 			} else {
-				b = (Boolean) null;
+				throw new NullPointerException();
 			}
 		}));
 
@@ -256,7 +264,7 @@ public class Main extends Thread {
 				new Verb("take get steal grab seize apprehend liberate collect pick", null, (Object o, Engine t) -> {
 					boolean b = o.holdable;
 					if (o.alive) {
-						b = (Boolean) null;
+						throw new NullPointerException();
 					}
 					if (!t.protag.inventory.contains(o)) {
 						t.protag.inventory.add(o);
@@ -264,7 +272,7 @@ public class Main extends Thread {
 						removal(o, t);
 						Terminal.println("You took the " + o.accessor + ".");
 					} else {
-						b = (Boolean) null;
+						throw new NullPointerException();
 					}
 				}));
 
@@ -389,15 +397,13 @@ public class Main extends Thread {
 		try {
 			o.referencer.reference = t.protag.currentRoom.floor;
 			o.referencer.description = t.lRandOf(new String[] { "lying", "sitting", "resting" }) + " on";
-		} catch (Exception e) {
-
-		}
+		} catch (Exception e) {}
 		try {
+			if(o.reference != t.protag.currentRoom.floor) {
 			o.reference.reference = t.protag.currentRoom.floor;
 			o.reference.description = "on";
-		} catch (Exception e) {
-
-		}
+			}
+		} catch (Exception e) {}
 	}
 
 	public void run() {

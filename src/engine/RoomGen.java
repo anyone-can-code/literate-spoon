@@ -21,7 +21,7 @@ public abstract class RoomGen {
 		map.addRoom(mainArea);
 
 		Room start = new Room(0, 0,
-				"A Dark Cavern\n(1000)The ceiling is too high for you to make out in the darkness. Cold, rough stone lies under your feet. A light wind passes over you.");
+				"(B)A Dark Cavern(B)\n(1000)The ceiling is too high for you to make out in the darkness. Cold, rough stone lies under your feet. A light wind passes over you.");
 		mainArea.addRoom(start);
 
 		Object o = new Object("red [brick]", "on a", null);
@@ -113,7 +113,7 @@ public abstract class RoomGen {
 			e.Dialogue("statement", h, p);
 		 */
 
-		Room r = new Room(0, 1, "A Dark Stone Passageway");
+		Room r = new Room(0, 1, "(B)A Dark Stone Passageway(B)");
 		mainArea.addRoom(r);
 
 		o = new Object("chunk of [obsidian]", "in a", null);
@@ -135,7 +135,7 @@ public abstract class RoomGen {
 		map.addRoom(mainArea);
 
 		r = new Room(0, 0,
-				"A Small Grove\n(1000)Tall, yellow blades of grass sway in the light breeze. The clouds are a dark grey, twisting in turmoil, a storm on its way.");
+				"(B)A Small Grove(B)\n(1000)Tall, yellow blades of grass sway in the light breeze. The clouds are a dark grey, twisting in turmoil, a storm on its way.");
 		mainArea.addRoom(r);
 
 		mainArea.setEntries();

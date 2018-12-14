@@ -15,6 +15,7 @@ import javafx.scene.input.KeyCode;
 import javafx.animation.SequentialTransition;
 import javafx.animation.TranslateTransition;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
@@ -48,11 +49,12 @@ public class Window extends Application {
 	@SuppressWarnings("restriction")
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		
+	
 		Scene scene = new Scene(root, 600, 400);
 		primaryStage.setTitle("Text Adventure");
 		primaryStage.setScene(scene);
 		primaryStage.show();
+		primaryStage.setOnCloseRequest(e -> System.exit(0));
 		stack.setPadding(new Insets(10, 10, 10, 10));
 		stack.setPrefWidth(root.getWidth()/2 - 20);
 		map.setPadding(new Insets(10, 10, 10, 10));

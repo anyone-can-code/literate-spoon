@@ -21,6 +21,7 @@ public class Engine {
 
 	private ArrayList<Word> vocabulary;
 	private ArrayList<String> prepositions;
+	private ArrayList<String> articles;
 	private ArrayList<String> omitWords;
 	public ArrayList<Object> objectQueue = new ArrayList<Object>();
 	Random rand = new Random();
@@ -40,7 +41,9 @@ public class Engine {
 		prepositions = new ArrayList<String>(
 				Arrays.asList(new String[] { "aboard", "about", "above", "across", "after", "against", "along", "amid",
 						"among", "around", "as", "at", "before", "behind", "below", "beside", "between", "by", "down",
-						"in", "inside", "into", "my", "near", "on", "the", "through", "to", "toward", "towards", "under", "with", "your"}));
+						"in", "inside", "into", "my", "near", "on", "through", "to", "toward", "towards", "under", "with", "your"}));
+		articles = new ArrayList<String>(
+				Arrays.asList(new String[] { "a", "an", "the"}));
 		omitWords = new ArrayList<String>(
 				Arrays.asList(new String[] {"up", "down"}));
 		
@@ -111,7 +114,7 @@ public class Engine {
 			String desc = holder.description;
 			while (holder.fatherRoom != null) {
 				holder = holder.fatherRoom;
-				desc = holder.description + ": " + desc;
+				desc = "(B)" + holder.description + ":(B) " + desc;
 			}
 
 			Terminal.println(desc);
@@ -317,9 +320,6 @@ public class Engine {
 
 	public void update() {
 		String userText;
-
-		
-		
 		runObjects();
 		
 		
@@ -334,17 +334,8 @@ public class Engine {
 			Terminal.print("(1000)");
 			if (protag.currentRoom != null) {
 				if (changedSurroundings) {
-			inspectRoom();
-			changedSurroundings = false;
-				} else {
-				Room holder = protag.currentRoom;
-				String desc = holder.description;
-				while (holder.fatherRoom != null) {
-					holder = holder.fatherRoom;
-					desc = holder.description + ": " + desc;
-				}
-
-				Terminal.println(desc);
+					inspectRoom();
+					changedSurroundings = false;
 				}
 			} else
 				Terminal.println("Currently not in any room!");
@@ -355,7 +346,9 @@ public class Engine {
 			for (String str : omitWords) {
 				userText = userText.replace(" " + str + " ", " ");
 			}
-			
+			for(String str : articles) {
+				userText = userText.replace(" " + str + " ", " ");
+			}
 			String[] parts = userText.split("with");
 			
 			String[] prepUsed = new String[parts.length];
@@ -385,7 +378,7 @@ public class Engine {
 
 			ArrayList<String> words = new ArrayList<String>();
 			words.addAll(Arrays.asList(parts[0].split(" ")));
-			if (words.size() > 2) {
+			if (words.size() > 2 || words.size() == 1) {
 				Terminal.println("What do you mean?");
 				continue;
 			}
@@ -529,7 +522,6 @@ public class Engine {
 					w0.perform(o1, o2, prepUsed[0], prepUsed[1], this);
 				}
 			}
-
 			updatePlayerState();
 			Iterator<Effect> effectIt = protag.effects.iterator();
 			while (effectIt.hasNext()) {
