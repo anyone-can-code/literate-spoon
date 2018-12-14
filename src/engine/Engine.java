@@ -129,18 +129,18 @@ public class Engine {
 				switch (o.injury) {
 				case crumples:
 					compSub = (p == 3 ? "dented " : p == 2 ? "bent " : p == 1 ? "crumpled-up " : "crushed ")
-							+ o.accessor;
+							+ o.compSub;
 					break;
 				case shatters:
-					compSub = (p == 3 ? "fractured " : p > 0 ? "cracked " : "shattered ") + o.accessor;
+					compSub = (p == 3 ? "fractured " : p > 0 ? "cracked " : "shattered ") + o.compSub;
 					break;
 				case squishes:
 					compSub = (p == 3 ? "bruised " : p == 2 ? "squashed " : p == 1 ? "compressed " : "trampled ")
-							+ o.accessor;
+							+ o.compSub;
 					break;
 				case bruises:
 					compSub = (p == 3 ? "bruised " : p == 2 ? "damaged " : p == 1 ? "beaten-up " : "pulverized ")
-							+ o.accessor;
+							+ o.compSub;
 					break;
 				}
 			}
@@ -153,21 +153,21 @@ public class Engine {
 					switch (o.reference.injury) {
 					case crumples:
 						rCompSub = (p == 3 ? "dented " : p == 2 ? "bent " : p == 1 ? "crumpled-up " : "crushed ")
-								+ o.reference.accessor;
+								+ o.reference.compSub;
 						break;
 					case shatters:
 						rCompSub = (p == 3 ? "fractured " : p > 0 ? "cracked " : "shattered ")
-								+ o.reference.accessor;
+								+ o.reference.compSub;
 						break;
 					case squishes:
 						rCompSub = (p == 3 ? "bruised "
 								: p == 2 ? "squashed " : p == 1 ? "compressed " : "trampled ")
-								+ o.reference.accessor;
+								+ o.reference.compSub;
 						break;
 					case bruises:
 						rCompSub = (p == 3 ? "bruised "
 								: p == 2 ? "damaged " : p == 1 ? "beaten-up " : "pulverized ")
-								+ o.reference.accessor;
+								+ o.reference.compSub;
 						break;
 					}
 				}
@@ -217,6 +217,7 @@ public class Engine {
 			try {
 				Object r = o.reference;
 				if (r != null) {
+					Terminal.print("(1000)");
 					if (x1 == 1) {
 						if (x2 == 0) {
 							Terminal.print(lRandOf(
@@ -279,18 +280,29 @@ public class Engine {
 		Iterator<Object> objectIt = protag.currentRoom.objects.iterator();
 		while (objectIt.hasNext()) {
 			Object o = objectIt.next();
+			if(!o.abstractObj) {
 			if (o.alive && o.health <= 0) {
 				if (o.getClass().getSimpleName().equals("Entity")) {
 					Entity e = (Entity) o;
+					int s = objectQueue.size();
 					e.death.accept(this);
 					for (Object obj : e.inventory) {
-						Object ref = new Object("the [floor]", obj, null);
-						ref.abstractNoun();
-						obj.reference = ref;
-						objectQueue.add(obj);
+						if (objectQueue.size() != s) {
+							objectQueue.get(s).container.addAll(e.inventory);
+						} else {
+							obj.reference = protag.currentRoom.floor;
+							obj.description = "on";
+							objectQueue.add(obj);
+						}
 					}
 					objectIt.remove();
 				}
+			} else if (!o.alive && o.health <= 0) {
+				for (Object obj : o.container) {
+					objectQueue.add(obj);
+				}
+				o.container.clear();
+			}
 			}
 		}
 		for (Object o : protag.currentRoom.objects) {
@@ -306,10 +318,7 @@ public class Engine {
 	public void update() {
 		String userText;
 
-		if (changedSurroundings) {
-			inspectRoom();
-			changedSurroundings = false;
-		}
+		
 		
 		runObjects();
 		
@@ -322,10 +331,23 @@ public class Engine {
 		
 		outerloop:
 		while (true) {// repeats until valid command
+			Terminal.print("(1000)");
+			if (protag.currentRoom != null) {
+				if (changedSurroundings) {
+			inspectRoom();
+			changedSurroundings = false;
+				} else {
+				Room holder = protag.currentRoom;
+				String desc = holder.description;
+				while (holder.fatherRoom != null) {
+					holder = holder.fatherRoom;
+					desc = holder.description + ": " + desc;
+				}
 
-			
-
-			Terminal.print("\n");
+				Terminal.println(desc);
+				}
+			} else
+				Terminal.println("Currently not in any room!");
 
 			userText = Terminal.readln();
 			userText = userText.toLowerCase();
@@ -430,6 +452,12 @@ public class Engine {
 					o1 = o;
 					foundObject = true;
 				}
+				for (Object obj : o.container) {
+					if (obj.accessor.equals(words.get(1))) {
+						o1 = obj;
+						foundObject = true;
+					}
+				}
 			}
 
 			for (Object o : protag.inventory) {
@@ -447,15 +475,25 @@ public class Engine {
 					o2 = o;
 				}
 			}
+			try {
+			if (protag.rightHand.accessor.equals(words.get(1))) {
+				o1 = protag.rightHand;
+				foundObject = true;
+			}
+			if (words.size() > 2 && protag.rightHand.accessor.equals(words.get(2))) {
+				o2 = protag.rightHand;
+			}
+			} catch(NullPointerException e) {}
 
 			if (!found && !foundObject) {
-				String str = (" " + protag.currentRoom.description.replace(".", " ").replace(",", " ").replace(";", " ").replace(":", " ") + " ").toLowerCase();
+				String str = (" " + protag.currentRoom.description.replace(".", " ").replace(",", " ").replace(";", " ")
+						.replace(":", " ") + " ").toLowerCase();
 				if (str.contains(" " + words.get(1) + " ")) {
-					
+
 					Terminal.println("No.");
 					continue;
 				}
-				
+
 				for (Object o : protag.currentRoom.objects) {
 					try {
 						if (o.reference.abstractObj && o.reference.accessor.equalsIgnoreCase(words.get(1))) {

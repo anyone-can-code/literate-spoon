@@ -31,7 +31,7 @@ public class Verb extends Word {
 		// Terminal.println(w + " : " + t);
 		try {
 		myFunc.accept(w, t);
-		} catch (NullPointerException e) {
+		} catch (Exception e) {
 			Terminal.println("You cannot " + synonyms.get(0) + prepUsed + " the " + w.synonyms.get(0) + ".");
 		}
 	}
@@ -40,7 +40,7 @@ public class Verb extends Word {
 		// Terminal.println(o + " : " + t);
 		try {
 			myFunc2.accept(o, t);
-		} catch (NullPointerException e) {
+		} catch (Exception e) {
 			Terminal.println("You cannot " + synonyms.get(0) + (prepUsed.isEmpty()? " the ": prepUsed + " ") + o.accessor + ".");
 		}
 	}
@@ -49,7 +49,7 @@ public class Verb extends Word {
 		// Terminal.println(o + " : " + t);
 		try {
 			myFunc3.accept(o1, o2, t);
-		} catch (NullPointerException e) {
+		} catch (Exception e) {
 			Terminal.println("You cannot " + synonyms.get(0) + (prepUsed1.isEmpty()? "the ": prepUsed1 + " ") + o1.accessor + " with" + (prepUsed2.isEmpty()? " the ": prepUsed2 + " ") + o2.accessor);
 		}
 	}
