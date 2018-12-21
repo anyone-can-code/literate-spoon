@@ -22,21 +22,21 @@ public class Player extends Object {
 	public Object fist = new Object("[fist]", (String) null, null);
 
 	public Player(int x, int y) {
-		super("[player]", (String)null, null);
-		
+		super("[player]", (String) null, null);
+
 		fist.abstractNoun();
 		inventory.add(fist);
 		weapon = fist;
-		
+
 		Object o = new Object("[foot]", (String) null, null);
 		o.abstractNoun();
 		inventory.add(o);
-		
+
 		o = new Object("[head]", (String) null, null);
 		o.playerDamage = 2;
 		o.abstractNoun();
 		inventory.add(o);
-		
+
 		alive = true;
 	}
 }

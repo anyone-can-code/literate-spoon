@@ -21,7 +21,7 @@ public abstract class RoomGen {
 		map.addRoom(mainArea);
 
 		Room start = new Room(0, 0,
-				"A Dark Cavern\n(1000)The ceiling is too high for you to make out in the darkness. Cold, rough stone lies under your feet. A light wind passes over you.");
+				"(B)A Dark Cavern(B)\n(1000)The ceiling is too high for you to make out in the darkness. Cold, rough stone lies under your feet. A light wind passes over you.");
 		mainArea.addRoom(start);
 
 		Object o = new Object("red [brick]", "on a", null);
@@ -40,7 +40,6 @@ public abstract class RoomGen {
 		reference = new Object("[face]", o, null);
 		reference.abstractNoun();
 		o.reference = reference;
->>>>>>> refs/heads/actualMaster
 		start.objects.add(o);
 		
 		o = Engine.Consumable("dead [corpse]", "lying on", null, 10);
@@ -49,11 +48,11 @@ public abstract class RoomGen {
 		reference = map.nestedMap.get(0).floor;
 		o.reference = reference;
 		start.objects.add(o);*/
-		
+
 		o = new Object("old wooden [bookshelf]", "in", null);
 		o.injury = Object.type.shatters;
 		o.holdable = null;
-		
+
 		Object o2 = new Object("dusty old [book]", o, null);
 		o2.text = map.description + "\nBy Anonymous";
 		o.container.addAll(Arrays.asList(o2, new Object("[jar] full of candy", o, null)));
@@ -61,7 +60,7 @@ public abstract class RoomGen {
 		reference.abstractNoun();
 		o.reference = reference;
 		start.objects.add(o);
-		
+
 		Entity e = new Entity("old [man]", "standing in front of", (Engine e2) -> {
 			Terminal.println("The old man dies. He leaves you a corpse as a parting gift.");
 			Object obj = Engine.Consumable("dead [corpse]", "lying on", null, 10);
@@ -73,27 +72,54 @@ public abstract class RoomGen {
 		e.reference = new Object("[you]", e, null);
 		e.reference.abstractNoun();
 		e.interaction = (Player p, Engine eng) -> {
+			HashMap<String, OneParamFunc<Player>> basicActions = new HashMap<String, OneParamFunc<Player>>();
+			basicActions.put("insult him", (Player p1) -> {
+				Terminal.println("He does not respond to your insult.");
+			});
+			basicActions.put("leave", (Player p1) -> {
+				Terminal.println(
+						"You start walking away.(1000)\n\nStop, the man says in a clear voice.(1000) He says something about the plot before lapsing into his insane mumblings.");
+			});
 			HashMap<String, OneParamFunc<Player>> h = new HashMap<String, OneParamFunc<Player>>();
-			h.put("yes", (Player p1) -> {
+			h.put("speak louder", (Player p1) -> {
 				HashMap<String, OneParamFunc<Player>> h1 = new HashMap<String, OneParamFunc<Player>>();
-				h1.put("yes", (Player p2) -> {
-					e.attack(p2);
+				h1.put("repeat question", (Player p2) -> {
+					Terminal.println("You ask again.(2000)\n\nThere is silence. Nothing more.");
+					e.Dialogue("He does not respond to your presence.", h1, p1);
 				});
-				h1.put("no", (Player p2) -> {
-					if (p2.agility + rand.nextInt(3) - 1 >= e.agility) {
-						Terminal.println("You dodged the attack.");
-					} else {
-						Terminal.println("You failed to dodge his attack.");
-						e.attack(p2);
-					}
+				h1.put("kick him", (Player p2) -> {
+					e.anger = 20;
+					Terminal.println(
+							"His mouth curls into a feral smile, his head tilting sideways. The gaping hole of a mouth he has reveals his lack of teeth.(1000)\n\nYou suppose he's hungry.");
 				});
-				e.Dialogue("The old man tries to kill you. Let him?", h1, p1);
+				basicActions.forEach(h1::putIfAbsent);
+				e.Dialogue(
+						"His head snaps up at you, and you now can see that his eyes are gouged out. You step backwards instinctively.",
+						h1, p1);
 			});
-			h.put("no", (Player p1) -> {
-				Terminal.println("You walk away, leaving him slightly confused and annoyed.");
-				e.anger += 20;
+			h.put("slap him", (Player p1) -> {
+				e.anger++;
+				h.get("speak louder").accept(p1);
 			});
-			e.Dialogue("The old man says hi. Greet him?", h, p);
+
+			basicActions.forEach(h::putIfAbsent);
+			e.Dialogue("You ask the man why he is here. He does not respond.", h, p);
+			e.talkedTo = true;
+		};
+		e.repeatInteraction = (Player p, Engine eng) -> {
+			HashMap<String, OneParamFunc<Player>> basicActions = new HashMap<String, OneParamFunc<Player>>();
+			basicActions.put("insult him", (Player p1) -> {
+				Terminal.println("He does not respond to your insult.");
+			});
+			basicActions.put("leave", (Player p1) -> {
+				Terminal.println("You walk away, your presence unnoticed.");
+			});
+			HashMap<String, OneParamFunc<Player>> h = new HashMap<String, OneParamFunc<Player>>();
+
+			basicActions.forEach(h::putIfAbsent);
+			e.Dialogue(eng.uRandOf(new String[] { "The man shouts something incoherent before lapsing into silence.",
+					"He absent-mindedly chews on his hand.",
+					"He mutters something about apples before dissolving into giggles." }), h, p);
 		};
 		o = new Object("water [bottle]", (String) null, null);
 		o.consumability = -5;
@@ -113,11 +139,11 @@ public abstract class RoomGen {
 			e.Dialogue("statement", h, p);
 		 */
 
-		Room r = new Room(0, 1, "A Dark Stone Passageway");
+		Room r = new Room(0, 1, "(B)A Dark Stone Passageway(B)\n(1000)Very dark, very stone.");
 		mainArea.addRoom(r);
 
 		o = new Object("chunk of [obsidian]", "in a", null);
-		
+
 		o = new Object("sharp chunk of [obsidian]", "in a", null);
 		o.injury = Object.type.shatters;
 		o.damage = 4;
@@ -130,12 +156,12 @@ public abstract class RoomGen {
 		mainArea.setEntries();// to be called after mainArea completely defined
 		// alternatively, you could pick the entry points directly if you want more
 		// control
-		
+
 		mainArea = new Room(0, 1, "Emerald Forest");
 		map.addRoom(mainArea);
 
 		r = new Room(0, 0,
-				"A Small Grove\n(1000)Tall, yellow blades of grass sway in the light breeze. The clouds are a dark grey, twisting in turmoil, a storm on its way.");
+				"(B)A Small Grove(B)\n(1000)Tall, yellow blades of grass sway in the light breeze. The clouds are a dark grey, twisting in turmoil, a storm on its way.");
 		mainArea.addRoom(r);
 
 		mainArea.setEntries();

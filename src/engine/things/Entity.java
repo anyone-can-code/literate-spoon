@@ -25,13 +25,16 @@ public class Entity extends Object {
 	public String accessor;
 	public String compSub = "";
 	public String description;
+	public String initConversation = null;
 	public Boolean interactable = true;
+	public Boolean talkedTo = false;
+	public ArrayList<String> knowledge = new ArrayList<String>();
 	public ArrayList<Object> inventory = new ArrayList<Object>();
 	public OneParamFunc<Engine> death;
 	public TwoParamFunc<Player, Engine> interaction;
+	public TwoParamFunc<Player, Engine> repeatInteraction;
 
-	public Entity(String compSub, String description,
-			OneParamFunc<Engine> death) {
+	public Entity(String compSub, String description, OneParamFunc<Engine> death) {
 		super(compSub, description, null);
 		this.accessor = compSub.substring(compSub.indexOf("[") + 1, compSub.indexOf("]"));
 		this.compSub = compSub.replace("[", "").replace("]", "");
@@ -45,14 +48,14 @@ public class Entity extends Object {
 	public void Dialogue(String statement, HashMap<String, OneParamFunc<Player>> options, Player p) {
 		boolean b = interactable;
 		Terminal.print(statement);
-		for(Map.Entry<String, OneParamFunc<Player>> entry : options.entrySet()) {
+		for (Map.Entry<String, OneParamFunc<Player>> entry : options.entrySet()) {
 			Terminal.print(" [" + entry.getKey() + "]");
 		}
 		Terminal.println("");
 		while (true) {
 			String str = Terminal.readln();
 			for (Map.Entry<String, OneParamFunc<Player>> entry : options.entrySet()) {
-				if(entry.getKey().equalsIgnoreCase(str)) {
+				if (entry.getKey().equalsIgnoreCase(str)) {
 					entry.getValue().accept(p);
 					return;
 				}
@@ -60,15 +63,19 @@ public class Entity extends Object {
 			Terminal.println("Not a valid response.");
 		}
 	}
-	
-	public Boolean check(Player p) {
-		if(anger >= restraint) {
+
+	public Boolean check(Player p, Engine e) {
+		if (anger >= restraint) {
 			attack(p);
-			return (Boolean)null;
+			return (Boolean) null;
+		}
+		if (initConversation != null && e.changedSurroundings) {
+			Terminal.println(initConversation);
+			interaction.accept(p, e);
 		}
 		return true;
 	}
-	
+
 	public void attack(Player p) {
 		Terminal.println("The " + accessor + " attacks you.");
 		p.health -= strength;
