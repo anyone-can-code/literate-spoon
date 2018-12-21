@@ -18,8 +18,9 @@ public class Verb extends Word {
 		myFunc = func;
 		myFunc2 = func2;
 	}
-	
-	public Verb(String list, TwoParamFunc<Word, Engine> func, TwoParamFunc<Object, Engine> func2, ThreeParamFunc<Object, Object, Engine> func3) {
+
+	public Verb(String list, TwoParamFunc<Word, Engine> func, TwoParamFunc<Object, Engine> func2,
+			ThreeParamFunc<Object, Object, Engine> func3) {
 		super(list);
 
 		myFunc = func;
@@ -30,7 +31,7 @@ public class Verb extends Word {
 	public void perform(Word w, String prepUsed, Engine t) {
 		// Terminal.println(w + " : " + t);
 		try {
-		myFunc.accept(w, t);
+			myFunc.accept(w, t);
 		} catch (Exception e) {
 			Terminal.println("You cannot " + synonyms.get(0) + prepUsed + " the " + w.synonyms.get(0) + ".");
 		}
@@ -41,16 +42,18 @@ public class Verb extends Word {
 		try {
 			myFunc2.accept(o, t);
 		} catch (Exception e) {
-			Terminal.println("You cannot " + synonyms.get(0) + (prepUsed.isEmpty()? " the ": prepUsed + " ") + o.accessor + ".");
+			Terminal.println("You cannot " + synonyms.get(0) + (prepUsed.isEmpty() ? " the " : prepUsed + " ")
+					+ o.accessor + ".");
 		}
 	}
-	
+
 	public void perform(Object o1, Object o2, String prepUsed1, String prepUsed2, Engine t) {
 		// Terminal.println(o + " : " + t);
 		try {
 			myFunc3.accept(o1, o2, t);
 		} catch (Exception e) {
-			Terminal.println("You cannot " + synonyms.get(0) + (prepUsed1.isEmpty()? "the ": prepUsed1 + " ") + o1.accessor + " with" + (prepUsed2.isEmpty()? " the ": prepUsed2 + " ") + o2.accessor);
+			Terminal.println("You cannot " + synonyms.get(0) + (prepUsed1.isEmpty() ? "the " : prepUsed1 + " ")
+					+ o1.accessor + " with" + (prepUsed2.isEmpty() ? " the " : prepUsed2 + " ") + o2.accessor);
 		}
 	}
 }

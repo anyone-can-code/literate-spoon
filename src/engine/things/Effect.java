@@ -10,6 +10,7 @@ public class Effect {
 	public int lifetime;
 	public String quality = "";
 	Random rand = new Random();
+
 	public Effect(OneParamFunc<Player> f, int lifetime, String init, String quality) {
 		this.f = f;
 		this.lifetime = lifetime;
@@ -19,7 +20,7 @@ public class Effect {
 
 	public void affect(Player p) {
 		f.accept(p);
-		if(rand.nextInt(5) == 0) {
+		if (rand.nextInt(5) == 0) {
 			Terminal.println("You are feeling " + quality + ".");
 		}
 		lifetime--;

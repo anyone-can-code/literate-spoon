@@ -16,10 +16,8 @@ public class Main extends Thread {
 	public static Engine game;
 
 	public Main() {
-		Terminal.print("Loading, please wait");
 		game = new Engine();
 
-		Terminal.print(".");
 		game.addWord(new Verb("move go walk run climb jog travel journey venture", (Word w, Engine t) -> {
 			if (w.getClass() != Direction.class) {
 				Terminal.println("...What?");
@@ -46,7 +44,7 @@ public class Main extends Thread {
 					}
 
 					if (x == r.coords[0] && y == r.coords[1]) {
-
+						
 						if (dx > 0) {//flipped from how you'd think
 							while (t.protag.currentRoom.westEntry != null)
 								t.protag.currentRoom = t.protag.currentRoom.westEntry;
@@ -86,8 +84,6 @@ public class Main extends Thread {
 			//t.protag.changePos(w.value);
 		}, null));
 
-		Terminal.print(".");
-
 		game.addWord(new Verb("eat consume", null, (Object o, Engine t) -> {
 			if (o.abstractObj) {
 				Terminal.println("Impossible.");
@@ -119,13 +115,11 @@ public class Main extends Thread {
 			}
 
 		}));
-		
-		Terminal.print(".");
 
 		game.addWord(new Verb("drink", null, (Object o, Engine t) -> {
 			if (!o.alive) {
 				t.protag.thirst -= o.drinkability;
-				if(o.poisonous) {
+				if (o.poisonous) {
 					Terminal.println("An acrid aftertaste fills your mouth.");
 				} else {
 					Terminal.println("You drank the " + o.accessor + ". Delicious.");
@@ -142,14 +136,12 @@ public class Main extends Thread {
 			}
 		}));
 
-		Terminal.print(".");
-
 		game.addWord(new Verb("inspect investigate examine scrutinize study observe look", (Word w, Engine t) -> {
 			if (w.represents == t.protag.inventory) {
 				Terminal.println("Try checking your inventory instead.");
 				return;
 			} else if (w.represents == "room") {
-				t.inspectRoom();
+				t.inspectRoom(false, null);
 			}
 		}, (Object o, Engine t) -> {
 			if (o.container.isEmpty()) {
@@ -174,17 +166,17 @@ public class Main extends Thread {
 			Terminal.println(".");
 		}));
 
-		Terminal.print(".");
-
 		game.addWord(new Verb("interact talk speak converse negotiate chat gossip", null, (Object o, Engine t) -> {
 			if (o.alive) {
 				Entity e = (Entity) o;
-				e.interaction.accept(t.protag, t);
+				if (e.talkedTo) {
+					e.repeatInteraction.accept(t.protag, t);
+				} else {
+					e.interaction.accept(t.protag, t);
+				}
 			}
 		}));
 
-		Terminal.print(".");
-		
 		game.addWord(new Verb("attack assault assail hit pummel strike kill destroy", null, (Object o, Engine t) -> {
 			if (o.equals(t.protag)) {
 				t.protag.health = 0;
@@ -193,7 +185,7 @@ public class Main extends Thread {
 			}
 
 			o.health -= t.protag.strength * t.protag.weapon.damage;
-			t.protag.health -= t.protag.strength * t.protag.weapon.playerDamage;
+			t.protag.health -= t.protag.strength + t.protag.weapon.playerDamage;
 
 			if (!t.protag.weapon.abstractObj)
 				t.protag.weapon.health -= t.protag.strength;
@@ -205,7 +197,6 @@ public class Main extends Thread {
 						e.anger = e.restraint;
 				} catch (Exception e) {
 				}
-				;
 			}
 			//Terminal.println("You attacked the " + o.accessor + " with the " + t.protag.weapon.accessor + ".");
 			Terminal.println("Weapon: " + t.protag.weapon.accessor);
@@ -218,8 +209,8 @@ public class Main extends Thread {
 				return;
 			}
 
-			o1.health -= t.protag.strength * t.protag.weapon.damage;
-			t.protag.health -= t.protag.strength * t.protag.weapon.playerDamage;
+			o1.health -= t.protag.strength + t.protag.weapon.damage;
+			t.protag.health -= t.protag.strength + t.protag.weapon.playerDamage;
 
 			if (!t.protag.weapon.abstractObj)
 				t.protag.weapon.health -= t.protag.strength;
@@ -236,8 +227,6 @@ public class Main extends Thread {
 			//Terminal.println("You attacked the " + o1.accessor + " with the " + t.protag.weapon.accessor + ".");
 			Terminal.println("Weapon: " + with.accessor);
 		}));
-
-		Terminal.print(".");
 
 		game.addWord(new Verb("hold equip", null, (Object o, Engine t) -> {
 			boolean b = o.holdable;
@@ -258,8 +247,6 @@ public class Main extends Thread {
 			}
 		}));
 
-		Terminal.print(".");
-
 		game.addWord(
 				new Verb("take get steal grab seize apprehend liberate collect pick", null, (Object o, Engine t) -> {
 					boolean b = o.holdable;
@@ -276,8 +263,6 @@ public class Main extends Thread {
 					}
 				}));
 
-		Terminal.print(".");
-
 		game.addWord(new Verb("drop leave put", null, (Object o, Engine t) -> {
 			if (o.abstractObj) {
 				Terminal.println("Impossible.");
@@ -289,21 +274,17 @@ public class Main extends Thread {
 				o.reference = t.protag.currentRoom.floor;
 				t.protag.currentRoom.objects.add(o);
 				Terminal.println("You dropped the " + o.accessor + ".");
-			}
-			else if (t.protag.inventory.contains(o)) {
+			} else if (t.protag.inventory.contains(o)) {
 				t.protag.inventory.remove(o);
 				o.description = "on";
 				o.reference = t.protag.currentRoom.floor;
 
-				
 				t.protag.currentRoom.objects.add(o);
 				Terminal.println("You dropped the " + o.accessor + ".");
 			} else {
 				Terminal.println("You don't have a " + o.accessor + " to drop.");
 			}
 		}));
-
-		Terminal.print(".");
 
 		game.addWord(new Verb("view open check", (Word n, Engine t) -> {
 			if (n.represents == t.protag.inventory) {
@@ -374,36 +355,29 @@ public class Main extends Thread {
 
 		}));
 
-		Terminal.print(".");
-
 		game.addWord(new Word("inventory", game.protag.inventory));
-
-		Terminal.print(".");
-
 		game.addWord(new Word("self me myself player", game.protag));
 		game.addWord(new Word("room area surroundings place around", "room"));
-
-		Terminal.print(".");
 
 		game.addWord(new Direction("north forwards forward ahead onward", "12"));
 		game.addWord(new Direction("south backwards backward back ", "10"));
 		game.addWord(new Direction("east right", "21"));
 		game.addWord(new Direction("west left", "01"));
-
-		Terminal.print(".");
 	}
 
 	public static void removal(Object o, Engine t) {
 		try {
 			o.referencer.reference = t.protag.currentRoom.floor;
 			o.referencer.description = t.lRandOf(new String[] { "lying", "sitting", "resting" }) + " on";
-		} catch (Exception e) {}
+		} catch (Exception e) {
+		}
 		try {
-			if(o.reference != t.protag.currentRoom.floor) {
-			o.reference.reference = t.protag.currentRoom.floor;
-			o.reference.description = "on";
+			if (o.reference != t.protag.currentRoom.floor) {
+				o.reference.reference = t.protag.currentRoom.floor;
+				o.reference.description = "on";
 			}
-		} catch (Exception e) {}
+		} catch (Exception e) {
+		}
 	}
 
 	public void run() {
