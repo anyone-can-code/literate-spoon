@@ -3,7 +3,7 @@ package engine;
 import java.util.ArrayList;
 import engine.things.Object;
 
-public class Room {
+public class Room implements Cloneable {
 	public int[] coords;// x and y
 	public ArrayList<Object> objects = new ArrayList<Object>();
 	public ArrayList<Room> nestedMap = new ArrayList<Room>();
@@ -71,4 +71,12 @@ public class Room {
 	public String toString() {
 		return coords[0] + ", " + coords[1];
 	}
+	public Room getClone() {
+		try {
+				return (Room) super.clone();
+		} catch (CloneNotSupportedException e) {
+				return null;
+		}
+	}
+
 }

@@ -33,7 +33,6 @@ public class Word {
 	public void perform(Object o, String s, Engine t) {
 		System.out.println(this.getClass());
 	}
-	
 	public void perform(Object o, Object o2, String s1, String s2, String joinerWord, Engine t) {
 		System.out.println(this.getClass());
 	}
