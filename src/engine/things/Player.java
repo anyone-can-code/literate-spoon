@@ -6,11 +6,11 @@ import engine.Room;
 import engine.things.Object;
 
 public class Player extends Object {
-	//private int[] pos;
+	// private int[] pos;
 	public Room currentRoom;
 	public ArrayList<Effect> effects = new ArrayList<Effect>();
 	public ArrayList<Object> inventory = new ArrayList<Object>();
-        public ArrayList<Quest> quests = new ArrayList<Quest>();
+	public ArrayList<Quest> quests = new ArrayList<Quest>();
 	public int hunger = 0;
 	public int thirst = 0;
 	public int strength = 5;
@@ -23,21 +23,21 @@ public class Player extends Object {
 	public Object fist = new Object("[fist]", (String) null, null);
 
 	public Player(int x, int y) {
-		super("[player]", (String)null, null);
-		
+		super("[player]", (String) null, null);
+
 		fist.abstractNoun();
 		inventory.add(fist);
 		weapon = fist;
-		
+
 		Object o = new Object("[foot]", (String) null, null);
 		o.abstractNoun();
 		inventory.add(o);
-		
+
 		o = new Object("[head]", (String) null, null);
 		o.playerDamage = 2;
 		o.abstractNoun();
 		inventory.add(o);
-		
+
 		alive = true;
 	}
 }
