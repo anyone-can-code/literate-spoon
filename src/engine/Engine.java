@@ -203,9 +203,12 @@ public class Engine {
 				try {
 					s = protag.currentRoom.objects.get(n).reference.accessor;
 					if (s.equals(o.reference.accessor)) {
+						if(x2 == 1) {
+							x2 = 0;
+						} else {
 						x2 = 1;
+						}
 					}
-					break;
 				} catch (NullPointerException e) {
 
 				} catch (IndexOutOfBoundsException e) {
@@ -226,7 +229,7 @@ public class Engine {
 
 					Terminal.print("(1000)");
 					if (x1 == 1) {
-						if (x2 == 0) {
+						if (x2 == 1) {
 							Terminal.print(lRandOf(
 									new String[] { " as well as a " + compSub + " " + o.description + " " + rCompSub,
 											" and a " + compSub + " " + o.description + " " + rCompSub }));
@@ -261,30 +264,30 @@ public class Engine {
 
 			}
 		}
-		if(!updated) {
-		for (Room r : protag.currentRoom.fatherRoom.nestedMap) {
-			String s = "";
-			if (r.coords[1] == protag.currentRoom.coords[1] + 1) {//north
-				s += "north";
+		if (!updated) {
+			for (Room r : protag.currentRoom.fatherRoom.nestedMap) {
+				String s = "";
+				if (r.coords[1] == protag.currentRoom.coords[1] + 1) {//north
+					s += "north";
+				}
+				if (r.coords[1] == protag.currentRoom.coords[1] - 1) {//south
+					s += "south";
+				}
+				if (r.coords[0] == protag.currentRoom.coords[0] + 1) {//right
+					if (s != "")
+						s += "-";
+					s += "east";
+				}
+				if (r.coords[0] == protag.currentRoom.coords[0] - 1) {//left
+					if (s != "")
+						s += "-";
+					s += "west";
+				}
+				if (s != "") {
+					Terminal.println(
+							"To the " + s + ", there is a " + r.description.substring(0, r.description.indexOf("\n")));
+				}
 			}
-			if (r.coords[1] == protag.currentRoom.coords[1] - 1) {//south
-				s += "south";
-			}
-			if (r.coords[0] == protag.currentRoom.coords[0] + 1) {//right
-				if (s != "")
-					s += "-";
-				s += "east";
-			}
-			if (r.coords[0] == protag.currentRoom.coords[0] - 1) {//left
-				if (s != "")
-					s += "-";
-				s += "west";
-			}
-			if (s != "") {
-				Terminal.println(
-						"To the " + s + ", there is a " + r.description.substring(0, r.description.indexOf("\n")));
-			}
-		}
 		}
 	}
 

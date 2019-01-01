@@ -240,6 +240,7 @@ public class Main extends Thread {
 				if (t.protag.rightHand != null)
 					t.protag.inventory.add(t.protag.rightHand);
 				t.protag.rightHand = o;
+				t.protag.currentRoom.objects.remove(o);
 				removal(o, t);
 				Terminal.println("You are now holding a " + o.accessor + ".");
 			} else {

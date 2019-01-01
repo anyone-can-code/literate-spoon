@@ -118,7 +118,7 @@ public class Terminal {
 						} else {
 							t.setFont(new Font(15));
 						}
-						FadeTransition ft = new FadeTransition(Duration.millis(3000), t);
+						FadeTransition ft = new FadeTransition(Duration.millis(2000), t);
 						ft.setFromValue(0.0);
 						ft.setToValue(1.0);
 						ft.play();
