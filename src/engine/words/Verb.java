@@ -12,20 +12,26 @@ public class Verb extends Word {
 	private TwoParamFunc<Object, Engine> myFunc2;
 	private ThreeParamFunc<Object, Object, Engine> myFunc3;
 
+	private String joinerWord;
+
 	public Verb(String list, TwoParamFunc<Word, Engine> func, TwoParamFunc<Object, Engine> func2) {
 		super(list);
 
 		myFunc = func;
 		myFunc2 = func2;
+
+		joinerWord = "";
 	}
 
 	public Verb(String list, TwoParamFunc<Word, Engine> func, TwoParamFunc<Object, Engine> func2,
-			ThreeParamFunc<Object, Object, Engine> func3) {
+			ThreeParamFunc<Object, Object, Engine> func3, String joinerWord) {
 		super(list);
 
 		myFunc = func;
 		myFunc2 = func2;
 		myFunc3 = func3;
+
+		this.joinerWord = joinerWord;
 	}
 
 	public void perform(Word w, String prepUsed, Engine t) {
@@ -47,13 +53,17 @@ public class Verb extends Word {
 		}
 	}
 
-	public void perform(Object o1, Object o2, String prepUsed1, String prepUsed2, Engine t) {
+	public void perform(Object o1, Object o2, String prepUsed1, String prepUsed2, String joiningWord, Engine t) {
 		// Terminal.println(o + " : " + t);
 		try {
+			if (!joiningWord.equals(joinerWord)) {
+				throw new Exception();
+			}
 			myFunc3.accept(o1, o2, t);
 		} catch (Exception e) {
-			Terminal.println("You cannot " + synonyms.get(0) + (prepUsed1.isEmpty() ? "the " : prepUsed1 + " ")
-					+ o1.accessor + " with" + (prepUsed2.isEmpty() ? " the " : prepUsed2 + " ") + o2.accessor);
+			Terminal.println(
+					"You cannot " + synonyms.get(0) + (prepUsed1.isEmpty() ? " the " : prepUsed1 + " ") + o1.accessor
+							+ " " + joiningWord + (prepUsed2.isEmpty() ? " the " : prepUsed2 + " ") + o2.accessor);
 		}
 	}
 }

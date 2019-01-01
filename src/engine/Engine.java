@@ -1,4 +1,3 @@
-
 package engine;
 
 import java.util.*;
@@ -7,12 +6,14 @@ import engine.things.Player;
 import engine.things.Effect;
 import engine.things.Entity;
 import engine.things.Object;
+import engine.things.Quest;
 import engine.words.Verb;
 import engine.words.Word;
 
 import engine.Terminal;
 
 public class Engine {
+
 	public Player protag;
 
 	// public ArrayList<Room> rooms;// can be accessed by verbs
@@ -106,7 +107,6 @@ public class Engine {
 			protag.health += protag.health < protag.maxHealth && protag.health > 0 ? 1 : 0;
 		}
 	}
-
 	public void inspectRoom(boolean updated, Room roomCache) {
 		if (!updated) {
 			if (protag.currentRoom != null) {
@@ -351,6 +351,9 @@ public class Engine {
 		String userText;
 		runObjects();
 
+		for (Quest q : protag.quests) {
+			q.run(this, true);
+		}
 		Terminal.println(protag.health > 90 ? ""
 				: protag.health > 50 ? "You are feeling slightly injured."
 						: protag.health > 0 ? "You think that you might have some injuries, but you've forgotten where."
@@ -374,14 +377,15 @@ public class Engine {
 				} catch (Exception e) {
 				}
 			}
-			changedSurroundings = false;
+			changedSurroundings = false;]
 			userText = Terminal.readln();
 			userText = userText.toLowerCase();
 
 			for (String str : omitWords) {
 				userText = userText.replace(" " + str + " ", " ");
 			}
-			for (String str : articles) {
+    
+            for (String str : articles) {
 				userText = userText.replace(" " + str + " ", " ");
 			}
 			for (Object o : protag.currentRoom.objects) {
@@ -411,11 +415,25 @@ public class Engine {
 				}
 			} catch (NullPointerException e) {
 			}
-			String[] parts = userText.split("with");
+
+			String[] parts;
+			String joinerWord = "";
+
+			if (userText.contains("with")) {
+				parts = userText.split("with");
+				joinerWord = "with";
+			} else if (userText.contains("to")) {
+				parts = userText.split("to");
+				joinerWord = "to";
+			} else {
+				parts = new String[1];
+				parts[0] = userText;
+			}
 
 			String[] prepUsed = new String[parts.length];
 
-			for (int i = 0; i < parts.length; i++) {//probably some of the ugliest code (by me) in my life, but it works
+			for (int i = 0; i < parts.length; i++) {// probably some of the ugliest code (by me) in my life, but it
+													// works
 				prepUsed[i] = "";
 				parts[i] = parts[i].trim();
 				int w = 0;
@@ -427,43 +445,42 @@ public class Engine {
 							parts[i] = parts[i].substring(0, w).trim() + " "
 									+ parts[i].substring(parts[i].substring(w).indexOf(' ') == -1 ? parts[i].length()
 											: parts[i].substring(w).indexOf(' ') + w).trim();
-							//System.out.println("1: " + parts[i]);
 							break;
 						}
 					}
 
-					if (parts[i].substring(w).indexOf(' ') == -1)
+					if (parts[i].substring(w).indexOf(' ') == -1) {
 						break;
+					}
 
-					w = parts[i].substring(w).indexOf(' ') + 1;
+					w = parts[i].substring(w).indexOf(' ') + w + 1;
 				}
 			}
 
-			//words = new ArrayList<String>();
-
+			// words = new ArrayList<String>();
 			ArrayList<String> words = new ArrayList<String>();
 			words.addAll(Arrays.asList(parts[0].split(" ")));
 			if (words.size() > 2 || words.size() == 1) {
 				Terminal.println("What do you mean?");
 				continue;
 			}
-
+                
 			for (int i = 1; i < parts.length; i++)
 				words.addAll(Arrays.asList(parts[i].trim().split(" ")));
 
-			//System.out.println(words);
-
-			/*for (String str : s) {
-				if (!str.isEmpty()) {
-					words.add(str);// user text goes to array of words
-				}
-			}*/
-
-			/*if (words.size() != 2) {
-				Terminal.println("All commands must be 2 words.");
+			if (words.size() == 1) {
+				Terminal.println("Please be more specific.");
 				continue;
-			}*/
+			}
+			/*
+			 * for (String str : s) { if (!str.isEmpty()) { words.add(str);// user text goes
+			 * to array of words } }
+			 */
 
+			/*
+			 * if (words.size() != 2) { Terminal.println("All commands must be 2 words.");
+			 * continue; }
+			 */
 			Word w0 = null;
 			Word w1 = null;
 			Object o1 = null;
@@ -509,6 +526,9 @@ public class Engine {
 				if (o.accessor.equals(words.get(1))) {
 					o1 = o;
 					foundObject = true;
+				}
+				if (words.size() > 2 && o.accessor.equals(words.get(2))) {
+					o2 = o;
 				}
 				for (Object obj : o.container) {
 					if (obj.accessor.equals(words.get(1))) {
@@ -583,10 +603,10 @@ public class Engine {
 					continue;
 				}
 			} else if (foundObject) {
-				if (o2 == null)
+				if (o2 == null) {
 					w0.perform(o1, prepUsed[0], this);
-				else {
-					w0.perform(o1, o2, prepUsed[0], prepUsed[1], this);
+				} else {
+					w0.perform(o1, o2, prepUsed[0], prepUsed[1], joinerWord, this);
 				}
 			}
 			updatePlayerState();
