@@ -107,6 +107,7 @@ public class Engine {
 			protag.health += protag.health < protag.maxHealth && protag.health > 0 ? 1 : 0;
 		}
 	}
+
 	public void inspectRoom(boolean updated, Room roomCache) {
 		if (!updated) {
 			if (protag.currentRoom != null) {
@@ -127,6 +128,13 @@ public class Engine {
 
 		outerloop: for (int i = 0; i < protag.currentRoom.objects.size(); i++) {
 			Object o = protag.currentRoom.objects.get(i);
+			if (updated) {
+				for (Object obj : roomCache.objects) {
+					if (o.accessor.equals(obj.accessor)) {
+						continue outerloop;
+					}
+				}
+			}
 			String compSub = o.compSub;
 			if (o.health != null && o.health < o.maxHealth) {
 				int p = (int) (((float) o.health / (float) o.maxHealth) * 4);
@@ -203,9 +211,12 @@ public class Engine {
 				try {
 					s = protag.currentRoom.objects.get(n).reference.accessor;
 					if (s.equals(o.reference.accessor)) {
-						x2 = 1;
+						if (x2 == 1) {
+							x2 = 0;
+						} else {
+							x2 = 1;
+						}
 					}
-					break;
 				} catch (NullPointerException e) {
 
 				} catch (IndexOutOfBoundsException e) {
@@ -213,20 +224,13 @@ public class Engine {
 				}
 				n--;
 			}
-			if (updated) {
-				for (Object obj : roomCache.objects) {
-					if (o.accessor.equals(obj.accessor)) {
-						continue outerloop;
-					}
-				}
-			}
+
 			try {
 				Object r = o.reference;
 				if (r != null) {
-
 					Terminal.print("(1000)");
 					if (x1 == 1) {
-						if (x2 == 0) {
+						if (x2 == 1) {
 							Terminal.print(lRandOf(
 									new String[] { " as well as a " + compSub + " " + o.description + " " + rCompSub,
 											" and a " + compSub + " " + o.description + " " + rCompSub }));
@@ -241,13 +245,21 @@ public class Engine {
 							Terminal.print(", a " + compSub);
 						}
 					} else {
+						if(updated) {
+							Terminal.print(uRandOf(new String[] {"there now is a " + compSub + " "
+											+ o.description + " " + rCompSub,
+									o.description + " " + rCompSub + ", "
+											+ "there now is a "
+											+ compSub }));
+						} else {
 						Terminal.print(uRandOf(new String[] {
-								"you observe that there is a " + compSub + " " + o.description + " " + rCompSub,
-								"another thing you notice is a " + compSub + " " + o.description + " " + rCompSub,
-								"there is a " + compSub + " " + o.description + " " + rCompSub,
-								o.description + " " + rCompSub + ", there is a " + compSub,
-								"you notice a " + compSub + " " + o.description + " " + rCompSub,
-								"you can also see a " + compSub + " " + o.description + " " + rCompSub }));
+								lRandOf(new String[] { "you observe that there is a ", "another thing you notice is a ",
+										"there is a ", "you notice a ", "you can also see a " }) + compSub + " "
+										+ o.description + " " + rCompSub,
+								o.description + " " + rCompSub + ", "
+										+ lRandOf(new String[] { "there is a ", "you can observe a ", "you notice a " })
+										+ compSub }));
+						}
 					}
 					if (x1 > 0) {
 						x1--;
@@ -261,30 +273,30 @@ public class Engine {
 
 			}
 		}
-		if(!updated) {
-		for (Room r : protag.currentRoom.fatherRoom.nestedMap) {
-			String s = "";
-			if (r.coords[1] == protag.currentRoom.coords[1] + 1) {//north
-				s += "north";
+		if (!updated) {
+			for (Room r : protag.currentRoom.fatherRoom.nestedMap) {
+				String s = "";
+				if (r.coords[1] == protag.currentRoom.coords[1] + 1) {//north
+					s += "north";
+				}
+				if (r.coords[1] == protag.currentRoom.coords[1] - 1) {//south
+					s += "south";
+				}
+				if (r.coords[0] == protag.currentRoom.coords[0] + 1) {//right
+					if (s != "")
+						s += "-";
+					s += "east";
+				}
+				if (r.coords[0] == protag.currentRoom.coords[0] - 1) {//left
+					if (s != "")
+						s += "-";
+					s += "west";
+				}
+				if (s != "") {
+					Terminal.println(
+							"To the " + s + ", there is a " + r.description.substring(0, r.description.indexOf("\n")));
+				}
 			}
-			if (r.coords[1] == protag.currentRoom.coords[1] - 1) {//south
-				s += "south";
-			}
-			if (r.coords[0] == protag.currentRoom.coords[0] + 1) {//right
-				if (s != "")
-					s += "-";
-				s += "east";
-			}
-			if (r.coords[0] == protag.currentRoom.coords[0] - 1) {//left
-				if (s != "")
-					s += "-";
-				s += "west";
-			}
-			if (s != "") {
-				Terminal.println(
-						"To the " + s + ", there is a " + r.description.substring(0, r.description.indexOf("\n")));
-			}
-		}
 		}
 	}
 
@@ -355,7 +367,6 @@ public class Engine {
 				: protag.health > 50 ? "You are feeling slightly injured."
 						: protag.health > 0 ? "You think that you might have some injuries, but you've forgotten where."
 								: "You feel slightly dead, but you aren't sure.");
-
 		outerloop: while (true) {// repeats until valid command
 			Terminal.print("(1000)");
 			if (protag.currentRoom != null) {
@@ -374,15 +385,15 @@ public class Engine {
 				} catch (Exception e) {
 				}
 			}
-			changedSurroundings = false;]
+			changedSurroundings = false;
 			userText = Terminal.readln();
 			userText = userText.toLowerCase();
 
 			for (String str : omitWords) {
 				userText = userText.replace(" " + str + " ", " ");
 			}
-    
-            for (String str : articles) {
+
+			for (String str : articles) {
 				userText = userText.replace(" " + str + " ", " ");
 			}
 			for (Object o : protag.currentRoom.objects) {
@@ -413,14 +424,18 @@ public class Engine {
 			} catch (NullPointerException e) {
 			}
 
+			while (userText.contains("  ")) {
+				userText = userText.replace("  ", " ");
+			}
+			String temp = userText;
 			String[] parts;
 			String joinerWord = "";
-
-			if (userText.contains("with")) {
-				parts = userText.split("with");
+			ArrayList<String> words = new ArrayList<String>();
+			if ((" " + userText + " ").contains("with")) {
+				parts = (" " + userText + " ").split(" with ");
 				joinerWord = "with";
-			} else if (userText.contains("to")) {
-				parts = userText.split("to");
+			} else if ((" " + userText + " ").contains("to")) {
+				parts = (" " + userText + " ").split(" to ");
 				joinerWord = "to";
 			} else {
 				parts = new String[1];
@@ -428,46 +443,61 @@ public class Engine {
 			}
 
 			String[] prepUsed = new String[parts.length];
+			try {
+				for (int i = 0; i < parts.length; i++) {
+					prepUsed[i] = "";
+					parts[i] = parts[i].trim();
+					int w = 0;
+					while (true) {
+						for (String str : prepositions) {
+							if (parts[i].substring(w, parts[i].substring(w).indexOf(' ') == -1 ? parts[i].length()
+									: parts[i].substring(w).indexOf(' ') + w).equals(str)) {
+								prepUsed[i] += " " + str;
+								parts[i] = parts[i].substring(0, w).trim() + " "
+										+ parts[i]
+												.substring(parts[i].substring(w).indexOf(' ') == -1 ? parts[i].length()
+														: parts[i].substring(w).indexOf(' ') + w)
+												.trim();
+								break;
+							}
+						}
 
-			for (int i = 0; i < parts.length; i++) {// probably some of the ugliest code (by me) in my life, but it
-													// works
-				prepUsed[i] = "";
-				parts[i] = parts[i].trim();
-				int w = 0;
-				while (true) {
-					for (String str : prepositions) {
-						if (parts[i].substring(w, parts[i].substring(w).indexOf(' ') == -1 ? parts[i].length()
-								: parts[i].substring(w).indexOf(' ') + w).equals(str)) {
-							prepUsed[i] += " " + str;
-							parts[i] = parts[i].substring(0, w).trim() + " "
-									+ parts[i].substring(parts[i].substring(w).indexOf(' ') == -1 ? parts[i].length()
-											: parts[i].substring(w).indexOf(' ') + w).trim();
+						if (parts[i].substring(w).indexOf(' ') == -1) {
 							break;
 						}
-					}
 
-					if (parts[i].substring(w).indexOf(' ') == -1) {
-						break;
+						w = parts[i].substring(w).indexOf(' ') + w + 1;
 					}
-
-					w = parts[i].substring(w).indexOf(' ') + w + 1;
 				}
-			}
 
-			// words = new ArrayList<String>();
-			ArrayList<String> words = new ArrayList<String>();
-			words.addAll(Arrays.asList(parts[0].split(" ")));
-			if (words.size() > 2 || words.size() == 1) {
-				Terminal.println("What do you mean?");
-				continue;
-			}
-                
-			for (int i = 1; i < parts.length; i++)
-				words.addAll(Arrays.asList(parts[i].trim().split(" ")));
+				// words = new ArrayList<String>();
 
-			if (words.size() == 1) {
-				Terminal.println("Please be more specific.");
-				continue;
+				words.addAll(Arrays.asList(parts[0].split(" ")));
+				if (words.size() > 2) {
+					throw new Exception();
+				}
+
+				for (int i = 1; i < parts.length; i++)
+					words.addAll(Arrays.asList(parts[i].trim().split(" ")));
+
+				if (words.size() == 1) {
+					throw new Exception();
+				}
+			} catch (Exception e) {
+				words.clear();
+				words.addAll(Arrays.asList(temp.split(" ")));
+				if (words.size() > 2) {
+					Terminal.println(uRandOf(new String[] {
+							"Why don't you help both of us out by typing something I can understand?",
+							"I'm sorry that I'm not smart enough to understand your big, complicated (I)sentences(I).",
+							"I'm going to ignore that." }));
+					continue;
+				}
+
+				if (words.size() == 1) {
+					Terminal.println("Please be more specific.");
+					continue;
+				}
 			}
 			/*
 			 * for (String str : s) { if (!str.isEmpty()) { words.add(str);// user text goes
@@ -615,6 +645,7 @@ public class Engine {
 					effectIt.remove();
 				}
 			}
+
 			break;
 		}
 	}

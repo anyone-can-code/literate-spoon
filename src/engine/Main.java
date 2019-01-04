@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import engine.Terminal;
 
 public class Main extends Thread {
-
 	public static Engine game;
 
 	public Main() {
@@ -175,13 +174,11 @@ public class Main extends Thread {
 		}));
 
 		game.addWord(new Verb("interact talk speak converse negotiate chat gossip", null, (Object o, Engine t) -> {
-			if (o.alive) {
-				Entity e = (Entity) o;
-				if (e.talkedTo) {
-					e.repeatInteraction.accept(t.protag, t);
-				} else {
-					e.interaction.accept(t.protag, t);
-				}
+			Entity e = (Entity) o;
+			if (e.talkedTo) {
+				e.repeatInteraction.accept(t.protag, t);
+			} else {
+				e.interaction.accept(t.protag, t);
 			}
 		}));
 
@@ -207,6 +204,8 @@ public class Main extends Thread {
 					}
 				} catch (Exception e) {
 				}
+				Terminal.println(t.uRandOf(new String[] {"A cry of pain greets your ears.", "The sharp smell of blood fills the air.", 
+						"Something cracks.", "A surge of adrenaline shoots through you."}));
 			}
 			// Terminal.println("You attacked the " + o.accessor + " with the " +
 			// t.protag.weapon.accessor + ".");
@@ -214,15 +213,12 @@ public class Main extends Thread {
 		}, (Object o1, Object with, Engine t) -> {
 			t.protag.weapon = with;
 
-			if (o1.equals(t.protag)) {
-				t.protag.health = 0;
+			o1.health -= t.protag.strength + t.protag.weapon.damage;
+			t.protag.health -= t.protag.strength + t.protag.weapon.playerDamage;
+			if (o1.equals(t.protag) && t.protag.health <= 0) {
 				Terminal.println("You killed yourself. Nice job.");
 				return;
 			}
-
-			o1.health -= t.protag.strength + t.protag.weapon.damage;
-			t.protag.health -= t.protag.strength + t.protag.weapon.playerDamage;
-
 			if (!t.protag.weapon.abstractObj) {
 				t.protag.weapon.health -= t.protag.strength;
 			}
@@ -235,11 +231,10 @@ public class Main extends Thread {
 					}
 				} catch (Exception e) {
 				}
-				;
+				Terminal.println(t.uRandOf(new String[] {"A cry of pain greets your ears.", "The sharp smell of blood fills the air.", 
+						"Something cracks.", "A surge of adrenaline shoots through you."}));
 			}
-			// Terminal.println("You attacked the " + o1.accessor + " with the " +
-			// t.protag.weapon.accessor + ".");
-			Terminal.println("Weapon: " + with.accessor);
+			
 		}, "with"));
 
 		game.addWord(new Verb("hold equip", null, (Object o, Engine t) -> {
@@ -256,6 +251,7 @@ public class Main extends Thread {
 					t.protag.inventory.add(t.protag.rightHand);
 				}
 				t.protag.rightHand = o;
+				t.protag.currentRoom.objects.remove(o);
 				removal(o, t);
 				Terminal.println("You are now holding a " + o.accessor + ".");
 			} else {
@@ -301,8 +297,6 @@ public class Main extends Thread {
 				Terminal.println("You don't have a " + o.accessor + " to drop.");
 			}
 		}));
-
-		Terminal.print(".");
 
 		game.addWord(new Verb("give gift supply donate", null, null, (Object gift, Object receiver, Engine t) -> {
 			Iterator<Object> obj = t.protag.inventory.iterator();
@@ -413,8 +407,6 @@ public class Main extends Thread {
 		game.addWord(new Word("inventory", game.protag.inventory));
 		game.addWord(new Word("quests quest-log questlog", game.protag.quests));
 
-		Terminal.print(".");
-        
 		game.addWord(new Word("self me myself player", game.protag));
 		game.addWord(new Word("room area surroundings place around", "room"));
 

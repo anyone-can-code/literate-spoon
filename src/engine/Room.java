@@ -71,11 +71,14 @@ public class Room implements Cloneable {
 	public String toString() {
 		return coords[0] + ", " + coords[1];
 	}
+
 	public Room getClone() {
 		try {
-				return (Room) super.clone();
+			Room r = (Room) super.clone();
+			r.objects = (ArrayList<Object>) this.objects.clone();
+			return r;
 		} catch (CloneNotSupportedException e) {
-				return null;
+			return null;
 		}
 	}
 

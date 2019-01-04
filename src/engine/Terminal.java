@@ -21,21 +21,20 @@ public class Terminal {
 	}
 
 	public static void println(Object s) {
-		if(printing) {
-		printText(s.toString());
-		Platform.runLater(() -> Window.enterStack = "\n");
-		try {
-			Thread.sleep(50);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		if (printing) {
+			printText(s.toString());
+			Platform.runLater(() -> Window.enterStack = "\n");
+			try {
+				Thread.sleep(50);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
 	public static void print(Object s) {
-		if(printing) {
-		printText(s.toString());
+		if (printing) {
+			printText(s.toString());
 		}
 	}
 
@@ -102,7 +101,8 @@ public class Terminal {
 			}
 			try {
 				Thread.sleep(n);
-			} catch (InterruptedException e) {}
+			} catch (InterruptedException e) {
+			}
 
 			if (i + 1 != strs.length) {
 				try {
@@ -118,7 +118,7 @@ public class Terminal {
 						} else {
 							t.setFont(new Font(15));
 						}
-						FadeTransition ft = new FadeTransition(Duration.millis(3000), t);
+						FadeTransition ft = new FadeTransition(Duration.millis(2000), t);
 						ft.setFromValue(0.0);
 						ft.setToValue(1.0);
 						ft.play();

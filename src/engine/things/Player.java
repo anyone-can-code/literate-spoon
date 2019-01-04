@@ -18,9 +18,9 @@ public class Player extends Object {
 	public int agility = 10;
 	public int charisma = 10;
 	public int literacy = 0;
-	public Object rightHand;
 	public Object weapon;
 	public Object fist = new Object("[fist]", (String) null, null);
+	public Object rightHand = fist;
 
 	public Player(int x, int y) {
 		super("[player]", (String) null, null);

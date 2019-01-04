@@ -113,8 +113,14 @@ public class Window extends Application {
 							ft.setFromValue(t.getOpacity());
 							ft.setToValue((t.localToScene(t.getBoundsInLocal()).getMaxY() - 50) / 200);
 							ft.play();
+						} else {
+							FadeTransition ft = new FadeTransition(Duration.millis(2000), t);
+							ft.setFromValue(t.getOpacity());
+							ft.setToValue(1.0);
+							ft.play();
 						}
-					} catch (Exception e) {}
+					} catch (Exception e) {
+					}
 				}
 			}
 		});

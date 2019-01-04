@@ -32,7 +32,7 @@ public class Entity extends Object {
 	public ArrayList<Object> inventory = new ArrayList<Object>();
 	public OneParamFunc<Engine> death;
 	public TwoParamFunc<Player, Engine> interaction;
-    public Quest quest = null;
+	public Quest quest = null;
 	public TwoParamFunc<Player, Engine> repeatInteraction;
 
 	public Entity(String compSub, String description, OneParamFunc<Engine> death) {
