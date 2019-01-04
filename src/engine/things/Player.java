@@ -21,7 +21,7 @@ public class Player extends Object {
 	public Object weapon;
 	public Object fist = new Object("[fist]", (String) null, null);
 	public Object rightHand = fist;
-	
+
 	public Player(int x, int y) {
 		super("[player]", (String) null, null);
 

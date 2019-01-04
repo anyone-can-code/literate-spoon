@@ -67,7 +67,7 @@ public class Quest {
 
 			if (found && print)
 				Terminal.println(
-						" Return the " + target.accessor + " to the " + giver.accessor + " to receive a reward.");
+						"Return the " + target.accessor + " to the " + giver.accessor + " to receive a reward.");
 		}
 	}
 

@@ -21,21 +21,20 @@ public class Terminal {
 	}
 
 	public static void println(Object s) {
-		if(printing) {
-		printText(s.toString());
-		Platform.runLater(() -> Window.enterStack = "\n");
-		try {
-			Thread.sleep(50);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		if (printing) {
+			printText(s.toString());
+			Platform.runLater(() -> Window.enterStack = "\n");
+			try {
+				Thread.sleep(50);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
 	public static void print(Object s) {
-		if(printing) {
-		printText(s.toString());
+		if (printing) {
+			printText(s.toString());
 		}
 	}
 
@@ -102,7 +101,8 @@ public class Terminal {
 			}
 			try {
 				Thread.sleep(n);
-			} catch (InterruptedException e) {}
+			} catch (InterruptedException e) {
+			}
 
 			if (i + 1 != strs.length) {
 				try {

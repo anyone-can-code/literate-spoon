@@ -36,7 +36,7 @@ public abstract class RoomGen {
 		o.injury = Object.type.bruises;
 		o.reference = new Object("[face]", o, null);
 		o.reference.abstractNoun();
-		
+
 		/*o = new Object("deformed [spider]", "on your", null);
 		o.injury = Object.type.squishes;
 		o.damage = 2;
@@ -160,7 +160,7 @@ public abstract class RoomGen {
 		map.addRoom(mainArea);
 
 		r = new Room(0, 0,
-				 "(B)A Small Grove(B)\n(1000)Tall, yellow blades of grass sway in the light breeze. The clouds are a dark grey, twisting in turmoil, a storm on its way.");
+				"(B)A Small Grove(B)\n(1000)Tall, yellow blades of grass sway in the light breeze. The clouds are a dark grey, twisting in turmoil, a storm on its way.");
 
 		Entity e1 = new Entity("shiny metal [box]", "fixed in the", (Engine e2) -> {
 			Terminal.println("You killed a lifeless chunk of metal. Anger issues?");
@@ -172,27 +172,53 @@ public abstract class RoomGen {
 				"An ancient metal box in the forest asks for a water bottle so that it can finally short its circuits. Eternity has driven it mad.",
 				o, e1, null);
 		e1.interaction = (Player p, Engine eng) -> {
+			HashMap<String, OneParamFunc<Player>> h = new HashMap<String, OneParamFunc<Player>>();
+			h.put("yes", (Player p1) -> {
+				HashMap<String, OneParamFunc<Player>> h1 = new HashMap<String, OneParamFunc<Player>>();
+				h1.put("yes", (Player p2) -> {
+					e1.quest.giveTo(p);
+				});
+				h1.put("no", (Player p2) -> {
+					Terminal.println("The old box tries to shed a tear.");
+				});
+				e1.Dialogue("The box asks for a water bottle so it doesn't have to suffer eternity. Accept quest?", h1,
+						p1);
+			});
+			h.put("no", (Player p1) -> {
+				Terminal.println("You walk away. The box keeps its static expression, but it seems more sorrowful.");
+				e1.anger += 20;
+			});
+			e1.Dialogue("With a soft, monotone noise, the box groans and asks you for help. Help it?", h, p);
+			e1.talkedTo = true;
+		};
+		e1.repeatInteraction = (Player p, Engine eng) -> {
 			if (!e1.quest.completed) {
 				HashMap<String, OneParamFunc<Player>> h = new HashMap<String, OneParamFunc<Player>>();
 				h.put("yes", (Player p1) -> {
-					HashMap<String, OneParamFunc<Player>> h1 = new HashMap<String, OneParamFunc<Player>>();
-					h1.put("yes", (Player p2) -> {
-						e1.quest.giveTo(p);
-					});
-					h1.put("no", (Player p2) -> {
-						Terminal.println("The old box tries to shed a tear.");
-					});
-					e1.Dialogue("The box asks for a water bottle so it doesn't have to suffer eternity. Accept quest?",
-							h1, p1);
+					if (e1.quest.found) {
+						e1.quest.gaveObj(eng, e1, e1.quest.target);
+					} else {
+
+						Terminal.println(
+								"You say yes.(1000)\nWhen it asks where it is, your lie becomes apparent and you walk away, hopefully ashamed.");
+					}
 				});
 				h.put("no", (Player p1) -> {
 					Terminal.println(
-							"You walk away. The box keeps its static expression, but it seems more sorrowful.");
-					e1.anger += 20;
+							"You tell it no, and it asks you why you came here if you didn't have it. It was a rhetorical question, so you walk away.");
 				});
-				e1.Dialogue("With a soft, monotone noise, the box groans and asks you for help. Help it?", h, p);
+				e1.Dialogue(
+						"With a soft, monotone noise, the box groans and asks you if you if you have the item it requested.",
+						h, p);
 			} else {
-				Terminal.println("The box creaks out a 'thank you' before shutting back off.");
+				e1.death = (Engine t) -> {
+					Terminal.println("The box creaks out a 'thank you' before shutting back off.");
+					Object o3 = new Object(e1.compSub, e1.description, null);
+					o3.holdable = false;
+					o3.consumability = null;
+					t.objectQueue.add(o3);
+				};
+				e.health = 0;
 			}
 		};
 		r.objects.add(e1);
