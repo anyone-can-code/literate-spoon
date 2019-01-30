@@ -1,6 +1,9 @@
 package engine;
 
 import javafx.application.Platform;
+
+import java.io.IOException;
+
 import javafx.animation.*;
 import javafx.util.Duration;
 import javafx.scene.text.TextFlow;
@@ -9,8 +12,9 @@ import javafx.scene.text.FontPosture;
 import javafx.scene.text.Text;
 import javafx.scene.text.FontWeight;
 
+@SuppressWarnings("restriction")
 public class Terminal {
-	static TextFlow flow = new TextFlow();
+	public static TextFlow flow = new TextFlow();
 	static boolean bold = false;
 	static boolean italic = false;
 	static boolean printing = true;
@@ -32,13 +36,71 @@ public class Terminal {
 		}
 	}
 
+	public static void sPrintln(Object s, int id) {
+		if (printing) {
+			Server.out[id].println("[PRINTLN]" + s.toString());
+			Server.out[id].flush();
+		}
+	}
+
+	public static void sPrint(Object s, int id) {
+		if (printing) {
+			Server.out[id].println("[PRINT]" + s.toString());
+			Server.out[id].flush();
+		}
+	}
+
+	public static void broadcast(String[] intro, Object s, int id) {
+		if (printing) {
+			for (int i = 0; i < Server.out.length; i++) {
+				if(Main.game.protags.get(i) != null) {
+				Server.out[i].println("[PRINTLN]" + intro[i == id ? 0 : 1] + s.toString());
+				Server.out[i].flush();
+				}
+			}
+		}
+	}
+	public static void describesPL(Object s, int id) {
+		if (printing) {
+			for (int i = 0; i < Server.out.length; i++) {
+				if(Main.game.protags.get(i) != null) {
+				if(i != id && Main.game.protags.get(id).currentRoom == Main.game.protags.get(i).currentRoom) {
+					if(s.toString().contains("player" + i)) {
+						Server.out[i].println("[PRINTLN]" + s.toString().replace("the player" + i, "you"));
+					} else {
+						Server.out[i].println("[PRINTLN]" + s.toString().replace("the player", "Player "));
+					}
+					Server.out[i].flush();
+				}
+				}
+			}
+		}
+	}
+	public static void describesP(Object s, int id) {
+		if (printing) {
+			for (int i = 0; i < Server.out.length; i++) {
+				if(Main.game.protags.get(i) != null) {
+				if(i != id && Main.game.protags.get(id).currentRoom == Main.game.protags.get(i).currentRoom) {
+					if(s.toString().contains("player" + i)) {
+						Server.out[i].println("[PRINT]" + s.toString().replace("the player" + i, "you"));
+					} else {
+						Server.out[i].println("[PRINT]" + s.toString().replace("the player", "Player "));
+					}
+					Server.out[i].flush();
+				}
+				}
+			}
+		}
+	}
+
 	public static void print(Object s) {
 		if (printing) {
 			printText(s.toString());
 		}
+
 	}
 
-	public static String readln() {
+	public static void readln() {
 		while (!Window.enterKeyPressed) {
 			try {
 				Thread.sleep(100);
@@ -46,14 +108,22 @@ public class Terminal {
 				e.printStackTrace();
 			}
 		}
+		try {
+			Thread.sleep(100);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		Window.enterKeyPressed = false;
 		TextFlow newFlow = new TextFlow();
 		newFlow.setPrefWidth(Window.root.getWidth() / 2);
 		Platform.runLater(() -> Window.stack.getChildren().add(newFlow));
 
 		flow = newFlow;
+Window.out.println(Window.s);
+		Window.out.flush();
+
 		printing = true;
-		return Window.s;
+		
 	}
 
 	public static void printText(String s) {

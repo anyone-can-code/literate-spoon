@@ -1,11 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package engine.things;
-
-import java.util.*;
 
 import engine.Engine;
 import engine.Terminal;
@@ -14,10 +7,6 @@ import engine.things.Player;
 import engine.things.Entity;
 import engine.things.Object;
 
-/**
- *
- * @author testtube24
- */
 public class Quest {
 	public String name;
 	public String description;
@@ -50,9 +39,9 @@ public class Quest {
 		}
 	}
 
-	public void run(Engine t, boolean print) {
+	public void run(Engine t, boolean print, Player protag) {
 		if (!found) {
-			f1: for (Object o : t.protag.inventory) {
+			f1: for (Object o : protag.inventory) {
 				if (o == target) {
 					found = true;
 					break;
@@ -71,9 +60,9 @@ public class Quest {
 		}
 	}
 
-	public void gaveObj(Engine t, Entity e, Object o) {
+	public void gaveObj(Engine t, Entity e, Object o, Player protag) {
 		if (!found) {
-			run(t, false);
+			run(t, false, protag);
 		}
 		if (found && e == giver && o == target) {
 			target = null;

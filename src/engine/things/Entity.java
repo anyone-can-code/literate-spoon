@@ -1,11 +1,13 @@
 package engine.things;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 import engine.Engine;
 import engine.OneParamFunc;
+import engine.Server;
 import engine.Terminal;
 import engine.TwoParamFunc;
 import engine.things.Object;
@@ -54,13 +56,15 @@ public class Entity extends Object {
 		}
 		Terminal.println("");
 		while (true) {
-			String str = Terminal.readln();
+			try {
+			String str = Server.in[p.id].readLine();
 			for (Map.Entry<String, OneParamFunc<Player>> entry : options.entrySet()) {
 				if (entry.getKey().equalsIgnoreCase(str)) {
 					entry.getValue().accept(p);
 					return;
 				}
 			}
+			} catch(IOException e) {e.printStackTrace();}
 			Terminal.println("Not a valid response.");
 		}
 	}
@@ -70,7 +74,7 @@ public class Entity extends Object {
 			attack(p);
 			return (Boolean) null;
 		}
-		if (initConversation != null && e.changedSurroundings) {
+		if (initConversation != null && p.changedSurroundings) {
 			Terminal.println(initConversation);
 			interaction.accept(p, e);
 		}

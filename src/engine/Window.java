@@ -4,10 +4,16 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Background;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.input.KeyCode;
+
+import java.io.*;
+import java.net.*;
+import java.util.Scanner;
+
 import javafx.animation.FadeTransition;
 import javafx.animation.TranslateTransition;
 import javafx.application.Application;
@@ -15,6 +21,7 @@ import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.TextField;
+import javafx.scene.effect.BlendMode;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import javafx.scene.text.Font;
@@ -23,6 +30,7 @@ import javafx.scene.text.TextFlow;
 import javafx.scene.shape.Line;
 import javafx.scene.paint.Paint;
 
+@SuppressWarnings("restriction")
 public class Window extends Application {
 	public static volatile boolean enterKeyPressed = false;
 	public static String s = "";
@@ -31,16 +39,46 @@ public class Window extends Application {
 	public static volatile VBox stack = new VBox();
 	public static volatile VBox map = new VBox();
 	public static volatile String enterStack = "";
-
+	public static PrintWriter out;
+	public static Scanner in;
+	public static int clientNumber;
+	
 	public static void main(String args[]) {
+		String serverName = "localhost";
+		int port = 4444;
+		try {
+			System.out.println("Connecting to " + serverName + " on port " + port);
+			Socket server = new Socket(serverName, port);
+			System.out.println("Just connected to " + server.getRemoteSocketAddress());
+			out = new PrintWriter(server.getOutputStream(), true);
+
+			InputStream inFromServer = server.getInputStream();
+			in = new Scanner(inFromServer);
+			clientNumber = Integer.parseInt(in.nextLine());
+			Thread t = new Thread() {
+				public void run() {
+					while(true) {
+						String s = in.nextLine();
+						if(s != "") {
+							if(s.contains("[PRINT]")) {
+								Terminal.print(s.replace("[PRINT]", ""));
+							} else if(s.contains("[PRINTLN]")) {
+								Terminal.println(s.replace("[PRINTLN]", ""));
+							}
+						}
+					}
+				}
+			};
+			t.start();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		launch(args);
 	}
 
-	@Override
 	public void start(Stage primaryStage) throws Exception {
-
 		Scene scene = new Scene(root, 600, 400);
-		primaryStage.setTitle("Text Adventure");
+		primaryStage.setTitle("Text Adventure: Client " + clientNumber);
 		primaryStage.setScene(scene);
 		primaryStage.show();
 		primaryStage.setOnCloseRequest(e -> System.exit(0));
@@ -49,6 +87,7 @@ public class Window extends Application {
 		map.setPadding(new Insets(10, 10, 10, 10));
 		map.setPrefWidth(root.getWidth() / 2 - 20);
 		TextField input = new TextField();
+		input.setBackground(Background.EMPTY);
 		input.setOnKeyReleased(new EventHandler<KeyEvent>() {
 			@Override
 			public void handle(KeyEvent ke) {
@@ -89,7 +128,10 @@ public class Window extends Application {
 		text.setFont(new Font(15));
 		map.getChildren().add(text);
 		map.getChildren().add(gp);
+		gp.setPrefHeight(root.getHeight());
 		map.setAlignment(Pos.CENTER);
+		gp.setAlignment(Pos.CENTER);
+
 		GridPane.setHgrow(gp, Priority.ALWAYS);
 		GridPane.setVgrow(gp, Priority.ALWAYS);
 		stack.heightProperty().addListener((obs, oldVal, newVal) -> {
@@ -119,14 +161,23 @@ public class Window extends Application {
 							ft.setToValue(1.0);
 							ft.play();
 						}
+
 					} catch (Exception e) {
 					}
 				}
 			}
+			
 		});
 		new Terminal();
-		Main m = new Main();
-		m.start();
+		
+		Thread t = new Thread() {
+			public void run() {
+				while(true) {
+					Terminal.readln();
+				}
+			}
+		};
+		t.start();
 	}
 
 }
