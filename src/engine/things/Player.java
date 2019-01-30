@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import engine.Engine;
 import engine.OneParamFunc;
 import engine.Room;
+import engine.TwoParamFunc;
 import engine.things.Object;
 
 public class Player extends Object {
@@ -24,7 +25,7 @@ public class Player extends Object {
 	public Object fist = new Object("[fist]", (String) null, null);
 	public Object rightHand = fist;
 	public Room roomCache;
-	public OneParamFunc<Engine> death;
+	public TwoParamFunc<Engine, ArrayList<Object>> death;
 	public boolean changedSurroundings = true;
 	public int id;
 

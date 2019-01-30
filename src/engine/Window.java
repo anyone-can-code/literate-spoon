@@ -17,9 +17,11 @@ import java.util.Scanner;
 import javafx.animation.FadeTransition;
 import javafx.animation.TranslateTransition;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.effect.BlendMode;
 import javafx.stage.Stage;
@@ -42,7 +44,7 @@ public class Window extends Application {
 	public static PrintWriter out;
 	public static Scanner in;
 	public static int clientNumber;
-	
+
 	public static void main(String args[]) {
 		String serverName = "localhost";
 		int port = 4444;
@@ -57,13 +59,22 @@ public class Window extends Application {
 			clientNumber = Integer.parseInt(in.nextLine());
 			Thread t = new Thread() {
 				public void run() {
-					while(true) {
+					while (true) {
 						String s = in.nextLine();
-						if(s != "") {
-							if(s.contains("[PRINT]")) {
+						if (s != "" && Terminal.printing) {
+							try {
+								int i = Integer.parseInt(s.substring(0, 1));
+								String[] strs = s.split(",");
+								Platform.runLater(() -> Window.gp.add(new Label(strs[2]),
+										Integer.parseInt(strs[0]), Integer.parseInt(strs[1])));
+							} catch(Exception e) {
+								if(s.contains("CLEARMAP")){
+									Platform.runLater(() -> Window.gp.getChildren().clear());
+								} else if (s.contains("[PRINT]")) {
 								Terminal.print(s.replace("[PRINT]", ""));
-							} else if(s.contains("[PRINTLN]")) {
+							} else if (s.contains("[PRINTLN]")) {
 								Terminal.println(s.replace("[PRINTLN]", ""));
+							}
 							}
 						}
 					}
@@ -166,13 +177,13 @@ public class Window extends Application {
 					}
 				}
 			}
-			
+
 		});
 		new Terminal();
-		
+
 		Thread t = new Thread() {
 			public void run() {
-				while(true) {
+				while (true) {
 					Terminal.readln();
 				}
 			}

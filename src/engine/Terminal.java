@@ -18,6 +18,7 @@ public class Terminal {
 	static boolean bold = false;
 	static boolean italic = false;
 	static boolean printing = true;
+	
 
 	public Terminal() {
 		flow.setPrefWidth(Window.stack.getWidth());
@@ -39,14 +40,12 @@ public class Terminal {
 	public static void sPrintln(Object s, int id) {
 		if (printing) {
 			Server.out[id].println("[PRINTLN]" + s.toString());
-			Server.out[id].flush();
 		}
 	}
 
 	public static void sPrint(Object s, int id) {
 		if (printing) {
 			Server.out[id].println("[PRINT]" + s.toString());
-			Server.out[id].flush();
 		}
 	}
 
@@ -109,7 +108,7 @@ public class Terminal {
 			}
 		}
 		try {
-			Thread.sleep(100);
+			Thread.sleep(500);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}

@@ -58,14 +58,16 @@ public class Entity extends Object {
 		Terminal.sPrintln("", p.id);
 		while (true) {
 			try {
-			String str = Server.in[p.id].readLine();
-			for (Map.Entry<String, OneParamFunc<Player>> entry : options.entrySet()) {
-				if (entry.getKey().equalsIgnoreCase(str)) {
-					entry.getValue().accept(p);
-					return;
+				String str = Server.in[p.id].readLine();
+				for (Map.Entry<String, OneParamFunc<Player>> entry : options.entrySet()) {
+					if (entry.getKey().equalsIgnoreCase(str)) {
+						entry.getValue().accept(p);
+						return;
+					}
 				}
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
-			} catch(IOException e) {e.printStackTrace();}
 			Terminal.println("Not a valid response.");
 		}
 	}
@@ -84,6 +86,7 @@ public class Entity extends Object {
 
 	public void attack(Player p) {
 		Terminal.sPrintln("The " + accessor + " attacks you.", p.id);
+		Terminal.describesPL("The " + accessor + " attacks the " + p.compSub, p.id);
 		p.health -= strength;
 	}
 }

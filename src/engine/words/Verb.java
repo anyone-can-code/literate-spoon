@@ -55,7 +55,8 @@ public class Verb extends Word {
 		}
 	}
 
-	public void perform(Object o1, Object o2, String prepUsed1, String prepUsed2, String joiningWord, Engine t, Player p) {
+	public void perform(Object o1, Object o2, String prepUsed1, String prepUsed2, String joiningWord, Engine t,
+			Player p) {
 		// Terminal.println(o + " : " + t);
 		try {
 			if (!joiningWord.equals(joinerWord)) {
@@ -65,7 +66,8 @@ public class Verb extends Word {
 		} catch (Exception e) {
 			Terminal.sPrintln(
 					"You cannot " + synonyms.get(0) + (prepUsed1.isEmpty() ? " the " : prepUsed1 + " ") + o1.accessor
-							+ " " + joiningWord + (prepUsed2.isEmpty() ? " the " : prepUsed2 + " ") + o2.accessor, p.id);
+							+ " " + joiningWord + (prepUsed2.isEmpty() ? " the " : prepUsed2 + " ") + o2.accessor,
+					p.id);
 		}
 	}
 }

@@ -3,6 +3,7 @@ package engine.words;
 import java.util.*;
 
 import engine.Engine;
+import engine.OneParamFuncReturn;
 import engine.things.Object;
 import engine.things.Player;
 
@@ -25,6 +26,20 @@ public class Word {
 		synonyms = new ArrayList<String>();
 		addSynonyms(list);
 		represents = o;
+	}
+	
+	public Word(String list, OneParamFuncReturn<Player> func) {
+		synonyms = new ArrayList<String>();
+		addSynonyms(list);
+		represents = func;
+	}
+	
+	public java.lang.Object accessPlayerSpecific(Player p) {
+		try {
+		return ((OneParamFuncReturn<Player>)represents).accept(p);
+		} catch(Exception e) {
+			return null;
+		}
 	}
 
 	public void perform(Word w, String prepUsed, Engine t, Player p) {

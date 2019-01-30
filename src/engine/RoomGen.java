@@ -82,7 +82,8 @@ public abstract class RoomGen {
 				});
 				basicActions.put("leave", (Player p1) -> {
 					Terminal.sPrintln(
-							"You start walking away.(1000)\n\nStop, the man says in a clear voice.(1000) He says something about the plot before lapsing into his insane mumblings.", p1.id);
+							"You start walking away.(1000)\n\nStop, the man says in a clear voice.(1000) He says something about the plot before lapsing into his insane mumblings.",
+							p1.id);
 				});
 				HashMap<String, OneParamFunc<Player>> h = new HashMap<String, OneParamFunc<Player>>();
 				h.put("speak louder", (Player p1) -> {
@@ -94,7 +95,8 @@ public abstract class RoomGen {
 					h1.put("kick him", (Player p2) -> {
 						e.anger = 20;
 						Terminal.sPrintln(
-								"His mouth curls into a feral smile, his head tilting sideways. The gaping hole of a mouth he has reveals his lack of teeth.(1000)\n\nYou suppose he's hungry.", p2.id);
+								"His mouth curls into a feral smile, his head tilting sideways. The gaping hole of a mouth he has reveals his lack of teeth.(1000)\n\nYou suppose he's hungry.",
+								p2.id);
 					});
 					basicActions.forEach(h1::putIfAbsent);
 					e.Dialogue(
@@ -206,12 +208,14 @@ public abstract class RoomGen {
 						} else {
 
 							Terminal.sPrintln(
-									"You say yes.(1000)\nWhen it asks where it is, your lie becomes apparent and you walk away, hopefully ashamed.", p.id);
+									"You say yes.(1000)\nWhen it asks where it is, your lie becomes apparent and you walk away, hopefully ashamed.",
+									p.id);
 						}
 					});
 					h.put("no", (Player p1) -> {
 						Terminal.sPrintln(
-								"You tell it no, and it asks you why you came here if you didn't have it. It was a rhetorical question, so you walk away.", p.id);
+								"You tell it no, and it asks you why you came here if you didn't have it. It was a rhetorical question, so you walk away.",
+								p.id);
 					});
 					e.Dialogue(
 							"With a soft, monotone noise, the box groans and asks you if you if you have the item it requested.",

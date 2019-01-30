@@ -69,11 +69,11 @@ public class Main extends Thread {
 								break;
 							}
 						}
-						/*Platform.runLater(() -> Window.gp.getChildren().clear());
+						Server.out[protag.id].println("CLEARMAP");
 						for (Room r : protag.currentRoom.fatherRoom.nestedMap) {
-							Platform.runLater(() -> Window.gp.add(new Label(protag.currentRoom == r ? "@" : "R"),
-									r.coords[0], r.coords[1]));
-						}*/
+							Server.out[protag.id].println(r.coords[0] + "," + r.coords[1] + "," + (protag.currentRoom == r ? "@" : "R"));
+						}
+						
 						for (Room r : cR.fatherRoom.nestedMap) {
 							if (x == r.coords[0] && y == r.coords[1]) {
 								protag.changedSurroundings = true;
@@ -91,7 +91,7 @@ public class Main extends Thread {
 						}
 					}
 					protag.currentRoom = currentRoom;
-					
+
 					Terminal.sPrintln("You can't move that way.", protag.id);
 
 					// protag.changePos(w.value);
@@ -138,7 +138,7 @@ public class Main extends Thread {
 				} else {
 					Terminal.sPrintln("You drank the " + o.accessor + ". Delicious.", protag.id);
 				}
-				Terminal.describesPL("He drinks a " + o.compSub, protag.id);
+				Terminal.describesPL("He drinks a " + o.compSub + ".", protag.id);
 				if (o.consumability == null) {
 					protag.currentRoom.objects.remove(o);
 					protag.inventory.remove(o);
@@ -151,14 +151,14 @@ public class Main extends Thread {
 			}
 		}));
 
-		game.addWord(new Verb("e inspect investigate examine scrutinize study observe look",
+		game.addWord(new Verb("inspect investigate examine scrutinize study observe look e",
 				(Word w, Engine t, Player protag) -> {
-					if (w.represents == protag.inventory) {
+					if (w.accessPlayerSpecific(protag) == (java.lang.Object)protag.inventory) {
 						Terminal.sPrintln("Try checking your inventory instead.", protag.id);
-					} else if (w.represents == protag.quests) {
+					} else if (w.accessPlayerSpecific(protag) == (java.lang.Object)protag.quests) {
 						Terminal.sPrintln("Try checking your quests instead.", protag.id);
-					} else if (w.represents == "room") {
-						t.inspectRoom(false, null, protag);
+					} else if (((String)w.represents).equals("room")) {
+						t.inspectRoom(false, protag.roomCache, protag);
 					}
 				}, (Object o, Engine t, Player protag) -> {
 					if (o.container.isEmpty()) {
@@ -221,8 +221,11 @@ public class Main extends Thread {
 						Terminal.sPrintln(t.uRandOf(new String[] { "A cry of pain greets your ears.",
 								"The sharp smell of blood fills the air.", "Something cracks.",
 								"A surge of adrenaline shoots through you." }), protag.id);
-						Terminal.describesPL(t.uRandOf(new String[] { "He strikes the " + o.compSub + " with an astounding force.",
-								"The sharp smell of blood fills the air as he hits the " + o.compSub, "He uses his " + protag.weapon.accessor + " to hit the " + o.compSub, }), protag.id);
+						Terminal.describesPL(
+								t.uRandOf(new String[] { "He strikes the " + o.compSub + " with an astounding force.",
+										"The sharp smell of blood fills the air as he hits the " + o.compSub + ".",
+										"He uses his " + protag.weapon.accessor + " to hit the " + o.compSub + ".", }),
+								protag.id);
 					}
 					// Terminal.sPrintln("You attacked the " + o.accessor + " with the " +
 					// protag.weapon.accessor + ".");
@@ -251,8 +254,11 @@ public class Main extends Thread {
 						Terminal.sPrintln(t.uRandOf(new String[] { "A cry of pain greets your ears.",
 								"The sharp smell of blood fills the air.", "Something cracks.",
 								"A surge of adrenaline shoots through you." }), protag.id);
-						Terminal.describesPL(t.uRandOf(new String[] { "He strikes the " + o.compSub + " with an astounding force.",
-								"The sharp smell of blood fills the air as he hits the " + o.compSub, "He uses his " + protag.weapon.accessor + " to hit the " + o.compSub, }), protag.id);
+						Terminal.describesPL(
+								t.uRandOf(new String[] { "He strikes the " + o.compSub + " with an astounding force.",
+										"The sharp smell of blood fills the air as he hits the " + o.compSub + ".",
+										"He uses his " + protag.weapon.accessor + " to hit the " + o.compSub + ".", }),
+								protag.id);
 					}
 
 				}, "with"));
@@ -339,14 +345,17 @@ public class Main extends Thread {
 								if (e.quest != null) {
 									e.quest.gaveObj(t, e, o, protag);
 								}
-								Terminal.describesPL("He gives a " + o.accessor + " to the " + receiver.accessor + ".", protag.id);
+								Terminal.describesPL("He gives a " + o.accessor + " to the " + receiver.accessor + ".",
+										protag.id);
 							} else if (receiver.getClass().toString().equals("class engine.things.Object")) {
 								receiver.container.add(o);
 								Terminal.sPrintln(
-										"If the " + receiver.accessor + " was alive, it would surely thank you.", protag.id);
-								Terminal.describesPL("He puts a " + o.accessor + " into the " + receiver.accessor, protag.id);
+										"If the " + receiver.accessor + " was alive, it would surely thank you.",
+										protag.id);
+								Terminal.describesPL("He puts a " + o.accessor + " into the " + receiver.accessor + ".",
+										protag.id);
 							}
-							
+
 							obj.remove();
 							break;
 						}
@@ -355,7 +364,7 @@ public class Main extends Thread {
 				}, "to"));
 
 		game.addWord(new Verb("view open check show", (Word n, Engine t, Player protag) -> {
-			if (n.represents == protag.inventory) {
+			if ((ArrayList<Object>)n.accessPlayerSpecific(protag) == protag.inventory) {
 				ArrayList<Object> realStuff = (ArrayList<Object>) protag.inventory.clone();
 				for (int i = 0; i < realStuff.size(); i++) {
 					if (realStuff.get(i).abstractObj) {
@@ -379,7 +388,7 @@ public class Main extends Thread {
 					}
 				}
 				Terminal.sPrintln(".", protag.id);
-			} else if (n.represents == protag.quests) {
+			} else if ((ArrayList<Quest>)n.accessPlayerSpecific(protag) == protag.quests) {
 				if (protag.quests.isEmpty()) {
 					Terminal.sPrint("You have no quests.", protag.id);
 				} else {
@@ -431,15 +440,16 @@ public class Main extends Thread {
 					: protag.literacy < 4 ? "You can barely read."
 							: protag.literacy < 6 ? "You're reading skills are so-so."
 									: protag.literacy < 8 ? "You can almost read perfectly."
-											: "You're an amazing reader.", protag.id);
+											: "You're an amazing reader.",
+					protag.id);
 
 		}));
 		// PLACEHOLDER FOR A REWRITTEN WORD-ACCESS-OBJECT FUNCTION
-		/*game.addWord(new Word("inventory", game.protags.get(0).inventory));
-		game.addWord(new Word("quests quest-log questlog", game.protags.get(0).quests));
+		game.addWord(new Word("inventory", (Player p) -> {return p.inventory;}));
+		game.addWord(new Word("quests quest-log questlog", (Player p) -> {return p.quests;}));
 		
-		game.addWord(new Word("self me myself player", game.protags.get(0)));
-		*/
+		game.addWord(new Word("self me myself player", (Player p) -> {return p;}));
+		
 		game.addWord(new Word("room area surroundings place around", "room"));
 
 		game.addWord(new Direction("north forwards forward ahead onward", "12"));
@@ -477,13 +487,15 @@ public class Main extends Thread {
 	}
 
 	public void run() {
-		for(int i = 0; i < game.protags.size(); i++) {
+		for (int i = 0; i < game.protags.size(); i++) {
 			final int b = i;
 			Thread t = new Thread() {
 				public void run() {
 					while (true) {
-						if(game.protags.get(b) != null) {
-						game.update(game.protags.get(b));
+						if (game.protags.get(b) != null) {
+							try {
+							game.update(game.protags.get(b));
+							} catch(Exception e) {}
 						}
 					}
 				}

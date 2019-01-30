@@ -28,6 +28,7 @@ public class Engine {
 	public ArrayList<Object> objectQueue = new ArrayList<Object>();
 	Random rand = new Random();
 	public Room startingRoom;
+
 	public Engine() {
 		// rooms = new ArrayList<Room>();
 		worldMap = new Room(0, 0, "The World of " + worldName);
@@ -267,7 +268,7 @@ public class Engine {
 					}
 				}
 			} catch (NullPointerException e) {
-				
+
 			}
 		}
 		if (!updated) {
@@ -341,20 +342,6 @@ public class Engine {
 							}
 						}
 						objectIt.remove();
-					} else if (o.getClass().getSimpleName().equals("Player")) {
-						Player p = (Player) o;
-						int s = objectQueue.size();
-						p.death.accept(this);
-						for (Object obj : p.inventory) {
-							if (objectQueue.size() != s) {
-								objectQueue.get(s).container.addAll(p.inventory);
-							} else {
-								obj.reference = protag.currentRoom.floor;
-								obj.description = "on";
-								objectQueue.add(obj);
-							}
-						}
-						objectIt.remove();
 					}
 				} else if (!o.alive && o.health <= 0) {
 					for (Object obj : o.container) {
@@ -364,7 +351,20 @@ public class Engine {
 				}
 			}
 		}
-
+		if (protag.health <= 0) {
+				int s = objectQueue.size();
+				protag.death.accept(this, objectQueue);
+				for (Object obj : protag.inventory) {
+					if (objectQueue.size() != s) {
+						objectQueue.get(s).container.addAll(protag.inventory);
+					} else {
+						obj.reference = protag.currentRoom.floor;
+						obj.description = "on";
+						objectQueue.add(obj);
+					}
+				}
+				protag.currentRoom.objects.remove(protag);
+		}
 		protag.currentRoom.objects.addAll(objectQueue);
 	}
 
@@ -379,34 +379,40 @@ public class Engine {
 		} catch (InterruptedException e1) {
 			e1.printStackTrace();
 		}
+		if(protag.health <= 90) {
 		Terminal.sPrintln("", protag.id);
+		}
+		runObjects(protag);
+		
 		Terminal.sPrintln(protag.health > 90 ? ""
 				: protag.health > 50 ? "You are feeling slightly injured."
 						: protag.health > 0 ? "You think that you might have some injuries, but you've forgotten where."
 								: "You have met your inevitable death a bit earlier than most.",
 				protag.id);
-		runObjects(protag);
+		
 		if (protag.health <= 0) {
 			protags.set(protag.id, null);
 			return;
 		}
 		try {
 			outerloop: while (true) {// repeats until valid command
-				
+
 				Terminal.sPrint("(1000)", protag.id);
 				if (protag.currentRoom != null) {
 					if (protag.changedSurroundings) {
 						inspectRoom(false, protag.roomCache, protag);
 						try {
-						for (int i = 0; i < Server.out.length; i++) {
-							if (protags.get(i).id != protag.id && protags.get(i).currentRoom == protag.currentRoom) {
-								Terminal.sPrintln("Player " + protag.id + " entered the room.", protags.get(i).id);
-							} else if (protags.get(i).id != protag.id
-									&& protags.get(i).currentRoom.coords == protag.roomCache.coords) {
-								Terminal.sPrintln("Player " + protag.id + " left the room.", protags.get(i).id);
+							for (int i = 0; i < Server.out.length; i++) {
+								if (protags.get(i).id != protag.id
+										&& protags.get(i).currentRoom == protag.currentRoom) {
+									Terminal.sPrintln("Player " + protag.id + " entered the room.", protags.get(i).id);
+								} else if (protags.get(i).id != protag.id
+										&& protags.get(i).currentRoom.coords == protag.roomCache.coords) {
+									Terminal.sPrintln("Player " + protag.id + " left the room.", protags.get(i).id);
+								}
 							}
+						} catch (NullPointerException e) {
 						}
-						} catch(NullPointerException e) {}
 					} else {
 						inspectRoom(true, protag.roomCache, protag);
 					}
@@ -420,7 +426,6 @@ public class Engine {
 					}
 				}
 				protag.changedSurroundings = false;
-				
 
 				while (!Server.in[protag.id].ready()) {
 					if (protag.health <= 0) {
@@ -428,6 +433,7 @@ public class Engine {
 					}
 				}
 				userText = Server.in[protag.id].readLine();
+				
 				if (userText.toLowerCase().contains("say")) {
 					Terminal.broadcast(new String[] { "You say", "He says" }, userText.replaceAll("(?i)say", "") + ".",
 							protag.id);
@@ -588,7 +594,10 @@ public class Engine {
 							if (w.represents == null) {
 								throw new NullPointerException();
 							}
-							o1 = (Object) w.represents;
+							o1 = (Object)((OneParamFuncReturn<Player>) w.represents).accept(protag);
+							if(o1 == null) {
+								throw new Exception();
+							}
 							foundObject = true;
 						} catch (Exception e) {
 							w1 = w;

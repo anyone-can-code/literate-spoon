@@ -4,6 +4,7 @@ import java.io.*;
 import java.net.*;
 import java.util.Scanner;
 
+import java.util.ArrayList;
 import engine.things.Object;
 import engine.things.Player;
 import engine.things.Object.type;
@@ -31,18 +32,20 @@ public class Server {
 
 				final int cN = clientNumber;
 				Player p = new Player(0, 0, cN);
-				p.setHealth(10);
+				p.setHealth(100);
 				p.injury = type.bruises;
 				p.currentRoom = Main.game.startingRoom;
 				p.currentRoom.objects.add(p);
 				p.roomCache = p.currentRoom.getClone();
-				p.death = (Engine e) -> {
-					Terminal.describesPL("Player " + p.id + " falls to the ground, his eyes staring wide open, his mouth open as if in surprise. He shudders before his body falls still, his eyes blank and unseeing.", p.id);
+				p.death = (Engine e, ArrayList<Object> objectQueue) -> {
+					Terminal.describesPL("Player " + p.id
+							+ " falls to the ground, his eyes staring wide open, his mouth open as if in surprise. He shudders before his body falls still, his eyes blank and unseeing.",
+							p.id);
 					Object obj = Engine.Consumable("dead [corpse]", "lying on", null, 10);
 					obj.injury = Object.type.bruises;
 					obj.holdable = null;
 					obj.reference = p.currentRoom.floor;
-					Main.game.objectQueue.add(obj);
+					objectQueue.add(obj);
 				};
 				Main.game.protags.add(p);
 				try {
