@@ -212,6 +212,7 @@ public class Main extends Thread {
 					if (o.alive) {
 						try {
 							Entity e = (Entity) o;
+							e.killer = protag;
 							if (e.anger < e.restraint) {
 								e.anger = e.restraint;
 							}

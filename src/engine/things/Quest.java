@@ -33,9 +33,9 @@ public class Quest {
 		if (!given) {
 			p.quests.add(this);
 			given = true;
-			Terminal.println("Quest added.");
+			Terminal.sPrintln("Quest added.", p.id);
 		} else {
-			Terminal.println("Quest already added.");
+			Terminal.sPrintln("Quest already added.", p.id);
 		}
 	}
 
@@ -55,8 +55,8 @@ public class Quest {
 			}
 
 			if (found && print)
-				Terminal.println(
-						"Return the " + target.accessor + " to the " + giver.accessor + " to receive a reward.");
+				Terminal.sPrintln(
+						"Return the " + target.accessor + " to the " + giver.accessor + " to receive a reward.", protag.id);
 		}
 	}
 
@@ -69,7 +69,7 @@ public class Quest {
 			if (reward != null) {
 				reward.accept(t, e);
 			} else {
-				Terminal.println("You receive nothing but gratitude for your troubles.");
+				Terminal.sPrintln("You receive nothing but gratitude for your troubles.", protag.id);
 			}
 			completed = true;
 		}

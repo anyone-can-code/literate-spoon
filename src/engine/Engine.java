@@ -330,7 +330,7 @@ public class Engine {
 					if (o.getClass().getSimpleName().equals("Entity")) {
 						Entity e = (Entity) o;
 						int s = objectQueue.size();
-						e.death.accept(this);
+						e.death.accept(this, e.killer);
 						for (Object obj : e.inventory) {
 							if (objectQueue.size() != s) {
 								objectQueue.get(s).container.addAll(e.inventory);

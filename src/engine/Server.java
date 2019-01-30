@@ -8,11 +8,9 @@ import engine.things.Object;
 import engine.things.Player;
 import engine.things.Object.type;
 
-
-//Server works
-//Fix entity conversations
-//Add presence notifiers for actions
-//Add ability to talk
+//Instructions:
+//refer to other person as just "player"
+//use "say" to converse
 
 public class Server {
 	static InputStream inFromClient;

@@ -32,12 +32,13 @@ public class Entity extends Object {
 	public Boolean talkedTo = false;
 	public ArrayList<String> knowledge = new ArrayList<String>();
 	public ArrayList<Object> inventory = new ArrayList<Object>();
-	public OneParamFunc<Engine> death;
+	public TwoParamFunc<Engine, Player> death;
+	public Player killer;
 	public TwoParamFunc<Player, Engine> interaction;
 	public Quest quest = null;
 	public TwoParamFunc<Player, Engine> repeatInteraction;
 
-	public Entity(String compSub, String description, OneParamFunc<Engine> death) {
+	public Entity(String compSub, String description, TwoParamFunc<Engine, Player> death) {
 		super(compSub, description, null);
 		this.accessor = compSub.substring(compSub.indexOf("[") + 1, compSub.indexOf("]"));
 		this.compSub = compSub.replace("[", "").replace("]", "");
@@ -50,11 +51,11 @@ public class Entity extends Object {
 
 	public void Dialogue(String statement, HashMap<String, OneParamFunc<Player>> options, Player p) {
 		boolean b = interactable;
-		Terminal.print(statement);
+		Terminal.sPrint(statement, p.id);
 		for (Map.Entry<String, OneParamFunc<Player>> entry : options.entrySet()) {
-			Terminal.print(" [" + entry.getKey() + "]");
+			Terminal.sPrint(" [" + entry.getKey() + "]", p.id);
 		}
-		Terminal.println("");
+		Terminal.sPrintln("", p.id);
 		while (true) {
 			try {
 			String str = Server.in[p.id].readLine();
@@ -75,14 +76,14 @@ public class Entity extends Object {
 			return (Boolean) null;
 		}
 		if (initConversation != null && p.changedSurroundings) {
-			Terminal.println(initConversation);
+			Terminal.sPrintln(initConversation, p.id);
 			interaction.accept(p, e);
 		}
 		return true;
 	}
 
 	public void attack(Player p) {
-		Terminal.println("The " + accessor + " attacks you.");
+		Terminal.sPrintln("The " + accessor + " attacks you.", p.id);
 		p.health -= strength;
 	}
 }

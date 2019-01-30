@@ -21,7 +21,7 @@ public class Effect {
 	public void affect(Player p) {
 		f.accept(p);
 		if (rand.nextInt(5) == 0) {
-			Terminal.println("You are feeling " + quality + ".");
+			Terminal.sPrintln("You are feeling " + quality + ".", p.id);
 		}
 		lifetime--;
 	}

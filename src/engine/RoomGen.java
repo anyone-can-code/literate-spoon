@@ -65,8 +65,8 @@ public abstract class RoomGen {
 		o.reference = reference;
 		start.objects.add(o);
 		if (true) {
-			Entity e = new Entity("old [man]", "standing in front of", (Engine e2) -> {
-				Terminal.println("The old man dies. He leaves you a corpse as a parting gift.");
+			Entity e = new Entity("old [man]", "standing in front of", (Engine e2, Player p) -> {
+				Terminal.sPrintln("The old man dies. He leaves you a corpse as a parting gift.", p.id);
 				Object obj = Engine.Consumable("dead [corpse]", "lying on", null, 10);
 				obj.injury = Object.type.bruises;
 				obj.holdable = null;
@@ -78,23 +78,23 @@ public abstract class RoomGen {
 			e.interaction = (Player p, Engine eng) -> {
 				HashMap<String, OneParamFunc<Player>> basicActions = new HashMap<String, OneParamFunc<Player>>();
 				basicActions.put("insult him", (Player p1) -> {
-					Terminal.println("He does not respond to your insult.");
+					Terminal.sPrintln("He does not respond to your insult.", p1.id);
 				});
 				basicActions.put("leave", (Player p1) -> {
-					Terminal.println(
-							"You start walking away.(1000)\n\nStop, the man says in a clear voice.(1000) He says something about the plot before lapsing into his insane mumblings.");
+					Terminal.sPrintln(
+							"You start walking away.(1000)\n\nStop, the man says in a clear voice.(1000) He says something about the plot before lapsing into his insane mumblings.", p1.id);
 				});
 				HashMap<String, OneParamFunc<Player>> h = new HashMap<String, OneParamFunc<Player>>();
 				h.put("speak louder", (Player p1) -> {
 					HashMap<String, OneParamFunc<Player>> h1 = new HashMap<String, OneParamFunc<Player>>();
 					h1.put("repeat question", (Player p2) -> {
-						Terminal.println("You ask again.(2000)\n\nThere is silence. Nothing more.");
+						Terminal.sPrintln("You ask again.(2000)\n\nThere is silence. Nothing more.", p2.id);
 						e.Dialogue("He does not respond to your presence.", h1, p1);
 					});
 					h1.put("kick him", (Player p2) -> {
 						e.anger = 20;
-						Terminal.println(
-								"His mouth curls into a feral smile, his head tilting sideways. The gaping hole of a mouth he has reveals his lack of teeth.(1000)\n\nYou suppose he's hungry.");
+						Terminal.sPrintln(
+								"His mouth curls into a feral smile, his head tilting sideways. The gaping hole of a mouth he has reveals his lack of teeth.(1000)\n\nYou suppose he's hungry.", p2.id);
 					});
 					basicActions.forEach(h1::putIfAbsent);
 					e.Dialogue(
@@ -113,10 +113,10 @@ public abstract class RoomGen {
 			e.repeatInteraction = (Player p, Engine eng) -> {
 				HashMap<String, OneParamFunc<Player>> basicActions = new HashMap<String, OneParamFunc<Player>>();
 				basicActions.put("insult him", (Player p1) -> {
-					Terminal.println("He does not respond to your insult.");
+					Terminal.sPrintln("He does not respond to your insult.", p1.id);
 				});
 				basicActions.put("leave", (Player p1) -> {
-					Terminal.println("You walk away, your presence unnoticed.");
+					Terminal.sPrintln("You walk away, your presence unnoticed.", p1.id);
 				});
 				HashMap<String, OneParamFunc<Player>> h = new HashMap<String, OneParamFunc<Player>>();
 
@@ -167,8 +167,8 @@ public abstract class RoomGen {
 		r = new Room(0, 0,
 				"(B)A Small Grove(B)\n(1000)Tall, yellow blades of grass sway in the light breeze. The clouds are a dark grey, twisting in turmoil, a storm on its way.");
 		if (true) {
-			Entity e = new Entity("shiny metal [box]", "fixed in the", (Engine e2) -> {
-				Terminal.println("You killed a lifeless chunk of metal. Anger issues?");
+			Entity e = new Entity("shiny metal [box]", "fixed in the", (Engine e2, Player p) -> {
+				Terminal.sPrintln("You killed a lifeless chunk of metal. Anger issues?", p.id);
 			});
 			e.inspection = "the box is securely attached to the ground. You'll never be able to move it. The box also seems to have a rusty speaker on its side";
 			e.reference = new Object("[ground]", e, null);
@@ -184,14 +184,14 @@ public abstract class RoomGen {
 						e.quest.giveTo(p);
 					});
 					h1.put("no", (Player p2) -> {
-						Terminal.println("The old box tries to shed a tear.");
+						Terminal.sPrintln("The old box tries to shed a tear.", p2.id);
 					});
 					e.Dialogue("The box asks for a water bottle so it doesn't have to suffer eternity. Accept quest?",
 							h1, p1);
 				});
 				h.put("no", (Player p1) -> {
-					Terminal.println(
-							"You walk away. The box keeps its static expression, but it seems more sorrowful.");
+					Terminal.sPrintln(
+							"You walk away. The box keeps its static expression, but it seems more sorrowful.", p.id);
 					e.anger += 20;
 				});
 				e.Dialogue("With a soft, monotone noise, the box groans and asks you for help. Help it?", h, p);
@@ -205,20 +205,20 @@ public abstract class RoomGen {
 							e.quest.gaveObj(eng, e, e.quest.target, p);
 						} else {
 
-							Terminal.println(
-									"You say yes.(1000)\nWhen it asks where it is, your lie becomes apparent and you walk away, hopefully ashamed.");
+							Terminal.sPrintln(
+									"You say yes.(1000)\nWhen it asks where it is, your lie becomes apparent and you walk away, hopefully ashamed.", p.id);
 						}
 					});
 					h.put("no", (Player p1) -> {
-						Terminal.println(
-								"You tell it no, and it asks you why you came here if you didn't have it. It was a rhetorical question, so you walk away.");
+						Terminal.sPrintln(
+								"You tell it no, and it asks you why you came here if you didn't have it. It was a rhetorical question, so you walk away.", p.id);
 					});
 					e.Dialogue(
 							"With a soft, monotone noise, the box groans and asks you if you if you have the item it requested.",
 							h, p);
 				} else {
-					e.death = (Engine t) -> {
-						Terminal.println("The box creaks out a 'thank you' before shutting back off.");
+					e.death = (Engine t, Player p1) -> {
+						Terminal.sPrintln("The box creaks out a 'thank you' before shutting back off.", p1.id);
 						Object obj = new Object(e.compSub, e.description, null);
 						obj.holdable = false;
 						obj.consumability = null;
