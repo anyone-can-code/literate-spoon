@@ -71,9 +71,10 @@ public class Main extends Thread {
 						}
 						Server.out[protag.id].println("CLEARMAP");
 						for (Room r : protag.currentRoom.fatherRoom.nestedMap) {
-							Server.out[protag.id].println(r.coords[0] + "," + r.coords[1] + "," + (protag.currentRoom == r ? "@" : "R"));
+							Server.out[protag.id].println(
+									r.coords[0] + "," + r.coords[1] + "," + (protag.currentRoom == r ? "@" : "R"));
 						}
-						
+
 						for (Room r : cR.fatherRoom.nestedMap) {
 							if (x == r.coords[0] && y == r.coords[1]) {
 								protag.changedSurroundings = true;
@@ -153,11 +154,11 @@ public class Main extends Thread {
 
 		game.addWord(new Verb("inspect investigate examine scrutinize study observe look e",
 				(Word w, Engine t, Player protag) -> {
-					if (w.accessPlayerSpecific(protag) == (java.lang.Object)protag.inventory) {
+					if (w.accessPlayerSpecific(protag) == (java.lang.Object) protag.inventory) {
 						Terminal.sPrintln("Try checking your inventory instead.", protag.id);
-					} else if (w.accessPlayerSpecific(protag) == (java.lang.Object)protag.quests) {
+					} else if (w.accessPlayerSpecific(protag) == (java.lang.Object) protag.quests) {
 						Terminal.sPrintln("Try checking your quests instead.", protag.id);
-					} else if (((String)w.represents).equals("room")) {
+					} else if (((String) w.represents).equals("room")) {
 						t.inspectRoom(false, protag.roomCache, protag);
 					}
 				}, (Object o, Engine t, Player protag) -> {
@@ -364,7 +365,7 @@ public class Main extends Thread {
 				}, "to"));
 
 		game.addWord(new Verb("view open check show", (Word n, Engine t, Player protag) -> {
-			if ((ArrayList<Object>)n.accessPlayerSpecific(protag) == protag.inventory) {
+			if ((ArrayList<Object>) n.accessPlayerSpecific(protag) == protag.inventory) {
 				ArrayList<Object> realStuff = (ArrayList<Object>) protag.inventory.clone();
 				for (int i = 0; i < realStuff.size(); i++) {
 					if (realStuff.get(i).abstractObj) {
@@ -388,7 +389,7 @@ public class Main extends Thread {
 					}
 				}
 				Terminal.sPrintln(".", protag.id);
-			} else if ((ArrayList<Quest>)n.accessPlayerSpecific(protag) == protag.quests) {
+			} else if ((ArrayList<Quest>) n.accessPlayerSpecific(protag) == protag.quests) {
 				if (protag.quests.isEmpty()) {
 					Terminal.sPrint("You have no quests.", protag.id);
 				} else {
@@ -445,11 +446,17 @@ public class Main extends Thread {
 
 		}));
 		// PLACEHOLDER FOR A REWRITTEN WORD-ACCESS-OBJECT FUNCTION
-		game.addWord(new Word("inventory", (Player p) -> {return p.inventory;}));
-		game.addWord(new Word("quests quest-log questlog", (Player p) -> {return p.quests;}));
-		
-		game.addWord(new Word("self me myself player", (Player p) -> {return p;}));
-		
+		game.addWord(new Word("inventory", (Player p) -> {
+			return p.inventory;
+		}));
+		game.addWord(new Word("quests quest-log questlog", (Player p) -> {
+			return p.quests;
+		}));
+
+		game.addWord(new Word("self me myself player", (Player p) -> {
+			return p;
+		}));
+
 		game.addWord(new Word("room area surroundings place around", "room"));
 
 		game.addWord(new Direction("north forwards forward ahead onward", "12"));
@@ -494,8 +501,9 @@ public class Main extends Thread {
 					while (true) {
 						if (game.protags.get(b) != null) {
 							try {
-							game.update(game.protags.get(b));
-							} catch(Exception e) {}
+								game.update(game.protags.get(b));
+							} catch (Exception e) {
+							}
 						}
 					}
 				}

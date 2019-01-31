@@ -27,17 +27,17 @@ public class Word {
 		addSynonyms(list);
 		represents = o;
 	}
-	
+
 	public Word(String list, OneParamFuncReturn<Player> func) {
 		synonyms = new ArrayList<String>();
 		addSynonyms(list);
 		represents = func;
 	}
-	
+
 	public java.lang.Object accessPlayerSpecific(Player p) {
 		try {
-		return ((OneParamFuncReturn<Player>)represents).accept(p);
-		} catch(Exception e) {
+			return ((OneParamFuncReturn<Player>) represents).accept(p);
+		} catch (Exception e) {
 			return null;
 		}
 	}

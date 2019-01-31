@@ -18,7 +18,6 @@ public class Terminal {
 	static boolean bold = false;
 	static boolean italic = false;
 	static boolean printing = true;
-	
 
 	public Terminal() {
 		flow.setPrefWidth(Window.stack.getWidth());
@@ -52,41 +51,43 @@ public class Terminal {
 	public static void broadcast(String[] intro, Object s, int id) {
 		if (printing) {
 			for (int i = 0; i < Server.out.length; i++) {
-				if(Main.game.protags.get(i) != null) {
-				Server.out[i].println("[PRINTLN]" + intro[i == id ? 0 : 1] + s.toString());
-				Server.out[i].flush();
+				if (Main.game.protags.get(i) != null) {
+					Server.out[i].println("[PRINTLN]" + intro[i == id ? 0 : 1] + s.toString());
+					Server.out[i].flush();
 				}
 			}
 		}
 	}
+
 	public static void describesPL(Object s, int id) {
 		if (printing) {
 			for (int i = 0; i < Server.out.length; i++) {
-				if(Main.game.protags.get(i) != null) {
-				if(i != id && Main.game.protags.get(id).currentRoom == Main.game.protags.get(i).currentRoom) {
-					if(s.toString().contains("player" + i)) {
-						Server.out[i].println("[PRINTLN]" + s.toString().replace("the player" + i, "you"));
-					} else {
-						Server.out[i].println("[PRINTLN]" + s.toString().replace("the player", "Player "));
+				if (Main.game.protags.get(i) != null) {
+					if (i != id && Main.game.protags.get(id).currentRoom == Main.game.protags.get(i).currentRoom) {
+						if (s.toString().contains("player" + i)) {
+							Server.out[i].println("[PRINTLN]" + s.toString().replace("the player" + i, "you"));
+						} else {
+							Server.out[i].println("[PRINTLN]" + s.toString().replace("the player", "Player "));
+						}
+						Server.out[i].flush();
 					}
-					Server.out[i].flush();
-				}
 				}
 			}
 		}
 	}
+
 	public static void describesP(Object s, int id) {
 		if (printing) {
 			for (int i = 0; i < Server.out.length; i++) {
-				if(Main.game.protags.get(i) != null) {
-				if(i != id && Main.game.protags.get(id).currentRoom == Main.game.protags.get(i).currentRoom) {
-					if(s.toString().contains("player" + i)) {
-						Server.out[i].println("[PRINT]" + s.toString().replace("the player" + i, "you"));
-					} else {
-						Server.out[i].println("[PRINT]" + s.toString().replace("the player", "Player "));
+				if (Main.game.protags.get(i) != null) {
+					if (i != id && Main.game.protags.get(id).currentRoom == Main.game.protags.get(i).currentRoom) {
+						if (s.toString().contains("player" + i)) {
+							Server.out[i].println("[PRINT]" + s.toString().replace("the player" + i, "you"));
+						} else {
+							Server.out[i].println("[PRINT]" + s.toString().replace("the player", "Player "));
+						}
+						Server.out[i].flush();
 					}
-					Server.out[i].flush();
-				}
 				}
 			}
 		}
@@ -118,11 +119,11 @@ public class Terminal {
 		Platform.runLater(() -> Window.stack.getChildren().add(newFlow));
 
 		flow = newFlow;
-Window.out.println(Window.s);
+		Window.out.println(Window.s);
 		Window.out.flush();
 
 		printing = true;
-		
+
 	}
 
 	public static void printText(String s) {

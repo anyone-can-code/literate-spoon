@@ -3,6 +3,7 @@ package engine;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.input.KeyEvent;
+import javafx.event.ActionEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.GridPane;
@@ -10,6 +11,9 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.input.KeyCode;
 
+import javafx.scene.control.Button;
+
+import java.awt.RenderingHints.Key;
 import java.io.*;
 import java.net.*;
 import java.util.Scanner;
@@ -46,58 +50,195 @@ public class Window extends Application {
 	public static int clientNumber;
 
 	public static void main(String args[]) {
-		String serverName = "localhost";
-		int port = 4444;
-		try {
-			System.out.println("Connecting to " + serverName + " on port " + port);
-			Socket server = new Socket(serverName, port);
-			System.out.println("Just connected to " + server.getRemoteSocketAddress());
-			out = new PrintWriter(server.getOutputStream(), true);
-
-			InputStream inFromServer = server.getInputStream();
-			in = new Scanner(inFromServer);
-			clientNumber = Integer.parseInt(in.nextLine());
-			Thread t = new Thread() {
-				public void run() {
-					while (true) {
-						String s = in.nextLine();
-						if (s != "" && Terminal.printing) {
-							try {
-								int i = Integer.parseInt(s.substring(0, 1));
-								String[] strs = s.split(",");
-								Platform.runLater(() -> Window.gp.add(new Label(strs[2]),
-										Integer.parseInt(strs[0]), Integer.parseInt(strs[1])));
-							} catch(Exception e) {
-								if(s.contains("CLEARMAP")){
-									Platform.runLater(() -> Window.gp.getChildren().clear());
-								} else if (s.contains("[PRINT]")) {
-								Terminal.print(s.replace("[PRINT]", ""));
-							} else if (s.contains("[PRINTLN]")) {
-								Terminal.println(s.replace("[PRINTLN]", ""));
-							}
-							}
-						}
-					}
-				}
-			};
-			t.start();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 		launch(args);
 	}
 
+	Scene scene = new Scene(root, 600, 400);
+	public static AnchorPane priorRoot = new AnchorPane();
+	Scene priorScene = new Scene(priorRoot, 600, 400);
+
 	public void start(Stage primaryStage) throws Exception {
-		Scene scene = new Scene(root, 600, 400);
-		primaryStage.setTitle("Text Adventure: Client " + clientNumber);
-		primaryStage.setScene(scene);
+		primaryStage.setScene(priorScene);
 		primaryStage.show();
 		primaryStage.setOnCloseRequest(e -> System.exit(0));
+		Button b1 = new Button("Join");
+		b1.setPrefWidth(100);
+		Button b2 = new Button("Host");
+		b2.setPrefWidth(100);
+		
+		Label label = new Label("Literate Spoon");
+		label.setFont(Font.font("Helvetica", 30));
+		priorRoot.getChildren().add(label);
+		label.setTranslateX(priorScene.getWidth()/2 - 100);
+		label.setTranslateY(priorScene.getHeight()/2 - 10);
+		b1.setOnAction(new EventHandler<ActionEvent>() {
+			public void handle(ActionEvent e) {
+				priorRoot.getChildren().clear();
+				TextField input = new TextField();
+				priorRoot.getChildren().add(input);
+				input.setFocusTraversable(false);
+				input.prefWidth(100);
+				input.prefHeight(30);
+				input.setPromptText("IP number here");
+				input.setTranslateX(priorScene.getWidth()/2 - 75);
+				input.setTranslateY(priorScene.getHeight()/2 - input.getPrefHeight()/2 - 15);
+				TextField input2 = new TextField();
+				priorRoot.getChildren().add(input2);
+				input2.setFocusTraversable(false);
+				input2.prefWidth(100);
+				input2.prefHeight(30);
+				input2.setPromptText("Port number here");
+				input2.setTranslateX(priorScene.getWidth()/2 - 75);
+				input2.setTranslateY(priorScene.getHeight()/2 - input.getPrefHeight()/2 + 15);
+				input2.setOnKeyReleased(new EventHandler<KeyEvent>() {
+					@Override
+					public void handle(KeyEvent ke) {
+						if (ke.getCode().equals(KeyCode.ENTER)) {
+							try {
+								int i = Integer.parseInt(input2.getText());
+								String serverName = input.getText();
+								int port = i;
+								try {
+									System.out.println("Connecting to " + serverName + " on port " + port);
+									Socket server = new Socket(serverName, port);
+									System.out.println("Just connected to " + server.getRemoteSocketAddress());
+									out = new PrintWriter(server.getOutputStream(), true);
+
+									InputStream inFromServer = server.getInputStream();
+									in = new Scanner(inFromServer);
+									clientNumber = Integer.parseInt(in.nextLine());
+									Thread t = new Thread() {
+										public void run() {
+											while (true) {
+												String s = in.nextLine();
+												if (s != "" && Terminal.printing) {
+													try {
+														int i = Integer.parseInt(s.substring(0, 1));
+														String[] strs = s.split(",");
+														Platform.runLater(() -> Window.gp.add(new Label(strs[2]),
+																Integer.parseInt(strs[0]), Integer.parseInt(strs[1])));
+													} catch (Exception e) {
+														if (s.contains("CLEARMAP")) {
+															Platform.runLater(() -> Window.gp.getChildren().clear());
+														} else if (s.contains("[PRINT]")) {
+															Terminal.print(s.replace("[PRINT]", ""));
+														} else if (s.contains("[PRINTLN]")) {
+															Terminal.println(s.replace("[PRINTLN]", ""));
+														}
+													}
+												}
+											}
+										}
+									};
+									t.start();
+									primaryStage.setTitle("Text Adventure: Client " + clientNumber);
+									primaryStage.setScene(scene);
+								} catch (IOException e1) {
+									e1.printStackTrace();
+								}
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
+					}
+				});
+			}
+
+		});
+		b2.setOnAction(new EventHandler<ActionEvent>() {
+			public void handle(ActionEvent e) {
+				priorRoot.getChildren().clear();
+				TextField input = new TextField();
+				priorRoot.getChildren().add(input);
+				input.setFocusTraversable(false);
+				input.prefWidth(100);
+				input.prefHeight(30);
+				input.setPromptText("Port number here");
+				input.setTranslateX(priorScene.getWidth()/2 - 75);
+				input.setTranslateY(priorScene.getHeight()/2 - input.getPrefHeight()/2);
+				input.setOnKeyReleased(new EventHandler<KeyEvent>() {
+					@Override
+					public void handle(KeyEvent ke) {
+						if (ke.getCode().equals(KeyCode.ENTER)) {
+							String serverName = "localhost";
+							try {
+								serverName = Inet4Address.getLocalHost().getHostAddress();
+							} catch (UnknownHostException e1) {
+								e1.printStackTrace();
+							}
+							int port = Integer.parseInt(input.getText());
+							Thread thr = new Thread() {
+								public void run() {
+									Server.main(new String[] { input.getText() });
+								}
+							};
+							thr.start();
+							try {
+								Thread.sleep(1000);
+							} catch (InterruptedException e2) {
+								e2.printStackTrace();
+							}
+							try {
+								System.out.println("Connecting to " + serverName + " on port " + port);
+								Socket server = new Socket(serverName, port);
+								System.out.println("Just connected to " + server.getRemoteSocketAddress());
+								out = new PrintWriter(server.getOutputStream(), true);
+
+								InputStream inFromServer = server.getInputStream();
+								in = new Scanner(inFromServer);
+								clientNumber = Integer.parseInt(in.nextLine());
+								Thread t = new Thread() {
+									public void run() {
+										while (true) {
+											String s = in.nextLine();
+											if (s != "" && Terminal.printing) {
+												try {
+													int i = Integer.parseInt(s.substring(0, 1));
+													String[] strs = s.split(",");
+													Platform.runLater(() -> Window.gp.add(new Label(strs[2]),
+															Integer.parseInt(strs[0]), Integer.parseInt(strs[1])));
+												} catch (Exception e) {
+													if (s.contains("CLEARMAP")) {
+														Platform.runLater(() -> Window.gp.getChildren().clear());
+													} else if (s.contains("[PRINT]")) {
+														Terminal.print(s.replace("[PRINT]", ""));
+													} else if (s.contains("[PRINTLN]")) {
+														Terminal.println(s.replace("[PRINTLN]", ""));
+													}
+												}
+											}
+										}
+									}
+								};
+								t.start();
+								primaryStage.setTitle("Text Adventure: Client " + clientNumber + ", Hosting at " + serverName);
+								primaryStage.setScene(scene);
+							} catch (IOException e1) {
+								e1.printStackTrace();
+							}
+						}
+					}
+				});
+			}
+		});
+		priorRoot.setPrefWidth(100);
+		priorRoot.setPrefHeight(500);
+		priorRoot.getChildren().add(b1);
+		b1.setTranslateX(scene.getWidth() / 2 - b1.getPrefWidth() / 2);
+		AnchorPane.setTopAnchor(b1, 100.0);
+		priorRoot.getChildren().add(b2);
+		b2.setTranslateX(scene.getWidth() / 2 - b2.getPrefWidth() / 2);
+		AnchorPane.setBottomAnchor(b2, 100.0);
+		
+
+		
 		stack.setPadding(new Insets(10, 10, 10, 10));
 		stack.setPrefWidth(root.getWidth() / 2 - 20);
 		map.setPadding(new Insets(10, 10, 10, 10));
 		map.setPrefWidth(root.getWidth() / 2 - 20);
 		TextField input = new TextField();
+		input.setFocusTraversable(false);
+		input.setPromptText("Insert action here");
 		input.setBackground(Background.EMPTY);
 		input.setOnKeyReleased(new EventHandler<KeyEvent>() {
 			@Override

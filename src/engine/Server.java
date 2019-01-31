@@ -20,7 +20,7 @@ public class Server {
 
 	public static void main(String[] args) {
 		Main main = new Main();
-		int port = 4444;
+		int port = Integer.parseInt(args[0]);
 
 		try (ServerSocket serverSocket = new ServerSocket(port)) {
 			System.out.println("Server is listening on port " + port);

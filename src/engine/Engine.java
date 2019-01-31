@@ -352,18 +352,18 @@ public class Engine {
 			}
 		}
 		if (protag.health <= 0) {
-				int s = objectQueue.size();
-				protag.death.accept(this, objectQueue);
-				for (Object obj : protag.inventory) {
-					if (objectQueue.size() != s) {
-						objectQueue.get(s).container.addAll(protag.inventory);
-					} else {
-						obj.reference = protag.currentRoom.floor;
-						obj.description = "on";
-						objectQueue.add(obj);
-					}
+			int s = objectQueue.size();
+			protag.death.accept(this, objectQueue);
+			for (Object obj : protag.inventory) {
+				if (objectQueue.size() != s) {
+					objectQueue.get(s).container.addAll(protag.inventory);
+				} else {
+					obj.reference = protag.currentRoom.floor;
+					obj.description = "on";
+					objectQueue.add(obj);
 				}
-				protag.currentRoom.objects.remove(protag);
+			}
+			protag.currentRoom.objects.remove(protag);
 		}
 		protag.currentRoom.objects.addAll(objectQueue);
 	}
@@ -379,17 +379,17 @@ public class Engine {
 		} catch (InterruptedException e1) {
 			e1.printStackTrace();
 		}
-		if(protag.health <= 90) {
-		Terminal.sPrintln("", protag.id);
+		if (protag.health <= 90) {
+			Terminal.sPrintln("", protag.id);
 		}
 		runObjects(protag);
-		
+
 		Terminal.sPrintln(protag.health > 90 ? ""
 				: protag.health > 50 ? "You are feeling slightly injured."
 						: protag.health > 0 ? "You think that you might have some injuries, but you've forgotten where."
 								: "You have met your inevitable death a bit earlier than most.",
 				protag.id);
-		
+
 		if (protag.health <= 0) {
 			protags.set(protag.id, null);
 			return;
@@ -433,7 +433,7 @@ public class Engine {
 					}
 				}
 				userText = Server.in[protag.id].readLine();
-				
+
 				if (userText.toLowerCase().contains("say")) {
 					Terminal.broadcast(new String[] { "You say", "He says" }, userText.replaceAll("(?i)say", "") + ".",
 							protag.id);
@@ -594,8 +594,8 @@ public class Engine {
 							if (w.represents == null) {
 								throw new NullPointerException();
 							}
-							o1 = (Object)((OneParamFuncReturn<Player>) w.represents).accept(protag);
-							if(o1 == null) {
+							o1 = (Object) ((OneParamFuncReturn<Player>) w.represents).accept(protag);
+							if (o1 == null) {
 								throw new Exception();
 							}
 							foundObject = true;
