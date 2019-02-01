@@ -25,7 +25,7 @@ public class Player extends Object {
 	public Object fist = new Object("[fist]", (String) null, null);
 	public Object rightHand = fist;
 	public Room roomCache;
-	public TwoParamFunc<Engine, ArrayList<Object>> death;
+	public OneParamFunc<Engine> death;
 	public boolean changedSurroundings = true;
 	public int id;
 

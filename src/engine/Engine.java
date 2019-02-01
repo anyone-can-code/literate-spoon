@@ -332,10 +332,10 @@ public class Engine {
 						Entity e = (Entity) o;
 						int s = objectQueue.size();
 						e.death.accept(this, e.killer);
-						for (Object obj : e.inventory) {
-							if (objectQueue.size() != s) {
-								objectQueue.get(s).container.addAll(e.inventory);
-							} else {
+						if (objectQueue.size() != s) {
+							objectQueue.get(s).container.addAll(e.inventory);
+						} else {
+							for (Object obj : e.inventory) {
 								obj.reference = protag.currentRoom.floor;
 								obj.description = "on";
 								objectQueue.add(obj);
@@ -353,16 +353,8 @@ public class Engine {
 		}
 		if (protag.health <= 0) {
 			int s = objectQueue.size();
-			protag.death.accept(this, objectQueue);
-			for (Object obj : protag.inventory) {
-				if (objectQueue.size() != s) {
-					objectQueue.get(s).container.addAll(protag.inventory);
-				} else {
-					obj.reference = protag.currentRoom.floor;
-					obj.description = "on";
-					objectQueue.add(obj);
-				}
-			}
+			protag.death.accept(this);
+			objectQueue.get(s).container.addAll(protag.inventory);
 			protag.currentRoom.objects.remove(protag);
 		}
 		protag.currentRoom.objects.addAll(objectQueue);

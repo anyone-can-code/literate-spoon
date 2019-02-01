@@ -37,7 +37,7 @@ public class Server {
 				p.currentRoom = Main.game.startingRoom;
 				p.currentRoom.objects.add(p);
 				p.roomCache = p.currentRoom.getClone();
-				p.death = (Engine e, ArrayList<Object> objectQueue) -> {
+				p.death = (Engine e) -> {
 					Terminal.describesPL("Player " + p.id
 							+ " falls to the ground, his eyes staring wide open, his mouth open as if in surprise. He shudders before his body falls still, his eyes blank and unseeing.",
 							p.id);
@@ -45,7 +45,7 @@ public class Server {
 					obj.injury = Object.type.bruises;
 					obj.holdable = null;
 					obj.reference = p.currentRoom.floor;
-					objectQueue.add(obj);
+					e.objectQueue.add(obj);
 				};
 				Main.game.protags.add(p);
 				try {
