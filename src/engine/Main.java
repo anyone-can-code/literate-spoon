@@ -1,6 +1,5 @@
 package engine;
 
-import java.io.IOException;
 import java.util.*;
 
 import engine.words.Direction;
@@ -11,8 +10,6 @@ import engine.things.Entity;
 import engine.things.Object;
 import engine.things.Player;
 import engine.things.Quest;
-import javafx.scene.control.Label;
-import javafx.application.Platform;
 import java.util.ArrayList;
 import engine.Terminal;
 
@@ -181,13 +178,13 @@ public class Main extends Thread {
 						Terminal.sPrint(" inside the " + o.accessor, protag.id);
 					}
 					Terminal.sPrintln(".", protag.id);
-					Terminal.describesPL("You can see him taking a closer look at a " + o.compSub, protag.id);
+					Terminal.describesPL("You can see him taking a closer look at a " + o.compSub + ".", protag.id);
 				}));
 
 		game.addWord(new Verb("interact talk speak converse negotiate chat gossip", null,
 				(Object o, Engine t, Player protag) -> {
 					Entity e = (Entity) o;
-					Terminal.describesPL("He begins conversing with the " + e.compSub, protag.id);
+					Terminal.describesPL("He begins conversing with the " + e.compSub + ".", protag.id);
 					if (e.talkedTo) {
 						e.repeatInteraction.accept(protag, t);
 					} else {

@@ -53,6 +53,10 @@ public class Engine {
 		return o;
 	}
 
+	public String capitalize(String s) {
+		return s.substring(0, 1).toUpperCase() + s.substring(1, s.length());
+	}
+
 	public String uRandOf(String[] s) {
 		int x = rand.nextInt(s.length);
 
@@ -354,7 +358,15 @@ public class Engine {
 		if (protag.health <= 0) {
 			int s = objectQueue.size();
 			protag.death.accept(this);
-			objectQueue.get(s).container.addAll(protag.inventory);
+			if (objectQueue.size() != s) {
+				objectQueue.get(s).container.addAll(protag.inventory);
+			} else {
+				for (Object obj : protag.inventory) {
+					obj.reference = protag.currentRoom.floor;
+					obj.description = "on";
+					objectQueue.add(obj);
+				}
+			}
 			protag.currentRoom.objects.remove(protag);
 		}
 		protag.currentRoom.objects.addAll(objectQueue);
@@ -427,8 +439,9 @@ public class Engine {
 				userText = Server.in[protag.id].readLine();
 
 				if (userText.toLowerCase().contains("say")) {
-					Terminal.broadcast(new String[] { "You say", "He says" }, userText.replaceAll("(?i)say", "") + ".",
-							protag.id);
+					Terminal.broadcast(
+							"\"" + capitalize(userText.replaceAll("(?i)say ", "").replaceAll("\\.$", "")) + ",\" ",
+							new String[] { "you say.", "he says." }, protag.id);
 					break;
 				}
 

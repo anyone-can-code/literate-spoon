@@ -6,10 +6,17 @@ import javafx.scene.input.KeyEvent;
 import javafx.event.ActionEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.Border;
+import javafx.scene.layout.BorderStroke;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.input.KeyCode;
+import javafx.scene.paint.Color;
+import javafx.scene.layout.CornerRadii;
+import javafx.scene.layout.BorderWidths;
+import javafx.scene.layout.BorderStrokeStyle;
 
 import javafx.scene.control.Button;
 
@@ -35,6 +42,7 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.scene.shape.Line;
 import javafx.scene.paint.Paint;
+import javafx.scene.input.MouseEvent;
 
 @SuppressWarnings("restriction")
 public class Window extends Application {
@@ -48,6 +56,8 @@ public class Window extends Application {
 	public static PrintWriter out;
 	public static Scanner in;
 	public static int clientNumber;
+	public Socket server;
+	public static DatagramSocket c;
 
 	public static void main(String args[]) {
 		launch(args);
@@ -60,17 +70,27 @@ public class Window extends Application {
 	public void start(Stage primaryStage) throws Exception {
 		primaryStage.setScene(priorScene);
 		primaryStage.show();
-		primaryStage.setOnCloseRequest(e -> System.exit(0));
-		Button b1 = new Button("Join");
+		primaryStage.setOnCloseRequest(e -> {
+			try {
+				server.close();
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+			System.exit(0);
+		});
+		
+		Button b1 = new Button("Join Direct");
 		b1.setPrefWidth(100);
 		Button b2 = new Button("Host");
 		b2.setPrefWidth(100);
-		
+		Button b3 = new Button("Join LAN");
+		b3.setPrefWidth(100);
+
 		Label label = new Label("Literate Spoon");
 		label.setFont(Font.font("Helvetica", 30));
 		priorRoot.getChildren().add(label);
-		label.setTranslateX(priorScene.getWidth()/2 - 100);
-		label.setTranslateY(priorScene.getHeight()/2 - 10);
+		label.setTranslateX(priorScene.getWidth() / 2 - 100);
+		label.setTranslateY(priorScene.getHeight() / 2 - 15);
 		b1.setOnAction(new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent e) {
 				priorRoot.getChildren().clear();
@@ -80,27 +100,18 @@ public class Window extends Application {
 				input.prefWidth(100);
 				input.prefHeight(30);
 				input.setPromptText("IP number here");
-				input.setTranslateX(priorScene.getWidth()/2 - 75);
-				input.setTranslateY(priorScene.getHeight()/2 - input.getPrefHeight()/2 - 15);
-				TextField input2 = new TextField();
-				priorRoot.getChildren().add(input2);
-				input2.setFocusTraversable(false);
-				input2.prefWidth(100);
-				input2.prefHeight(30);
-				input2.setPromptText("Port number here");
-				input2.setTranslateX(priorScene.getWidth()/2 - 75);
-				input2.setTranslateY(priorScene.getHeight()/2 - input.getPrefHeight()/2 + 15);
-				input2.setOnKeyReleased(new EventHandler<KeyEvent>() {
+				input.setTranslateX(priorScene.getWidth() / 2 - 75);
+				input.setTranslateY(priorScene.getHeight() / 2 - input.getPrefHeight() / 2);
+				input.setOnKeyReleased(new EventHandler<KeyEvent>() {
 					@Override
 					public void handle(KeyEvent ke) {
 						if (ke.getCode().equals(KeyCode.ENTER)) {
 							try {
-								int i = Integer.parseInt(input2.getText());
 								String serverName = input.getText();
-								int port = i;
+								int port = 4444;
 								try {
 									System.out.println("Connecting to " + serverName + " on port " + port);
-									Socket server = new Socket(serverName, port);
+									server = new Socket(serverName, port);
 									System.out.println("Just connected to " + server.getRemoteSocketAddress());
 									out = new PrintWriter(server.getOutputStream(), true);
 
@@ -148,14 +159,15 @@ public class Window extends Application {
 		b2.setOnAction(new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent e) {
 				priorRoot.getChildren().clear();
+
 				TextField input = new TextField();
 				priorRoot.getChildren().add(input);
 				input.setFocusTraversable(false);
 				input.prefWidth(100);
 				input.prefHeight(30);
-				input.setPromptText("Port number here");
-				input.setTranslateX(priorScene.getWidth()/2 - 75);
-				input.setTranslateY(priorScene.getHeight()/2 - input.getPrefHeight()/2);
+				input.setPromptText("Number of players");
+				input.setTranslateX(priorScene.getWidth() / 2 - 75);
+				input.setTranslateY(priorScene.getHeight() / 2 - input.getPrefHeight() / 2);
 				input.setOnKeyReleased(new EventHandler<KeyEvent>() {
 					@Override
 					public void handle(KeyEvent ke) {
@@ -166,10 +178,10 @@ public class Window extends Application {
 							} catch (UnknownHostException e1) {
 								e1.printStackTrace();
 							}
-							int port = Integer.parseInt(input.getText());
+							int port = 4444;
 							Thread thr = new Thread() {
 								public void run() {
-									Server.main(new String[] { input.getText() });
+									Server.main(new String[] { "4444", input.getText() });
 								}
 							};
 							thr.start();
@@ -180,7 +192,7 @@ public class Window extends Application {
 							}
 							try {
 								System.out.println("Connecting to " + serverName + " on port " + port);
-								Socket server = new Socket(serverName, port);
+								server = new Socket(serverName, port);
 								System.out.println("Just connected to " + server.getRemoteSocketAddress());
 								out = new PrintWriter(server.getOutputStream(), true);
 
@@ -211,7 +223,8 @@ public class Window extends Application {
 									}
 								};
 								t.start();
-								primaryStage.setTitle("Text Adventure: Client " + clientNumber + ", Hosting at " + serverName);
+								primaryStage.setTitle(
+										"Text Adventure: Client " + clientNumber + ", Hosting at " + serverName);
 								primaryStage.setScene(scene);
 							} catch (IOException e1) {
 								e1.printStackTrace();
@@ -219,6 +232,102 @@ public class Window extends Application {
 						}
 					}
 				});
+			}
+		});
+		b3.setOnAction(new EventHandler<ActionEvent>() {
+			public void handle(ActionEvent e) {
+				priorRoot.getChildren().clear();
+				Thread t = new Thread() {
+					public void run() {
+						try {
+							c = new DatagramSocket(8888, InetAddress.getByName("0.0.0.0"));
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+						VBox servers = new VBox();
+						Platform.runLater(()->priorRoot.getChildren().add(servers));
+						while (true) {
+							byte[] recvBuf = new byte[15000];
+							DatagramPacket receivePacket = new DatagramPacket(recvBuf, recvBuf.length);
+							try {
+								c.receive(receivePacket);
+							} catch (IOException e3) {
+								e3.printStackTrace();
+							}
+							
+							//Check if the message is correct
+							String message = new String(receivePacket.getData()).trim();
+							final String serverName;
+							if (message.contains("serverLANBroadcast")) {
+								serverName = receivePacket.getAddress().getHostAddress();
+							} else {
+								serverName = "localhost";
+							}
+							
+							boolean alreadyHave = false;
+							for(Node n : servers.getChildren()) {
+								Label l = (Label)n;
+								if(l.getText().contains(serverName)) {
+									alreadyHave = true;
+								}
+							}
+							if(true) {
+							Label l = new Label("Server hosted at " + serverName + ", " + message.replace("serverLANBroadcast", "") + " players");
+							l.setPrefWidth(priorRoot.getWidth());
+							l.setBorder(new Border(new BorderStroke(Color.WHITE, BorderStrokeStyle.SOLID, null, new BorderWidths(1))));
+							l.setBackground(new Background(new BackgroundFill(new Color(0.5, 0.5, 0.5, 1.0), CornerRadii.EMPTY, Insets.EMPTY)));
+							Platform.runLater(()->servers.getChildren().add(l));
+							l.setOnMouseClicked(new EventHandler<MouseEvent>() {
+								@Override
+								public void handle(MouseEvent e) {
+										int port = 4444;
+										try {
+											System.out.println("Connecting to " + serverName + " on port " + port);
+											server = new Socket(serverName, port);
+											System.out.println("Just connected to " + server.getRemoteSocketAddress());
+											out = new PrintWriter(server.getOutputStream(), true);
+
+											InputStream inFromServer = server.getInputStream();
+											in = new Scanner(inFromServer);
+											clientNumber = Integer.parseInt(in.nextLine());
+											Thread t = new Thread() {
+												public void run() {
+													while (true) {
+														String s = in.nextLine();
+														if (s != "" && Terminal.printing) {
+															try {
+																int i = Integer.parseInt(s.substring(0, 1));
+																String[] strs = s.split(",");
+																Platform.runLater(() -> Window.gp.add(
+																		new Label(strs[2]), Integer.parseInt(strs[0]),
+																		Integer.parseInt(strs[1])));
+															} catch (Exception e) {
+																if (s.contains("CLEARMAP")) {
+																	Platform.runLater(
+																			() -> Window.gp.getChildren().clear());
+																} else if (s.contains("[PRINT]")) {
+																	Terminal.print(s.replace("[PRINT]", ""));
+																} else if (s.contains("[PRINTLN]")) {
+																	Terminal.println(s.replace("[PRINTLN]", ""));
+																}
+															}
+														}
+													}
+												}
+											};
+											t.start();
+											primaryStage.setTitle("Text Adventure: Client " + clientNumber);
+											primaryStage.setScene(scene);
+										} catch (IOException e1) {
+											e1.printStackTrace();
+										}
+								}
+							});
+						}
+						}
+					}
+				};
+				t.start();
 			}
 		});
 		priorRoot.setPrefWidth(100);
@@ -229,9 +338,10 @@ public class Window extends Application {
 		priorRoot.getChildren().add(b2);
 		b2.setTranslateX(scene.getWidth() / 2 - b2.getPrefWidth() / 2);
 		AnchorPane.setBottomAnchor(b2, 100.0);
-		
+		priorRoot.getChildren().add(b3);
+		b3.setTranslateX(scene.getWidth() / 2 - b3.getPrefWidth() / 2);
+		AnchorPane.setTopAnchor(b3, 50.0);
 
-		
 		stack.setPadding(new Insets(10, 10, 10, 10));
 		stack.setPrefWidth(root.getWidth() / 2 - 20);
 		map.setPadding(new Insets(10, 10, 10, 10));

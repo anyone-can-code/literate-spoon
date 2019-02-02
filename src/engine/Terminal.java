@@ -58,6 +58,16 @@ public class Terminal {
 			}
 		}
 	}
+	public static void broadcast(Object s, String[] ending, int id) {
+		if (printing) {
+			for (int i = 0; i < Server.out.length; i++) {
+				if (Main.game.protags.get(i) != null) {
+					Server.out[i].println("[PRINTLN]" + s.toString() + ending[i == id ? 0 : 1]);
+					Server.out[i].flush();
+				}
+			}
+		}
+	}
 
 	public static void describesPL(Object s, int id) {
 		if (printing) {

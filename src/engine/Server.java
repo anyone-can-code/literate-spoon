@@ -5,6 +5,8 @@ import java.net.*;
 import java.util.Scanner;
 
 import java.util.ArrayList;
+import java.util.Enumeration;
+
 import engine.things.Object;
 import engine.things.Player;
 import engine.things.Object.type;
@@ -15,17 +17,32 @@ import engine.things.Object.type;
 
 public class Server {
 	static InputStream inFromClient;
-	public static PrintWriter[] out = new PrintWriter[2];
-	public static BufferedReader[] in = new BufferedReader[2];
-
+	public static PrintWriter[] out;
+	public static BufferedReader[] in;
+	static int clientNumber = 0;
 	public static void main(String[] args) {
+		Thread t = new Thread() {
+			public void run() {
+				while(true) {
+					try {
+						Thread.sleep(2000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					broadcast(Integer.parseInt(args[1]));
+				}
+			}
+		};
+		t.start();
+		out = new PrintWriter[Integer.parseInt(args[1])];
+		in = new BufferedReader[Integer.parseInt(args[1])];
 		Main main = new Main();
 		int port = Integer.parseInt(args[0]);
 
 		try (ServerSocket serverSocket = new ServerSocket(port)) {
 			System.out.println("Server is listening on port " + port);
-			int clientNumber = 0;
-			while (clientNumber < 2) {
+			
+			while (clientNumber < Integer.parseInt(args[1])) {
 				System.out.println("Searching...");
 				Socket socket = serverSocket.accept();
 				System.out.println("New client connected " + clientNumber);
@@ -59,10 +76,53 @@ public class Server {
 				clientNumber++;
 			}
 			System.out.println("HACKING INITIATED");
+			t.stop();
 			main.start();
 		} catch (IOException ex) {
 			System.out.println("Server exception: " + ex.getMessage());
 			ex.printStackTrace();
 		}
+	}
+	
+	public static void broadcast(int totalPlayers) {
+		try {
+			  DatagramSocket c = new DatagramSocket();
+			  c.setBroadcast(true);
+
+			  byte[] sendData = ("serverLANBroadcast" + clientNumber + "/" + totalPlayers).getBytes();
+
+			  try {
+			    DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName("255.255.255.255"), 8888);
+			    c.send(sendPacket);
+			    System.out.println(">>> Request packet sent to: 255.255.255.255 (DEFAULT)");
+			  } catch (Exception e) {
+				  e.printStackTrace();
+			  }
+
+			  Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+			  while (interfaces.hasMoreElements()) {
+			    NetworkInterface networkInterface = interfaces.nextElement();
+
+			    if (networkInterface.isLoopback() || !networkInterface.isUp()) {
+			      continue;
+			    }
+
+			    for (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses()) {
+			      InetAddress broadcast = interfaceAddress.getBroadcast();
+			      if (broadcast == null) {
+			        continue;
+			      }
+
+			      try {
+			        DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, broadcast, 8888);
+			        c.send(sendPacket);
+			      } catch (Exception e) {
+			      }
+
+			      System.out.println(">>> Request packet sent to: " + broadcast.getHostAddress() + "; Interface: " + networkInterface.getDisplayName());
+			    }
+			  }
+			  c.close();
+		} catch(Exception e) {}
 	}
 }
