@@ -19,7 +19,7 @@ public class Server {
 			public void run() {
 				while (true) {
 					try {
-						Thread.sleep(2000);
+						Thread.sleep(1500);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
@@ -48,7 +48,7 @@ public class Server {
 					in[cN] = new BufferedReader(new InputStreamReader(inFromClient));
 
 					Player p = new Player(0, 0, cN, Main.game.capitalize(in[cN].readLine()));
-					p.setHealth(10);
+					p.setHealth(100);
 					p.injury = type.bruises;
 					p.currentRoom = Main.game.startingRoom;
 					p.currentRoom.objects.add(p);
@@ -57,7 +57,7 @@ public class Server {
 						Terminal.describesPL(p.name
 								+ " falls to the ground, his eyes staring wide open, his mouth open as if in surprise. He shudders before his body falls still, his eyes blank and unseeing.",
 								p.id);
-						Object obj = Engine.Consumable(p.name + "'s dead [corpse]", "lying on", null, 10);
+						Object obj = Engine.Consumable("dead [corpse] that belonged to " + p.name, "lying on", null, 10);
 						obj.injury = Object.type.bruises;
 						obj.holdable = null;
 						obj.reference = p.currentRoom.floor;
