@@ -28,11 +28,6 @@ public class Terminal {
 		if (printing) {
 			printText(s.toString());
 			Platform.runLater(() -> Window.enterStack = "\n");
-			try {
-				Thread.sleep(50);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
 		}
 	}
 
@@ -77,7 +72,7 @@ public class Terminal {
 						if (s.toString().contains("player" + i)) {
 							Server.out[i].println("[PRINTLN]" + s.toString().replace("the player" + i, "you"));
 						} else {
-							Server.out[i].println("[PRINTLN]" + s.toString().replace("the player", "Player "));
+							Server.out[i].println("[PRINTLN]" + s.toString().replace("the player", Main.game.protags.get(i).name));
 						}
 						Server.out[i].flush();
 					}
@@ -94,7 +89,7 @@ public class Terminal {
 						if (s.toString().contains("player" + i)) {
 							Server.out[i].println("[PRINT]" + s.toString().replace("the player" + i, "you"));
 						} else {
-							Server.out[i].println("[PRINT]" + s.toString().replace("the player", "Player "));
+							Server.out[i].println("[PRINT]" + s.toString().replace("the player", Main.game.protags.get(i).name));
 						}
 						Server.out[i].flush();
 					}
@@ -118,8 +113,9 @@ public class Terminal {
 				e.printStackTrace();
 			}
 		}
+		Window.t.interrupt();
 		try {
-			Thread.sleep(500);
+			Thread.sleep(50);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -137,7 +133,7 @@ public class Terminal {
 	}
 
 	public static void printText(String s) {
-		s = s.replace(".", ".(500)");
+		s = s.replace(".", ".(250)");
 		s = s.replace("(", "∆").replace(")", "∆");
 		boolean b = false;
 		if (!s.isEmpty()) {

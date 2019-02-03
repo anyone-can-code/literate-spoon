@@ -400,19 +400,29 @@ public class Engine {
 		}
 		try {
 			outerloop: while (true) {// repeats until valid command
-
 				Terminal.sPrint("(1000)", protag.id);
 				if (protag.currentRoom != null) {
 					if (protag.changedSurroundings) {
 						inspectRoom(false, protag.roomCache, protag);
 						try {
+							Thread.sleep(50);
+						} catch (InterruptedException e1) {
+							e1.printStackTrace();
+						}
+						try {
 							for (int i = 0; i < Server.out.length; i++) {
+								if(protags.get(i) != null) {
 								if (protags.get(i).id != protag.id
 										&& protags.get(i).currentRoom == protag.currentRoom) {
-									Terminal.sPrintln("Player " + protag.id + " entered the room.", protags.get(i).id);
+									Terminal.sPrintln(protag.name + " entered the room.", protags.get(i).id);
 								} else if (protags.get(i).id != protag.id
 										&& protags.get(i).currentRoom.coords == protag.roomCache.coords) {
-									Terminal.sPrintln("Player " + protag.id + " left the room.", protags.get(i).id);
+									Terminal.sPrintln(protag.name + " left the room.", protags.get(i).id);
+								}
+								if (protags.get(i).id != protag.id
+										&& protags.get(i).currentRoom == protag.currentRoom && protags.get(i).currentRoom.coords != protag.roomCache.coords) {
+									Terminal.sPrintln(protags.get(i).name + " is in the room.", protag.id);
+								}
 								}
 							}
 						} catch (NullPointerException e) {
@@ -444,8 +454,13 @@ public class Engine {
 							new String[] { "you say.", "he says." }, protag.id);
 					break;
 				}
-
 				userText = userText.toLowerCase();
+				for(int i = 0; i < Server.out.length; i++) {
+					if(protags.get(i) != null) {
+					userText = userText.replace(" " + protags.get(i).name.toLowerCase(), " " + protags.get(i).accessor);
+					}
+				}
+				
 
 				for (String str : omitWords) {
 					userText = userText.replace(" " + str + " ", " ");
@@ -480,6 +495,7 @@ public class Engine {
 						userText = userText.replace(protag.rightHand.compSub, protag.rightHand.accessor);
 					}
 				} catch (NullPointerException e) {
+					e.printStackTrace();
 				}
 				userText = userText.replace(".", "");
 				while (userText.contains("  ")) {
@@ -610,9 +626,7 @@ public class Engine {
 						}
 					}
 				}
-
 				for (Object o : protag.currentRoom.objects) {
-					if (o != protag) {
 						if (o.accessor.equals(words.get(1))) {
 							o1 = o;
 							foundObject = true;
@@ -626,7 +640,6 @@ public class Engine {
 								foundObject = true;
 							}
 						}
-					}
 				}
 
 				for (Object o : protag.inventory) {

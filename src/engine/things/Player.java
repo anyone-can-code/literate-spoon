@@ -27,10 +27,12 @@ public class Player extends Object {
 	public Room roomCache;
 	public OneParamFunc<Engine> death;
 	public boolean changedSurroundings = true;
+	public String name;
 	public int id;
 
-	public Player(int x, int y, int id) {
-		super("[player]" + id, (String) null, null);
+	public Player(int x, int y, int id, String name) {
+		super("[player" + id + "]", (String) null, null);
+		this.name = name;
 		this.id = id;
 		fist.abstractNoun();
 		inventory.add(fist);
