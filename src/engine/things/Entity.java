@@ -86,7 +86,7 @@ public class Entity extends Object {
 
 	public void attack(Player p) {
 		Terminal.sPrintln("The " + accessor + " attacks you.", p.id);
-		Terminal.describesPL("The " + accessor + " attacks the " + p.compSub, p.id);
+		Terminal.describesPL("The " + accessor + " attacks the " + p.compSub + ".", p.id);
 		p.health -= strength;
 	}
 }

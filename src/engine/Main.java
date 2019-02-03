@@ -118,7 +118,7 @@ public class Main extends Thread {
 				} else {
 					Terminal.sPrintln("You ate the " + o.accessor + ". Delicious.", protag.id);
 				}
-				Terminal.describesPL("He starts to consume a " + o.compSub, protag.id);
+				Terminal.describesPL("He starts to consume a " + o.compSub + ".", protag.id);
 				protag.currentRoom.objects.remove(o);
 				protag.inventory.remove(o);
 				removal(o, t, protag);

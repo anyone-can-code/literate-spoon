@@ -72,7 +72,7 @@ public class Terminal {
 						if (s.toString().contains("player" + i)) {
 							Server.out[i].println("[PRINTLN]" + s.toString().replace("the player" + i, "you"));
 						} else {
-							Server.out[i].println("[PRINTLN]" + s.toString().replace("the player", Main.game.protags.get(i).name));
+							Server.out[i].println("[PRINTLN]" + s.toString().replace("the player" + id, Main.game.protags.get(i).name));
 						}
 						Server.out[i].flush();
 					}
@@ -89,7 +89,7 @@ public class Terminal {
 						if (s.toString().contains("player" + i)) {
 							Server.out[i].println("[PRINT]" + s.toString().replace("the player" + i, "you"));
 						} else {
-							Server.out[i].println("[PRINT]" + s.toString().replace("the player", Main.game.protags.get(i).name));
+							Server.out[i].println("[PRINT]" + s.toString().replace("the player" + id, Main.game.protags.get(i).name));
 						}
 						Server.out[i].flush();
 					}
