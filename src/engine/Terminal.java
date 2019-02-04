@@ -102,7 +102,6 @@ public class Terminal {
 		if (printing) {
 			printText(s.toString());
 		}
-
 	}
 
 	public static void readln() {

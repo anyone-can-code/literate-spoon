@@ -10,16 +10,16 @@ import engine.things.Object;
 public class Quest {
 	public String name;
 	public String description;
-	public Object target;
+	public String target;
 	public TwoParamFunc<Engine, Entity> reward;
 	public Entity giver;
 	public boolean completed;
 	public boolean found;
 	public boolean given;
 
-	public Quest(String nam, String desc, Object tar, Entity givr, TwoParamFunc<Engine, Entity> rew) {
+	public Quest(String nam, String desc, String target, Entity givr, TwoParamFunc<Engine, Entity> rew) {
 		description = desc;
-		target = tar;
+		this.target = target;
 		reward = rew;
 		giver = givr;
 		name = nam;
@@ -42,12 +42,12 @@ public class Quest {
 	public void run(Engine t, boolean print, Player protag) {
 		if (!found) {
 			f1: for (Object o : protag.inventory) {
-				if (o == target) {
+				if (o.compSub.equals(target)) {
 					found = true;
 					break;
 				}
 				for (Object Obj : o.container) {
-					if (Obj == target) {
+					if (Obj.compSub.equals(target)) {
 						found = true;
 						break;
 					}
@@ -56,16 +56,16 @@ public class Quest {
 
 			if (found && print)
 				Terminal.sPrintln(
-						"Return the " + target.accessor + " to the " + giver.accessor + " to receive a reward.",
+						"Return the " + target + " to the " + giver.accessor + " to receive a reward.",
 						protag.id);
 		}
 	}
 
-	public void gaveObj(Engine t, Entity e, Object o, Player protag) {
+	public void gaveObj(Engine t, Entity e, String o, Player protag) {
 		if (!found) {
 			run(t, false, protag);
 		}
-		if (found && e == giver && o == target) {
+		if (found && e == giver && o.equals(target)) {
 			target = null;
 			if (reward != null) {
 				reward.accept(t, e);

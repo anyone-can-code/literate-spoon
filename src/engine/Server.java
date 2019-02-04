@@ -35,7 +35,6 @@ public class Server {
 
 		try (ServerSocket serverSocket = new ServerSocket(port)) {
 			System.out.println("Server is listening on port " + port);
-
 			while (clientNumber < Integer.parseInt(args[1])) {
 				System.out.println("Searching...");
 				Socket socket = serverSocket.accept();
@@ -84,9 +83,7 @@ public class Server {
 		try {
 			DatagramSocket c = new DatagramSocket();
 			c.setBroadcast(true);
-
 			byte[] sendData = ("serverLANBroadcast" + clientNumber + "/" + totalPlayers).getBytes();
-
 			try {
 				DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length,
 						InetAddress.getByName("255.255.255.255"), 8888);
@@ -94,23 +91,19 @@ public class Server {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-
 			Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
 			while (interfaces.hasMoreElements()) {
 				NetworkInterface networkInterface = interfaces.nextElement();
-
 				if (networkInterface.isLoopback() || !networkInterface.isUp()) {
 					continue;
 				}
-
 				for (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses()) {
-					InetAddress broadcast = interfaceAddress.getBroadcast();
-					if (broadcast == null) {
+					InetAddress i = interfaceAddress.getBroadcast();
+					if (i == null) {
 						continue;
 					}
-
 					try {
-						DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, broadcast, 8888);
+						DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, i, 8888);
 						c.send(sendPacket);
 					} catch (Exception e) {
 					}

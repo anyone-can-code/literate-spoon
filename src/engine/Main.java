@@ -1,5 +1,6 @@
 package engine;
 
+import java.io.IOException;
 import java.util.*;
 
 import engine.words.Direction;
@@ -10,6 +11,8 @@ import engine.things.Entity;
 import engine.things.Object;
 import engine.things.Player;
 import engine.things.Quest;
+import engine.things.Object.type;
+
 import java.util.ArrayList;
 import engine.Terminal;
 
@@ -18,7 +21,7 @@ public class Main extends Thread {
 
 	public Main() {
 		game = new Engine();
-
+		
 		game.addWord(
 				new Verb("move go walk run climb jog travel journey venture", (Word w, Engine t, Player protag) -> {
 					if (w.getClass() != Direction.class) {
@@ -153,6 +156,7 @@ public class Main extends Thread {
 				(Word w, Engine t, Player protag) -> {
 					if (w.accessPlayerSpecific(protag) == (java.lang.Object) protag.inventory) {
 						Terminal.sPrintln("Try checking your inventory instead.", protag.id);
+						
 					} else if (w.accessPlayerSpecific(protag) == (java.lang.Object) protag.quests) {
 						Terminal.sPrintln("Try checking your quests instead.", protag.id);
 					} else if (((String) w.represents).equals("room")) {
@@ -338,10 +342,10 @@ public class Main extends Thread {
 								e.inventory.add(o);
 								Terminal.sPrintln("The " + receiver.accessor + " gladly accepts your gift.", protag.id);
 								for (Quest q : protag.quests) {
-									q.gaveObj(t, (Entity) receiver, o, protag);
+									q.gaveObj(t, (Entity) receiver, o.compSub, protag);
 								}
 								if (e.quest != null) {
-									e.quest.gaveObj(t, e, o, protag);
+									e.quest.gaveObj(t, e, o.compSub, protag);
 								}
 								Terminal.describesPL("He gives a " + o.accessor + " to the " + receiver.accessor + ".",
 										protag.id);
@@ -500,6 +504,40 @@ public class Main extends Thread {
 							try {
 								game.update(game.protags.get(b));
 							} catch (Exception e) {
+							}
+						} else {
+							Terminal.sPrintln("Restart? [y] [n]", b);
+							try {
+								String s = Server.in[b].readLine();
+								if(s.equals("y")) {
+									Terminal.sPrintln("What is your new name?", b);
+									String name = Server.in[b].readLine();
+									if(name.matches("[a-zA-Z]+") && name.length() <= 10) {
+									Player p = new Player(0, 0, b, game.capitalize(name));
+									p.setHealth(100);
+									p.injury = type.bruises;
+									p.currentRoom = game.startingRoom;
+									p.currentRoom.objects.add(p);
+									p.roomCache = p.currentRoom.getClone();
+									p.death = (Engine e) -> {
+										Terminal.describesPL(p.name
+												+ " falls to the ground, his eyes staring wide open, his mouth open as if in surprise. He shudders before his body falls still, his eyes blank and unseeing.",
+												p.id);
+										Object obj = Engine.Consumable("dead [corpse] that belonged to " + p.name, "lying on", null, 10);
+										obj.injury = Object.type.bruises;
+										obj.holdable = null;
+										obj.reference = p.currentRoom.floor;
+										e.objectQueue.add(obj);
+									};
+									game.protags.set(b, p);
+								} else {
+									Terminal.sPrintln("That's not a name.", b);
+								}	
+								} else if(s.equals("n")){
+									Server.out[b].println("DESTROY");
+								}
+							} catch (IOException e) {
+								e.printStackTrace();
 							}
 						}
 					}

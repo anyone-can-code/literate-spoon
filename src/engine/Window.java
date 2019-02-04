@@ -20,7 +20,6 @@ import javafx.scene.layout.BorderStrokeStyle;
 
 import javafx.scene.control.Button;
 
-import java.awt.RenderingHints.Key;
 import java.io.*;
 import java.net.*;
 import java.util.Scanner;
@@ -34,7 +33,6 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.effect.BlendMode;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import javafx.scene.text.Font;
@@ -114,7 +112,7 @@ public class Window extends Application {
 				input2.setOnKeyReleased(new EventHandler<KeyEvent>() {
 					@Override
 					public void handle(KeyEvent ke) {
-						if (ke.getCode().equals(KeyCode.ENTER) && input2.getText().matches("[a-zA-Z]+") && input2.getText().length() < 10) {
+						if (ke.getCode().equals(KeyCode.ENTER) && input2.getText().matches("[a-zA-Z]+") && input2.getText().length() <= 10) {
 							try {
 								String serverName = input.getText();
 								int port = 4444;
@@ -127,30 +125,7 @@ public class Window extends Application {
 									InputStream inFromServer = server.getInputStream();
 									in = new Scanner(inFromServer);
 									clientNumber = Integer.parseInt(in.nextLine());
-									t = new Thread() {
-										public void run() {
-											while (true) {
-												String s = in.nextLine();
-												if (s != "" && Terminal.printing) {
-													try {
-														int i = Integer.parseInt(s.substring(0, 1));
-														String[] strs = s.split(",");
-														Platform.runLater(() -> Window.gp.add(new Label(strs[2]),
-																Integer.parseInt(strs[0]), Integer.parseInt(strs[1])));
-													} catch (Exception e) {
-														if (s.contains("CLEARMAP")) {
-															Platform.runLater(() -> Window.gp.getChildren().clear());
-														} else if (s.contains("[PRINT]")) {
-															Terminal.print(s.replace("[PRINT]", ""));
-														} else if (s.contains("[PRINTLN]")) {
-															Terminal.println(s.replace("[PRINTLN]", ""));
-														}
-													}
-												}
-											}
-										}
-									};
-									t.start();
+									t = runThread(t);
 									primaryStage.setTitle("Text Adventure: Client " + clientNumber);
 									primaryStage.setScene(scene);
 								} catch (IOException e1) {
@@ -188,7 +163,7 @@ public class Window extends Application {
 				input2.setOnKeyReleased(new EventHandler<KeyEvent>() {
 					@Override
 					public void handle(KeyEvent ke) {
-						if (ke.getCode().equals(KeyCode.ENTER) && input2.getText().matches("[a-zA-Z]+") && input2.getText().length() < 10) {
+						if (ke.getCode().equals(KeyCode.ENTER) && input2.getText().matches("[a-zA-Z]+") && input2.getText().length() <= 10) {
 							String serverName = "localhost";
 							try {
 								serverName = Inet4Address.getLocalHost().getHostAddress();
@@ -216,30 +191,7 @@ public class Window extends Application {
 								InputStream inFromServer = server.getInputStream();
 								in = new Scanner(inFromServer);
 								clientNumber = Integer.parseInt(in.nextLine());
-								t = new Thread() {
-									public void run() {
-										while (true) {
-											String s = in.nextLine();
-											if (s != "" && Terminal.printing) {
-												try {
-													int i = Integer.parseInt(s.substring(0, 1));
-													String[] strs = s.split(",");
-													Platform.runLater(() -> Window.gp.add(new Label(strs[2]),
-															Integer.parseInt(strs[0]), Integer.parseInt(strs[1])));
-												} catch (Exception e) {
-													if (s.contains("CLEARMAP")) {
-														Platform.runLater(() -> Window.gp.getChildren().clear());
-													} else if (s.contains("[PRINT]")) {
-														Terminal.print(s.replace("[PRINT]", ""));
-													} else if (s.contains("[PRINTLN]")) {
-														Terminal.println(s.replace("[PRINTLN]", ""));
-													}
-												}
-											}
-										}
-									}
-								};
-								t.start();
+								t = runThread(t);
 								primaryStage.setTitle(
 										"Text Adventure: Client " + clientNumber + ", Hosting at " + serverName);
 								primaryStage.setScene(scene);
@@ -264,7 +216,7 @@ public class Window extends Application {
 				input.setTranslateY(priorScene.getHeight() / 2 - input.getPrefHeight() / 2);
 				input.setOnKeyReleased(new EventHandler<KeyEvent>() {
 					public void handle(KeyEvent ke) {
-						if(ke.getCode().equals(KeyCode.ENTER) && input.getText().matches("[a-zA-Z]+") && input.getText().length() < 10) {
+						if(ke.getCode().equals(KeyCode.ENTER) && input.getText().matches("[a-zA-Z]+") && input.getText().length() <= 10) {
 						priorRoot.getChildren().clear();
 						Thread thr = new Thread() {
 							public void run() {
@@ -324,34 +276,7 @@ public class Window extends Application {
 													InputStream inFromServer = server.getInputStream();
 													in = new Scanner(inFromServer);
 													clientNumber = Integer.parseInt(in.nextLine());
-													t = new Thread() {
-														public void run() {
-															while (true) {
-																String s = in.nextLine();
-																if (s != "" && Terminal.printing) {
-																	try {
-																		int i = Integer.parseInt(s.substring(0, 1));
-																		String[] strs = s.split(",");
-																		Platform.runLater(
-																				() -> Window.gp.add(new Label(strs[2]),
-																						Integer.parseInt(strs[0]),
-																						Integer.parseInt(strs[1])));
-																	} catch (Exception e) {
-																		if (s.contains("CLEARMAP")) {
-																			Platform.runLater(() -> Window.gp
-																					.getChildren().clear());
-																		} else if (s.contains("[PRINT]")) {
-																			Terminal.print(s.replace("[PRINT]", ""));
-																		} else if (s.contains("[PRINTLN]")) {
-																			Terminal.println(
-																					s.replace("[PRINTLN]", ""));
-																		}
-																	}
-																}
-															}
-														}
-													};
-													t.start();
+													t = runThread(t);
 													primaryStage.setTitle("Text Adventure: Client " + clientNumber);
 													primaryStage.setScene(scene);
 												} catch (IOException e1) {
@@ -480,5 +405,37 @@ public class Window extends Application {
 		};
 		thr.start();
 	}
-
+	public Thread runThread(Thread t) {
+		t = new Thread() {
+			public void run() {
+				while (true) {
+					String s = in.nextLine();
+					if (s != "" && Terminal.printing) {
+						try {
+							int i = Integer.parseInt(s.substring(0, 1));
+							String[] strs = s.split(",");
+							Platform.runLater(
+									() -> Window.gp.add(new Label(strs[2]),
+											Integer.parseInt(strs[0]),
+											Integer.parseInt(strs[1])));
+						} catch (Exception e) {
+							if (s.contains("CLEARMAP")) {
+								Platform.runLater(() -> Window.gp
+										.getChildren().clear());
+							} else if (s.contains("[PRINT]")) {
+								Terminal.print(s.replace("[PRINT]", ""));
+							} else if (s.contains("[PRINTLN]")) {
+								Terminal.println(
+										s.replace("[PRINTLN]", ""));
+							} else if(s.equals("DESTROY")) {
+								System.exit(0);
+							}
+						}
+					}
+				}
+			}
+		};
+		t.start();
+		return t;
+	}
 }

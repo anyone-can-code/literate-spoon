@@ -358,13 +358,20 @@ public class Engine {
 		if (protag.health <= 0) {
 			int s = objectQueue.size();
 			protag.death.accept(this);
+			Iterator<Object> it = protag.inventory.iterator();
+			while(it.hasNext()) {
+				Object o = it.next();
+				if(o.abstractObj) {
+					it.remove();
+				}
+			}
 			if (objectQueue.size() != s) {
 				objectQueue.get(s).container.addAll(protag.inventory);
 			} else {
-				for (Object obj : protag.inventory) {
-					obj.reference = protag.currentRoom.floor;
-					obj.description = "on";
-					objectQueue.add(obj);
+				for (Object o : protag.inventory) {
+					o.reference = protag.currentRoom.floor;
+					o.description = "on";
+					objectQueue.add(o);
 				}
 			}
 			protag.currentRoom.objects.remove(protag);
@@ -439,6 +446,7 @@ public class Engine {
 					} catch (Exception e) {
 					}
 				}
+				protag.roomCache = protag.currentRoom.getClone();
 				protag.changedSurroundings = false;
 
 				while (!Server.in[protag.id].ready()) {
@@ -697,7 +705,7 @@ public class Engine {
 						continue;
 					}
 				}
-				protag.roomCache = protag.currentRoom.getClone();
+				
 				if (found) {
 					try {
 						w0.perform(w1, prepUsed[0], this, protag);// fills out word's function

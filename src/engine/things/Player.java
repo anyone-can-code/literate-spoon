@@ -31,7 +31,7 @@ public class Player extends Object {
 	public int id;
 
 	public Player(int x, int y, int id, String name) {
-		super("[player" + id + "]", (String) null, null);
+		super("[player" + id + "]", "You look just like you always have.", null);
 		this.name = name;
 		this.id = id;
 		fist.abstractNoun();

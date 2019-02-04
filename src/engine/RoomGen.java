@@ -177,7 +177,7 @@ public abstract class RoomGen {
 			e.reference.abstractNoun();
 			e.quest = new Quest("Death by water",
 					"An ancient metal box in the forest asks for a water bottle so that it can finally short its circuits. Eternity has driven it mad.",
-					o, e, null);
+					"water bottle", e, null);
 			e.interaction = (Player p, Engine eng) -> {
 				HashMap<String, OneParamFunc<Player>> h = new HashMap<String, OneParamFunc<Player>>();
 				h.put("yes", (Player p1) -> {
@@ -222,8 +222,8 @@ public abstract class RoomGen {
 							h, p);
 				} else {
 					e.death = (Engine t, Player p1) -> {
-						Terminal.sPrintln("The box creaks out a 'thank you' before shutting back off.", p1.id);
-						Object obj = new Object(e.compSub, e.description, null);
+						Terminal.sPrintln("The box creaks out a 'thank you' before shutting off.", p.id);
+						Object obj = new Object("shiny metal [box]", e.description, null);
 						obj.holdable = false;
 						obj.consumability = null;
 						t.objectQueue.add(obj);
