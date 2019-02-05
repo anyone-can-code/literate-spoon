@@ -236,7 +236,6 @@ public class Window extends Application {
 										e3.printStackTrace();
 									}
 
-									//Check if the message is correct
 									String message = new String(receivePacket.getData()).trim();
 									final String serverName;
 									if (message.contains("serverLANBroadcast")) {
