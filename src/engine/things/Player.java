@@ -2,10 +2,7 @@ package engine.things;
 
 import java.util.ArrayList;
 
-import engine.Engine;
-import engine.OneParamFunc;
 import engine.Room;
-import engine.TwoParamFunc;
 import engine.things.Object;
 
 public class Player extends Object {
@@ -24,16 +21,10 @@ public class Player extends Object {
 	public Object weapon;
 	public Object fist = new Object("[fist]", (String) null, null);
 	public Object rightHand = fist;
-	public Room roomCache;
-	public OneParamFunc<Engine> death;
-	public boolean changedSurroundings = true;
-	public String name;
-	public int id;
 
-	public Player(int x, int y, int id, String name) {
-		super("[player" + id + "]", "You look just like you always have.", null);
-		this.name = name;
-		this.id = id;
+	public Player(int x, int y) {
+		super("[player]", (String) null, null);
+
 		fist.abstractNoun();
 		inventory.add(fist);
 		weapon = fist;

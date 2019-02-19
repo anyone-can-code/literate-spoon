@@ -1,4 +1,11 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package engine.things;
+
+import java.util.*;
 
 import engine.Engine;
 import engine.Terminal;
@@ -7,19 +14,23 @@ import engine.things.Player;
 import engine.things.Entity;
 import engine.things.Object;
 
+/**
+ *
+ * @author testtube24
+ */
 public class Quest {
 	public String name;
 	public String description;
-	public String target;
+	public Object target;
 	public TwoParamFunc<Engine, Entity> reward;
 	public Entity giver;
 	public boolean completed;
 	public boolean found;
 	public boolean given;
 
-	public Quest(String nam, String desc, String target, Entity givr, TwoParamFunc<Engine, Entity> rew) {
+	public Quest(String nam, String desc, Object tar, Entity givr, TwoParamFunc<Engine, Entity> rew) {
 		description = desc;
-		this.target = target;
+		target = tar;
 		reward = rew;
 		giver = givr;
 		name = nam;
@@ -33,21 +44,21 @@ public class Quest {
 		if (!given) {
 			p.quests.add(this);
 			given = true;
-			Terminal.sPrintln("Quest added.", p.id);
+			Terminal.println("Quest added.");
 		} else {
-			Terminal.sPrintln("Quest already added.", p.id);
+			Terminal.println("Quest already added.");
 		}
 	}
 
-	public void run(Engine t, boolean print, Player protag) {
+	public void run(Engine t, boolean print) {
 		if (!found) {
-			f1: for (Object o : protag.inventory) {
-				if (o.compSub.equals(target)) {
+			f1: for (Object o : t.protag.inventory) {
+				if (o == target) {
 					found = true;
 					break;
 				}
 				for (Object Obj : o.container) {
-					if (Obj.compSub.equals(target)) {
+					if (Obj == target) {
 						found = true;
 						break;
 					}
@@ -55,22 +66,21 @@ public class Quest {
 			}
 
 			if (found && print)
-				Terminal.sPrintln(
-						"Return the " + target + " to the " + giver.accessor + " to receive a reward.",
-						protag.id);
+				Terminal.println(
+						"Return the " + target.accessor + " to the " + giver.accessor + " to receive a reward.");
 		}
 	}
 
-	public void gaveObj(Engine t, Entity e, String o, Player protag) {
+	public void gaveObj(Engine t, Entity e, Object o) {
 		if (!found) {
-			run(t, false, protag);
+			run(t, false);
 		}
-		if (found && e == giver && o.equals(target)) {
+		if (found && e == giver && o == target) {
 			target = null;
 			if (reward != null) {
 				reward.accept(t, e);
 			} else {
-				Terminal.sPrintln("You receive nothing but gratitude for your troubles.", protag.id);
+				Terminal.println("You receive nothing but gratitude for your troubles.");
 			}
 			completed = true;
 		}

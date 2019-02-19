@@ -3,9 +3,7 @@ package engine.words;
 import java.util.*;
 
 import engine.Engine;
-import engine.OneParamFuncReturn;
 import engine.things.Object;
-import engine.things.Player;
 
 public class Word {
 	public ArrayList<String> synonyms;
@@ -28,29 +26,15 @@ public class Word {
 		represents = o;
 	}
 
-	public Word(String list, OneParamFuncReturn<Player> func) {
-		synonyms = new ArrayList<String>();
-		addSynonyms(list);
-		represents = func;
-	}
-
-	public java.lang.Object accessPlayerSpecific(Player p) {
-		try {
-			return ((OneParamFuncReturn<Player>) represents).accept(p);
-		} catch (Exception e) {
-			return null;
-		}
-	}
-
-	public void perform(Word w, String prepUsed, Engine t, Player p) {
+	public void perform(Word w, String prepUsed, Engine t) {
 		System.out.println(this.getClass());
 	}
 
-	public void perform(Object o, String s, Engine t, Player p) {
+	public void perform(Object o, String s, Engine t) {
 		System.out.println(this.getClass());
 	}
 
-	public void perform(Object o, Object o2, String s1, String s2, String joinerWord, Engine t, Player p) {
+	public void perform(Object o, Object o2, String s1, String s2, String joinerWord, Engine t) {
 		System.out.println(this.getClass());
 	}
 
