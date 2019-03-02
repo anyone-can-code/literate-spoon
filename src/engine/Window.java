@@ -113,7 +113,11 @@ public class Window extends Application {
 		b.setTranslateX(start.getWidth() / 2 - b.getPrefWidth() / 2);
 		b.setTranslateY(start.getHeight() / 2 - b.getPrefHeight() / 2);
 		b.setStyle("-fx-focus-color: transparent;-fx-faint-focus-color: transparent;-fx-background-color: #DDDDDD");
-		
+		start.addEventFilter(KeyEvent.KEY_PRESSED, k -> {
+	        if (k.getCode() == KeyCode.SPACE){
+	            k.consume();
+	        }
+	    });
 		Thread thr = new Thread() {
 			public void run() {
 				Random rand = new Random();
@@ -155,8 +159,8 @@ public class Window extends Application {
 							- MouseInfo.getPointerInfo().getLocation().getY();
 					double deltaMag = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 					if (deltaMag < 100) {
-						momentumX = 0.999 * momentumX + 0.0001 * deltaX / deltaMag * 1500;
-						momentumY = 0.999 * momentumY + 0.0001 * deltaY / deltaMag * 1500;
+						momentumX = 0.999 * momentumX + 0.0001 * deltaX / deltaMag * 2500;
+						momentumY = 0.999 * momentumY + 0.0001 * deltaY / deltaMag * 2500;
 					}
 					Platform.runLater(() -> {
 						if (b.getTranslateX() < -100) {
@@ -246,6 +250,7 @@ public class Window extends Application {
 						rotation += 45;
 					} else {
 						Terminal.printing = true;
+						return;
 					}
 					ArrayList<Node> gpChildren = new ArrayList<>();
 					synchronized (gp) {

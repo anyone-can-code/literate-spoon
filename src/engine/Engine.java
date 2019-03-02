@@ -173,6 +173,12 @@ public class Engine {
 						if (protag.currentRoom.area[x][y] != null
 								&& !protag.currentRoom.area[x][y].accessor.equals("floor")) {
 							objectsViewed.add(protag.currentRoom.area[x][y]);
+							if(protag.currentRoom.area[x][y].reference != null) {
+								objectsViewed.add(protag.currentRoom.area[x][y].reference);
+							}
+							for(Object o : protag.currentRoom.area[x][y].container) {
+								objectsViewed.add(o);
+							}
 						}
 						view[x][y] = 1;
 					}

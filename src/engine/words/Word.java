@@ -3,6 +3,7 @@ package engine.words;
 import java.util.*;
 
 import engine.Engine;
+import engine.Terminal;
 import engine.things.Object;
 
 public class Word {
@@ -27,15 +28,15 @@ public class Word {
 	}
 
 	public void perform(Word w, String prepUsed, Engine t) {
-		System.out.println(this.getClass());
+		Terminal.println(this.getClass());
 	}
 
 	public void perform(Object o, String s, Engine t) {
-		System.out.println(this.getClass());
+		Terminal.println(this.getClass());
 	}
 
 	public void perform(Object o, Object o2, String s1, String s2, String joinerWord, Engine t) {
-		System.out.println(this.getClass());
+		Terminal.println(this.getClass());
 	}
 
 	public void addSynonyms(String list) {
