@@ -37,6 +37,7 @@ public class Entity extends Object {
 
 	public Entity(String compSub, String description, OneParamFunc<Engine> death) {
 		super(compSub, description, null);
+		this.holdable = false;
 		this.accessor = compSub.substring(compSub.indexOf("[") + 1, compSub.indexOf("]"));
 		this.compSub = compSub.replace("[", "").replace("]", "");
 		this.description = description;
@@ -70,7 +71,7 @@ public class Entity extends Object {
 			attack(p);
 			return (Boolean) null;
 		}
-		if (initConversation != null && e.changedSurroundings) {
+		if (initConversation != null && e.changedLocation) {
 			Terminal.println(initConversation);
 			interaction.accept(p, e);
 		}

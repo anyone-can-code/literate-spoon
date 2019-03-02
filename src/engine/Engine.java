@@ -9,25 +9,28 @@ import engine.things.Object;
 import engine.things.Quest;
 import engine.words.Verb;
 import engine.words.Word;
-
+import javafx.application.Platform;
+import javafx.geometry.Insets;
+import javafx.scene.Node;
+import javafx.scene.control.Label;
+import javafx.scene.layout.GridPane;
+import javafx.scene.paint.Color;
 import engine.Terminal;
 
 public class Engine {
-
 	public Player protag;
-
-	// public ArrayList<Room> rooms;// can be accessed by verbs
 	public Room worldMap;
 	public final String worldName = "Azaroth";// just a random name (thank Liam)
 
-	private ArrayList<Word> vocabulary;
+	public ArrayList<Word> vocabulary;
 	private ArrayList<String> prepositions;
 	private ArrayList<String> articles;
 	private ArrayList<String> omitWords;
 	public ArrayList<Object> objectQueue = new ArrayList<Object>();
 	Random rand = new Random();
 
-	public boolean changedSurroundings = true;
+	public boolean changedRoom = true;
+	public boolean changedLocation = true;
 	public Room roomCache;
 
 	public Engine() {
@@ -35,7 +38,7 @@ public class Engine {
 		protag.setHealth(100);
 
 		// rooms = new ArrayList<Room>();
-		worldMap = new Room(0, 0, "The World of " + worldName);
+		worldMap = new Room(0, 0, 1, 1, "The World of " + worldName);
 
 		protag.currentRoom = RoomGen.gen(worldMap, objectQueue);// returns starting room
 		roomCache = protag.currentRoom.getClone();
@@ -60,7 +63,8 @@ public class Engine {
 		return o;
 	}
 
-	public String uRandOf(String[] s) {
+	public static String uRandOf(String[] s) {
+		Random rand = new Random();
 		int x = rand.nextInt(s.length);
 
 		// Convert 'a's to 'an's
@@ -74,7 +78,8 @@ public class Engine {
 		return s[x].substring(0, 1).toUpperCase() + s[x].substring(1, s[x].length());
 	}
 
-	public String lRandOf(String[] s) {
+	public static String lRandOf(String[] s) {
+		Random rand = new Random();
 		int x = rand.nextInt(s.length);
 		// Convert 'a's to 'an's
 		for (int i = 2; i < s[x].length(); i++) {
@@ -85,6 +90,10 @@ public class Engine {
 			}
 		}
 		return s[x].toLowerCase();
+	}
+
+	public static String capitalize(String s) {
+		return s.substring(0, 1).toUpperCase() + s.substring(1, s.length());
 	}
 
 	public void updatePlayerState() {
@@ -108,14 +117,24 @@ public class Engine {
 		}
 	}
 
+	public ArrayList<Object> objectCache = new ArrayList<Object>();
+	public ArrayList<Object> objectsViewed = new ArrayList<Object>();
+	public float[][] view = new float[1000][1000];
+
 	public void inspectRoom(boolean updated, Room roomCache) {
+		if (protag.health <= 90) {
+			Terminal.println(protag.health > 50 ? "You are feeling slightly injured."
+					: protag.health > 0 ? "You think that you might have some injuries, but you've forgotten where."
+							: "You feel slightly dead, but you aren't sure.");
+			updatePlayerState();
+		}
 		if (!updated) {
 			if (protag.currentRoom != null) {
 				Room holder = protag.currentRoom;
 				String desc = holder.description;
 				while (holder.fatherRoom != null) {
 					holder = holder.fatherRoom;
-					desc = "(B)" + holder.description + ":(B) " + desc;
+					desc = "(T)" + holder.description + ":(T) " + desc;
 				}
 
 				Terminal.println(desc);
@@ -123,17 +142,50 @@ public class Engine {
 				Terminal.println("Currently not in any room!");
 		}
 
-		int x1 = 0;
-		int x2 = 0;
+		for (float[] f : view) {
+			for (int i = 0; i < f.length; i++) {
+				f[i] = 0;
+			}
+		}
+		ArrayList<Node> gp = new ArrayList<>();
+		synchronized(Window.gp) {
+			gp = new ArrayList<>(Window.gp.getChildren());
+		}
+		double pX = 0;
+		double pY = 0;
+		for (Node n : gp) {
+			if (GridPane.getColumnIndex(n) == protag.x && GridPane.getRowIndex(n) == protag.y) {
+				pX = Window.gp.localToParent(n.getBoundsInParent()).getMinX();
+				pY = Window.gp.localToParent(n.getBoundsInParent()).getMinY();
+			}
+		}
 
-		outerloop: for (int i = 0; i < protag.currentRoom.objects.size(); i++) {
-			Object o = protag.currentRoom.objects.get(i);
-			if (updated) {
-				for (Object obj : roomCache.objects) {
-					if (o.accessor.equals(obj.accessor)) {
-						continue outerloop;
+		objectsViewed.clear();
+		for (Node n : gp) {
+			double deltaX = pX - Window.gp.localToParent(n.getBoundsInParent()).getMinX();
+			double deltaY = pY - Window.gp.localToParent(n.getBoundsInParent()).getMinY();
+			if (!(deltaX == 0 && deltaY == 0)) {
+				double deltaMag = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+				if (deltaMag < 150) {
+					if (Math.atan2(deltaY, deltaX) > Math.PI / 3 && Math.atan2(deltaY, deltaX) < 2 * Math.PI / 3) {
+						int x = GridPane.getColumnIndex(n);
+						int y = GridPane.getRowIndex(n);
+						if (protag.currentRoom.area[x][y] != null
+								&& !protag.currentRoom.area[x][y].accessor.equals("floor")) {
+							objectsViewed.add(protag.currentRoom.area[x][y]);
+						}
+						view[x][y] = 1;
 					}
 				}
+			}
+		}
+		int x1 = 0;
+		int x2 = 0;
+		outerloop: for (int i = 0; i < objectsViewed.size(); i++) {
+			Object o = objectsViewed.get(i);
+			if (updated) {
+				if (objectCache.contains(o))
+					continue outerloop;
 			}
 			String compSub = o.compSub;
 			if (o.health != null && o.health < o.maxHealth) {
@@ -193,7 +245,7 @@ public class Engine {
 			String s = null;
 			while (s == null) {
 				try {
-					s = protag.currentRoom.objects.get(n).reference.accessor;
+					s = objectsViewed.get(n).reference.accessor;
 					if (s.equals(o.reference.accessor)) {
 						x1 = 2;
 					}
@@ -209,7 +261,7 @@ public class Engine {
 			s = null;
 			while (s == null) {
 				try {
-					s = protag.currentRoom.objects.get(n).reference.accessor;
+					s = objectsViewed.get(n).reference.accessor;
 					if (s.equals(o.reference.accessor)) {
 						if (x2 == 1) {
 							x2 = 0;
@@ -228,7 +280,7 @@ public class Engine {
 			try {
 				Object r = o.reference;
 				if (r != null) {
-					Terminal.print("(1000)");
+					Terminal.print("(500)");
 					if (x1 == 1) {
 						if (x2 == 1) {
 							Terminal.print(lRandOf(
@@ -245,20 +297,19 @@ public class Engine {
 							Terminal.print(", a " + compSub);
 						}
 					} else {
-						if(updated) {
-							Terminal.print(uRandOf(new String[] {"there now is a " + compSub + " "
-											+ o.description + " " + rCompSub,
-									o.description + " " + rCompSub + ", "
-											+ "there now is a "
-											+ compSub }));
+						if (updated) {
+							Terminal.print(uRandOf(new String[] {
+									"you find that there is a " + compSub + " " + o.description + " " + rCompSub,
+									o.description + " " + rCompSub + " in front of you, " + "there is a " + compSub }));
 						} else {
-						Terminal.print(uRandOf(new String[] {
-								lRandOf(new String[] { "you observe that there is a ", "another thing you notice is a ",
-										"there is a ", "you notice a ", "you can also see a " }) + compSub + " "
-										+ o.description + " " + rCompSub,
-								o.description + " " + rCompSub + ", "
-										+ lRandOf(new String[] { "there is a ", "you can observe a ", "you notice a " })
-										+ compSub }));
+							Terminal.print(uRandOf(new String[] {
+									lRandOf(new String[] { "you observe that there is a ",
+											"another thing you notice is a ", "there is a ", "you notice a ",
+											"you can also see a " }) + compSub + " " + o.description + " " + rCompSub,
+									o.description
+											+ " " + rCompSub + ", " + lRandOf(new String[] { "there is a ",
+													"you can observe that there is a ", "you notice a " })
+											+ compSub }));
 						}
 					}
 					if (x1 > 0) {
@@ -273,14 +324,16 @@ public class Engine {
 
 			}
 		}
+		objectCache.clear();
+		objectCache.addAll(objectsViewed);
 		if (!updated) {
 			for (Room r : protag.currentRoom.fatherRoom.nestedMap) {
 				String s = "";
 				if (r.coords[1] == protag.currentRoom.coords[1] + 1) {//north
-					s += "north";
+					s += "south";
 				}
 				if (r.coords[1] == protag.currentRoom.coords[1] - 1) {//south
-					s += "south";
+					s += "north";
 				}
 				if (r.coords[0] == protag.currentRoom.coords[0] + 1) {//right
 					if (s != "")
@@ -292,9 +345,14 @@ public class Engine {
 						s += "-";
 					s += "west";
 				}
-				if (s != "") {
-					Terminal.println(
-							"To the " + s + ", there is a " + r.description.substring(0, r.description.indexOf("\n")));
+				if (s != "" && Math.abs(r.coords[0] - protag.currentRoom.coords[0]) < 2
+						&& Math.abs(r.coords[1] - protag.currentRoom.coords[1]) < 2) {
+					try {
+						Terminal.println("(500)To the " + s + ", there is "
+								+ r.description.substring(0, r.description.indexOf("\n")).replace("(T)", "(B)"));
+					} catch (Exception e) {
+						Terminal.println("(500)To the " + s + ", there is " + r.description.replace("(T)", "(B)"));
+					}
 				}
 			}
 		}
@@ -307,7 +365,7 @@ public class Engine {
 				for (Object obj : o.container) {
 					obj.reference = protag.currentRoom.floor;
 					obj.description = lRandOf(new String[] { "lying", "sitting", "resting" }) + " on";
-
+					distribute(protag.currentRoom, o, obj);
 				}
 				o.container.clear();
 			}
@@ -318,13 +376,13 @@ public class Engine {
 				for (Object obj : o.container) {
 					obj.reference = protag.currentRoom.floor;
 					obj.description = lRandOf(new String[] { "lying", "sitting", "resting" }) + " on";
-
+					distribute(protag.currentRoom, o, obj);
 				}
 				o.container.clear();
 			}
 		}
 
-		Iterator<Object> objectIt = protag.currentRoom.objects.iterator();
+		Iterator<Object> objectIt = objectsViewed.iterator();
 		while (objectIt.hasNext()) {
 			Object o = objectIt.next();
 			if (!o.abstractObj) {
@@ -333,12 +391,17 @@ public class Engine {
 						Entity e = (Entity) o;
 						int s = objectQueue.size();
 						e.death.accept(this);
+						if(objectQueue.size() != s)
+							objectQueue.get(s).x = e.x;
+							objectQueue.get(s).y = e.y;
+							protag.currentRoom.area[e.x][e.y] = objectQueue.get(s);
 						for (Object obj : e.inventory) {
 							if (objectQueue.size() != s) {
 								objectQueue.get(s).container.addAll(e.inventory);
 							} else {
 								obj.reference = protag.currentRoom.floor;
 								obj.description = "on";
+								distribute(protag.currentRoom, o, obj);
 								objectQueue.add(obj);
 							}
 						}
@@ -346,6 +409,7 @@ public class Engine {
 					}
 				} else if (!o.alive && o.health <= 0) {
 					for (Object obj : o.container) {
+						distribute(protag.currentRoom, o, obj);
 						objectQueue.add(obj);
 					}
 					o.container.clear();
@@ -355,7 +419,20 @@ public class Engine {
 
 		protag.currentRoom.objects.addAll(objectQueue);
 	}
-
+	
+	public void distribute(Room r, Object o, Object obj) {
+		int area = 1;
+		int i = 0;
+		while (i < 1000) {
+			obj.x = o.x + rand.nextInt(2 + area) - area;
+			obj.y = o.y + rand.nextInt(2 + area) - area;
+			if (r.area[obj.x][obj.y] == r.floor)
+				r.area[obj.x][obj.y] = obj;
+			else if (i == 500 || i == 750)
+				area++;
+		}
+	}
+	
 	public void update() {
 		String userText;
 		runObjects();
@@ -363,29 +440,48 @@ public class Engine {
 		for (Quest q : protag.quests) {
 			q.run(this, true);
 		}
-		Terminal.println(protag.health > 90 ? ""
-				: protag.health > 50 ? "You are feeling slightly injured."
-						: protag.health > 0 ? "You think that you might have some injuries, but you've forgotten where."
-								: "You feel slightly dead, but you aren't sure.");
-		outerloop: while (true) {// repeats until valid command
-			Terminal.print("(1000)");
-			if (protag.currentRoom != null) {
-				if (changedSurroundings) {
-					inspectRoom(false, roomCache);
-				} else {
-					inspectRoom(true, roomCache);
-				}
-
-			} else
-				Terminal.println("Currently not in any room!");
-			for (Object o : protag.currentRoom.objects) {
+		if (protag.currentRoom != null) {
+			if (changedRoom) {
+				inspectRoom(false, roomCache);
+			} else {
+				inspectRoom(true, roomCache);
+			}
+			roomCache = protag.currentRoom.getClone();
+		} else
+			Terminal.println("Currently not in any room!");
+		for (Object o : objectsViewed) {
+			try {
+				Entity e = (Entity) o;
+				e.interactable = e.check(protag, this);
+			} catch (Exception e) {
+			}
+		}
+		Platform.runLater(() -> Window.gp.getChildren().clear());
+		for (int x = 0; x < protag.currentRoom.area.length; x++) {
+			for (int y = 0; y < protag.currentRoom.area[x].length; y++) {
+				Label l = new Label(protag.x == x && protag.y == y ? "@"
+						: protag.currentRoom.area[x][y] != null ? String.valueOf(protag.currentRoom.area[x][y].label)
+								: "~");
+				l.setFont(Terminal.mapFont);
+				l.setTextFill(Color.gray(0.8));
 				try {
-					Entity e = (Entity) o;
-					e.interactable = e.check(protag, this);
+					if (view[x][y] == 1) {
+						l.setTextFill(Color.gray(0.5));
+					}
 				} catch (Exception e) {
 				}
+				l.setRotate(-Window.rotation);
+				l.setOpacity(Window.gpTP[x][y]);
+				final int x1 = x;
+				final int y1 = y;
+				Platform.runLater(() -> Window.gp.add(l, x1, y1));
 			}
-			changedSurroundings = false;
+		}
+
+		outerloop: while (true) {// repeats until valid command
+			Terminal.print("(250)");
+			changedRoom = false;
+			changedLocation = false;
 			userText = Terminal.readln();
 			userText = userText.toLowerCase();
 
@@ -549,7 +645,7 @@ public class Engine {
 				}
 			}
 
-			for (Object o : protag.currentRoom.objects) {
+			for (Object o : objectsViewed) {
 				if (o.accessor.equals(words.get(1))) {
 					o1 = o;
 					foundObject = true;
@@ -600,7 +696,7 @@ public class Engine {
 					continue;
 				}
 
-				for (Object o : protag.currentRoom.objects) {
+				for (Object o : objectsViewed) {
 					try {
 						if (o.reference.abstractObj && o.reference.accessor.equalsIgnoreCase(words.get(1))) {
 							Terminal.println("No.");
@@ -610,7 +706,7 @@ public class Engine {
 					}
 				}
 
-				Terminal.println("I don't know what '" + words.get(1) + "' means.");
+				Terminal.println("I can't see a " + words.get(1) + " anywhere here.");
 				continue;
 			}
 
@@ -620,7 +716,7 @@ public class Engine {
 					continue;
 				}
 			}
-			roomCache = protag.currentRoom.getClone();
+
 			if (found) {
 				try {
 					w0.perform(w1, prepUsed[0], this);// fills out word's function
@@ -636,7 +732,6 @@ public class Engine {
 					w0.perform(o1, o2, prepUsed[0], prepUsed[1], joinerWord, this);
 				}
 			}
-			updatePlayerState();
 			Iterator<Effect> effectIt = protag.effects.iterator();
 			while (effectIt.hasNext()) {
 				Effect e = effectIt.next();

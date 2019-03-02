@@ -12,27 +12,41 @@ public class Room implements Cloneable {
 	public Room northEntry;
 	public Room southEntry;
 	public Room fatherRoom = null;
+	public Object[][] area;
 
 	Object floor = new Object("the [floor]", (String) null, null);
-	//Object floor = new Object("the [ground]", (String)null, null);
 
 	public String description;
 
-	public Room() {
+	public Room(int width, int height) {
 		coords = new int[2];
 	}
 
-	public Room(int x, int y, String description) {
+	public Room(int x, int y, int width, int height, String description) {
 		coords = new int[2];
 		coords[0] = x;
 		coords[1] = y;
+		area = new Object[width][height];
+		floor.label = '#';
+		for(Object[] objs : area) {
+			for(int i = 0; i < objs.length; i++) {
+				objs[i] = floor;
+			}
+		}
 		floor.abstractNoun();
 		objects.add(floor);
 		this.description = description;
 	}
 
-	public void addObject(Object o) {
+	public void addObject(Object o, int x, int y) {
 		objects.add(o);
+		area[x][y] = o;
+		o.x = x;
+		o.y = y;
+		try {
+			o.reference.x = o.x;
+			o.reference.y = o.y;
+		} catch(Exception e) {}
 	}
 
 	public void addRoom(Room r) {
@@ -72,6 +86,7 @@ public class Room implements Cloneable {
 		return coords[0] + ", " + coords[1];
 	}
 
+	@SuppressWarnings("unchecked")
 	public Room getClone() {
 		try {
 			Room r = (Room) super.clone();

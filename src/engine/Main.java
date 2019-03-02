@@ -5,12 +5,14 @@ import java.util.*;
 import engine.words.Direction;
 import engine.words.Verb;
 import engine.words.Word;
+import javafx.scene.Node;
+import javafx.scene.control.Label;
+import javafx.scene.layout.GridPane;
 import engine.things.Effect;
 import engine.things.Entity;
 import engine.things.Object;
+import engine.things.Player;
 import engine.things.Quest;
-import javafx.scene.control.Label;
-import javafx.application.Platform;
 import java.util.ArrayList;
 import engine.Terminal;
 
@@ -19,78 +21,80 @@ public class Main extends Thread {
 
 	public Main() {
 		game = new Engine();
-
+		Terminal.t = game;
 		game.addWord(new Verb("move go walk run climb jog travel journey venture", (Word w, Engine t) -> {
 			if (w.getClass() != Direction.class) {
 				Terminal.println("...What?");
 				return;
-			}
+			}try {
 			int x, y;
 
 			int dx = Integer.parseInt(w.value.substring(0, 1)) - 1;
 			int dy = Integer.parseInt(w.value.substring(1, 2)) - 1;
+			ArrayList<Node> gp = new ArrayList<>();
+			synchronized(Window.gp) {
+				gp = new ArrayList<>(Window.gp.getChildren());
+			}
+			double pX = 0;
+			double pY = 0;
+			Node playerNode = null;
+			for (Node n : gp) {
+				try {
+					Label l = (Label) n;
+					if (l.getText().equals("@")) {
+						pX = Window.gp.localToParent(n.getBoundsInParent()).getMinX() + dx * 100;
+						pY = Window.gp.localToParent(n.getBoundsInParent()).getMinY() + dy * 100;
+						playerNode = n;
+					}
+				} catch (Exception e) {
+				}
+			}
+			double closest = 100;
+			Node closestNode = null;
+			for (Node n : gp) {
+				if (n != playerNode && GridPane.getColumnIndex(n) > t.protag.x - 2
+						&& GridPane.getColumnIndex(n) < t.protag.x + 2 && GridPane.getRowIndex(n) > t.protag.y - 2
+						&& GridPane.getRowIndex(n) < t.protag.y + 2) {
+					double deltaX = Window.gp.localToParent(n.getBoundsInParent()).getMinX() - pX;
+					double deltaY = Window.gp.localToParent(n.getBoundsInParent()).getMinY() - pY;
+					double deltaMag = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+					if (deltaMag < closest) {
+						closestNode = n;
+						closest = deltaMag;
+					}
+				}
+			}
+			dx = GridPane.getColumnIndex(closestNode) - GridPane.getColumnIndex(playerNode);
+			dy = GridPane.getRowIndex(closestNode) - GridPane.getRowIndex(playerNode);
+			t.protag.x += dx;
+			t.protag.y += dy;
 
-			Room currentRoom = t.protag.currentRoom;
-			while (true) {// recursion without recursion
-				x = t.protag.currentRoom.coords[0];
-				y = t.protag.currentRoom.coords[1];
+			x = t.protag.currentRoom.coords[0];
+			y = t.protag.currentRoom.coords[1];
 
-				x += dx;
-				y += dy;
-				Platform.runLater(() -> Window.gp.getChildren().clear());
-				Room cR = t.protag.currentRoom;
+			Room cR = t.protag.currentRoom;
+			if (t.protag.x < 0 || t.protag.y < 0 || t.protag.x >= cR.area.length || t.protag.y >= cR.area[0].length) {
+				t.protag.x -= dx;
+				t.protag.y -= dy;
+
 				for (Room r : t.protag.currentRoom.fatherRoom.nestedMap) {
-					if (x == r.coords[0] && y == r.coords[1]) {
+					if (x + dx == r.coords[0] && y + dy == r.coords[1]) {
 						t.protag.currentRoom = r;
-					}
-
-					if (x == r.coords[0] && y == r.coords[1]) {
-						if (dx > 0) {// flipped from how you'd think
-							while (t.protag.currentRoom.westEntry != null) {
-								t.protag.currentRoom = t.protag.currentRoom.westEntry;
-							}
-						} else if (dx < 0) {
-							while (t.protag.currentRoom.eastEntry != null) {
-								t.protag.currentRoom = t.protag.currentRoom.eastEntry;
-							}
-						} else if (dy > 0) {
-							while (t.protag.currentRoom.southEntry != null) {
-								t.protag.currentRoom = t.protag.currentRoom.southEntry;
-							}
-						} else if (dy < 0) {
-							while (t.protag.currentRoom.northEntry != null) {
-								t.protag.currentRoom = t.protag.currentRoom.northEntry;
-							}
-						}
-						break;
-					}
-				}
-				for (Room r : t.protag.currentRoom.fatherRoom.nestedMap) {
-					Platform.runLater(() -> Window.gp.add(new Label(t.protag.currentRoom == r ? "@" : "R"), r.coords[0],
-							r.coords[1]));
-				}
-				for (Room r : cR.fatherRoom.nestedMap) {
-					if (x == r.coords[0] && y == r.coords[1]) {
-						t.changedSurroundings = true;
+						t.changedRoom = true;
 						return;
 					}
 				}
 
-				if (t.protag.currentRoom.fatherRoom.fatherRoom != null)// main map only has 1 room, so can't be there
-																		// either
-				{
-					t.protag.currentRoom = t.protag.currentRoom.fatherRoom;
-				} else {
-					break;
-				}
+				Terminal.println("You can't move that way.");
+				return;
+			} else {
+				t.changedLocation = true;
+				return;
 			}
-			t.protag.currentRoom = currentRoom;
-			Terminal.println("You can't move that way.");
+			} catch(Exception e) {}
+		}, null, null, null));
 
-			// t.protag.changePos(w.value);
-		}, null));
-
-		game.addWord(new Verb("eat consume", null, (Object o, Engine t) -> {
+		game.addWord(new Verb("eat consume", null, (Object o, Engine t) ->{
 			if (o.abstractObj) {
 				Terminal.println("Impossible.");
 				return;
@@ -113,13 +117,13 @@ public class Main extends Thread {
 				} else {
 					Terminal.println("You ate the " + o.accessor + ". Delicious.");
 				}
-				t.protag.currentRoom.objects.remove(o);
-				t.protag.inventory.remove(o);
 				removal(o, t);
 			} else {
 				throw new NullPointerException();
 			}
 
+		}, null, (Object o, Engine t)-> {
+			Terminal.println("Your physical limitations prevent you from consuming the " + o.compSub + ".");
 		}));
 
 		game.addWord(new Verb("drink", null, (Object o, Engine t) -> {
@@ -131,8 +135,6 @@ public class Main extends Thread {
 					Terminal.println("You drank the " + o.accessor + ". Delicious.");
 				}
 				if (o.consumability == null) {
-					t.protag.currentRoom.objects.remove(o);
-					t.protag.inventory.remove(o);
 					removal(o, t);
 				} else {
 					o.drinkability = null;
@@ -140,22 +142,40 @@ public class Main extends Thread {
 			} else {
 				throw new NullPointerException();
 			}
+		}, null, (Object o, Engine t)-> {
+			Terminal.println("You aren't able to drink the " + o.compSub + ".");
 		}));
 
 		game.addWord(new Verb("inspect investigate examine scrutinize study observe look", (Word w, Engine t) -> {
 			if (w.represents == t.protag.inventory) {
-				Terminal.println("Try checking your inventory instead.");
+				for (Word word : t.vocabulary) {
+					if (word.checkWord("check")) {
+						for (Word obj : t.vocabulary) {
+							if (obj.checkWord("inventory")) {
+								word.perform(obj, null, t);
+							}
+						}
+					}
+				}
 			} else if (w.represents == t.protag.quests) {
-				Terminal.println("Try checking your quests instead.");
+				for (Word word : t.vocabulary) {
+					if (word.checkWord("check")) {
+						for (Word obj : t.vocabulary) {
+							if (obj.checkWord("quests")) {
+								word.perform(obj, null, t);
+							}
+						}
+					}
+				}
 			} else if (w.represents == "room") {
-				t.inspectRoom(false, null);
+				t.inspectRoom(false, t.roomCache);
 			}
 		}, (Object o, Engine t) -> {
 			if (o.container.isEmpty()) {
-				Terminal.print(t.uRandOf(new String[] { "Upon inspection, you realize that " + o.inspection,
+				Terminal.print(Engine.uRandOf(new String[] { "Upon inspection, you realize that " + o.inspection,
 						"It looks like " + o.inspection, "You now can see that " + o.inspection }));
 			} else {
-				Terminal.print(t.uRandOf(
+				Terminal.print(Engine.uRandOf(
 						new String[] { "Upon inspection, you observe that there is a " + o.container.get(0).compSub,
 								"It looks like there is a " + o.container.get(0).compSub,
 								"You now can see that there is a " + o.container.get(0).compSub }));
@@ -171,6 +191,8 @@ public class Main extends Thread {
 				Terminal.print(" inside the " + o.accessor);
 			}
 			Terminal.println(".");
+		}, null, (Object o, Engine t)-> {
+			Terminal.println("You can't inspect that.");
 		}));
 
 		game.addWord(new Verb("interact talk speak converse negotiate chat gossip", null, (Object o, Engine t) -> {
@@ -180,6 +202,8 @@ public class Main extends Thread {
 			} else {
 				e.interaction.accept(t.protag, t);
 			}
+		}, null, (Object o, Engine t)-> {
+			Terminal.println("You greet the " + o.accessor + ", but it doesn't respond.");
 		}));
 
 		game.addWord(new Verb("attack assault assail hit pummel strike kill destroy", null, (Object o, Engine t) -> {
@@ -204,13 +228,18 @@ public class Main extends Thread {
 					}
 				} catch (Exception e) {
 				}
-				Terminal.println(t.uRandOf(new String[] {"A cry of pain greets your ears.", "The sharp smell of blood fills the air.", 
-						"Something cracks.", "A surge of adrenaline shoots through you."}));
+				Terminal.println(Engine.uRandOf(
+						new String[] { "A cry of pain greets your ears.", "The sharp smell of blood fills the air.",
+								"Something cracks.", "A surge of adrenaline shoots through you." }));
 			}
 			// Terminal.println("You attacked the " + o.accessor + " with the " +
 			// t.protag.weapon.accessor + ".");
 			Terminal.println("Weapon: " + t.protag.weapon.accessor);
 		}, (Object o1, Object with, Engine t) -> {
+			if (!with.holdable) {
+				Terminal.println("You cannot hold that item, and therefore cannot attack with it.");
+				return;
+			}
 			t.protag.weapon = with;
 
 			o1.health -= t.protag.strength + t.protag.weapon.damage;
@@ -231,11 +260,12 @@ public class Main extends Thread {
 					}
 				} catch (Exception e) {
 				}
-				Terminal.println(t.uRandOf(new String[] {"A cry of pain greets your ears.", "The sharp smell of blood fills the air.", 
-						"Something cracks.", "A surge of adrenaline shoots through you."}));
+				Terminal.println(Engine.uRandOf(
+						new String[] { "A cry of pain greets your ears.", "The sharp smell of blood fills the air.",
+								"Something cracks.", "A surge of adrenaline shoots through you." }));
 			}
-			
-		}, "with"));
+
+		}, "with", null, null, null));
 
 		game.addWord(new Verb("hold equip", null, (Object o, Engine t) -> {
 			boolean b = o.holdable;
@@ -246,17 +276,18 @@ public class Main extends Thread {
 				t.protag.rightHand = o;
 				t.protag.inventory.remove(o);
 				Terminal.println("You are now holding a " + o.accessor + ".");
-			} else if (t.protag.currentRoom.objects.contains(o)) {
+			} else if (t.objectsViewed.contains(o)) {
+				removal(o, t);
 				if (t.protag.rightHand != null) {
 					t.protag.inventory.add(t.protag.rightHand);
 				}
 				t.protag.rightHand = o;
-				t.protag.currentRoom.objects.remove(o);
-				removal(o, t);
 				Terminal.println("You are now holding a " + o.accessor + ".");
 			} else {
 				throw new NullPointerException();
 			}
+		}, null, (Object o, Engine t)-> {
+			Terminal.println("You can't hold the " + o.compSub + ".");
 		}));
 
 		game.addWord(
@@ -266,13 +297,14 @@ public class Main extends Thread {
 						throw new NullPointerException();
 					}
 					if (!t.protag.inventory.contains(o)) {
-						t.protag.inventory.add(o);
-						t.protag.currentRoom.objects.remove(o);
 						removal(o, t);
-						Terminal.print("You took the " + o.accessor + ".");
+						t.protag.inventory.add(o);
+						Terminal.println("You took the " + o.accessor + ".");
 					} else {
 						throw new NullPointerException();
 					}
+				}, null, (Object o, Engine t)-> {
+					Terminal.println("The " + o.compSub + " doesn't appear to be something you can merely 'take'.");
 				}));
 
 		game.addWord(new Verb("drop leave put", null, (Object o, Engine t) -> {
@@ -284,19 +316,18 @@ public class Main extends Thread {
 				t.protag.rightHand = t.protag.fist;
 				o.description = "on";
 				o.reference = t.protag.currentRoom.floor;
-				t.protag.currentRoom.objects.add(o);
+				addObject(o, t.protag.x, t.protag.y, t.protag.currentRoom);
 				Terminal.println("You dropped the " + o.accessor + ".");
 			} else if (t.protag.inventory.contains(o)) {
 				t.protag.inventory.remove(o);
 				o.description = "on";
 				o.reference = t.protag.currentRoom.floor;
-
-				t.protag.currentRoom.objects.add(o);
+				addObject(o, t.protag.x, t.protag.y, t.protag.currentRoom);
 				Terminal.println("You dropped the " + o.accessor + ".");
 			} else {
 				Terminal.println("You don't have a " + o.accessor + " to drop.");
 			}
-		}));
+		}, null, null));
 
 		game.addWord(new Verb("give gift supply donate", null, null, (Object gift, Object receiver, Engine t) -> {
 			Iterator<Object> obj = t.protag.inventory.iterator();
@@ -322,7 +353,9 @@ public class Main extends Thread {
 				}
 			}
 
-		}, "to"));
+		}, "to", null, null, (Object gift, Object receiver, Engine t)-> {
+			Terminal.println("You cannot give the " + gift.accessor + " to the " + receiver.accessor + ".");
+		}));
 
 		game.addWord(new Verb("view open check show", (Word n, Engine t) -> {
 			if (n.represents == t.protag.inventory) {
@@ -335,7 +368,7 @@ public class Main extends Thread {
 				}
 
 				if (realStuff.isEmpty()) {
-					Terminal.print("You have nothing in your inventory.");
+					Terminal.print("You have nothing in your inventory");
 				} else {
 					Terminal.print("You have a " + realStuff.get(0).compSub);
 					if (realStuff.size() == 2) {
@@ -358,6 +391,8 @@ public class Main extends Thread {
 					}
 				}
 			}
+		}, null, (Word w, Engine t)-> {
+			Terminal.println("You can't check that.");
 		}, null));
 
 		game.addWord(new Verb("read", null, (Object o, Engine t) -> {
@@ -380,7 +415,7 @@ public class Main extends Thread {
 					for (int i = 0; i < word.length(); i++) {
 						if (word.charAt(i) != '\n') {
 							word = word.substring(0, i)
-									+ t.lRandOf(new String[] { "@", "#", "&", "/", "%", "$", "!", "*", "+" })
+									+ Engine.lRandOf(new String[] { "@", "#", "&", "/", "%", "$", "!", "*", "+" })
 									+ word.substring(i + 1);
 						}
 					}
@@ -402,6 +437,8 @@ public class Main extends Thread {
 									: t.protag.literacy < 8 ? "You can almost read perfectly."
 											: "You're an amazing reader.");
 
+		}, null, (Object o, Engine t)-> {
+			Terminal.println("I don't think that the " + o.compSub + " is something that you can read.");
 		}));
 
 		game.addWord(new Word("inventory", game.protag.inventory));
@@ -410,21 +447,40 @@ public class Main extends Thread {
 		game.addWord(new Word("self me myself player", game.protag));
 		game.addWord(new Word("room area surroundings place around", "room"));
 
-		game.addWord(new Direction("north forwards forward ahead onward", "12"));
-		game.addWord(new Direction("south backwards backward back ", "10"));
+		game.addWord(new Direction("north forwards forward ahead onward", "10"));
+		game.addWord(new Direction("south backwards backward back ", "12"));
 		game.addWord(new Direction("east right", "21"));
 		game.addWord(new Direction("west left", "01"));
 	}
-
+	public void addObject(Object o, int x, int y, Room r) {
+		o.x = x;
+		o.y = y;
+		r.area[x][y] = o;
+	}
 	public static void removal(Object o, Engine t) {
+		Room r = t.protag.currentRoom;
+		Player p = t.protag;
+		for(Object[] objs : r.area) {
+			for(int i = 0; i < objs.length; i++) {
+				if(objs[i] == o) {
+					r.objects.remove(o);
+					p.inventory.remove(o);
+					try {
+						objs[i] = o.reference;
+					} catch (Exception e) {
+						objs[i] = r.floor;
+					}
+				}
+			}
+		}
 		try {
-			o.referencer.reference = t.protag.currentRoom.floor;
-			o.referencer.description = t.lRandOf(new String[] { "lying", "sitting", "resting" }) + " on";
+			o.referencer.reference = r.floor;
+			o.referencer.description = Engine.lRandOf(new String[] { "lying", "sitting", "resting" }) + " on";
 		} catch (Exception e) {
 		}
 		try {
-			if (o.reference != t.protag.currentRoom.floor) {
-				o.reference.reference = t.protag.currentRoom.floor;
+			if (o.reference != r.floor) {
+				o.reference.reference = r.floor;
 				o.reference.description = "on";
 			}
 		} catch (Exception e) {
