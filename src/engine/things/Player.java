@@ -21,10 +21,12 @@ public class Player extends Object {
 	public Object weapon;
 	public Object fist = new Object("[fist]", (String) null, null);
 	public Object rightHand = fist;
-
+	public int x;
+	public int y;
 	public Player(int x, int y) {
 		super("[player]", (String) null, null);
-
+		this.x = x;
+		this.y = y;
 		fist.abstractNoun();
 		inventory.add(fist);
 		weapon = fist;

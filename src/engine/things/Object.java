@@ -21,6 +21,9 @@ public class Object {
 	public Integer maxHealth = 10;
 	public boolean abstractObj = false;
 	public boolean poisonous = false;
+	public char label = ' ';
+	public int x = 0;
+	public int y = 0;
 
 	public enum type {
 		crumples, shatters, squishes, bruises
