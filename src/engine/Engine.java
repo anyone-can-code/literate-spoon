@@ -120,7 +120,7 @@ public class Engine {
 	public ArrayList<Object> objectCache = new ArrayList<Object>();
 	public ArrayList<Object> objectsViewed = new ArrayList<Object>();
 	public float[][] view = new float[1000][1000];
-
+	int kl = 0;
 	public void inspectRoom(boolean updated, Room roomCache) {
 		if (protag.health <= 90) {
 			Terminal.println(protag.health > 50 ? "You are feeling slightly injured."
@@ -411,6 +411,7 @@ public class Engine {
 								objectQueue.add(obj);
 							}
 						}
+						Main.removal(o, this);
 						objectIt.remove();
 					}
 				} else if (!o.alive && o.health <= 0) {
@@ -429,13 +430,15 @@ public class Engine {
 	public void distribute(Room r, Object o, Object obj) {
 		int area = 1;
 		int i = 0;
-		while (i < 1000) {
+		while (i++ < 1000) {
 			obj.x = o.x + rand.nextInt(2 + area) - area;
 			obj.y = o.y + rand.nextInt(2 + area) - area;
-			if (r.area[obj.x][obj.y] == r.floor)
+			if (r.area[obj.x][obj.y] == r.floor) {
 				r.area[obj.x][obj.y] = obj;
-			else if (i == 500 || i == 750)
+				break;
+			} else if (i == 500 || i == 750) {
 				area++;
+			}
 		}
 	}
 	

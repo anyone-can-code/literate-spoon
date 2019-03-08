@@ -55,7 +55,7 @@ public class Window extends Application {
 	public static volatile VBox stack = new VBox();
 	public static volatile VBox map = new VBox();
 	public static volatile String enterStack = "";
-	public boolean skipStart = false; // for quick testing
+	public boolean skipStart = true; // for quick testing
 	public boolean enterText = false;
 	public static int moveX = 0;
 	public static int moveY = 0;

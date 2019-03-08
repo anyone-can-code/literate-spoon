@@ -231,20 +231,25 @@ public class Main extends Thread {
 				Terminal.println(Engine.uRandOf(
 						new String[] { "A cry of pain greets your ears.", "The sharp smell of blood fills the air.",
 								"Something cracks.", "A surge of adrenaline shoots through you." }));
+			} else {
+			Terminal.println("You attacked the " + o.accessor + " with the " +
+			t.protag.weapon.accessor + ".");
 			}
-			// Terminal.println("You attacked the " + o.accessor + " with the " +
-			// t.protag.weapon.accessor + ".");
-			Terminal.println("Weapon: " + t.protag.weapon.accessor);
-		}, (Object o1, Object with, Engine t) -> {
+		}, (Object o, Object with, Engine t) -> {
 			if (!with.holdable) {
 				Terminal.println("You cannot hold that item, and therefore cannot attack with it.");
 				return;
+			} else {
+				if (!t.protag.inventory.contains(with)) {
+					removal(with, t);
+					t.protag.inventory.add(with);
+				}
 			}
 			t.protag.weapon = with;
 
-			o1.health -= t.protag.strength + t.protag.weapon.damage;
+			o.health -= t.protag.strength + t.protag.weapon.damage;
 			t.protag.health -= t.protag.strength + t.protag.weapon.playerDamage;
-			if (o1.equals(t.protag) && t.protag.health <= 0) {
+			if (o.equals(t.protag) && t.protag.health <= 0) {
 				Terminal.println("You killed yourself. Nice job.");
 				return;
 			}
@@ -252,9 +257,9 @@ public class Main extends Thread {
 				t.protag.weapon.health -= t.protag.strength;
 			}
 
-			if (o1.alive) {
+			if (o.alive) {
 				try {
-					Entity e = (Entity) o1;
+					Entity e = (Entity) o;
 					if (e.anger < e.restraint) {
 						e.anger = e.restraint;
 					}
@@ -263,6 +268,9 @@ public class Main extends Thread {
 				Terminal.println(Engine.uRandOf(
 						new String[] { "A cry of pain greets your ears.", "The sharp smell of blood fills the air.",
 								"Something cracks.", "A surge of adrenaline shoots through you." }));
+			} else {
+				Terminal.println("You attacked the " + o.accessor + " with the " +
+						t.protag.weapon.accessor + ".");
 			}
 
 		}, "with", null, null, null));
