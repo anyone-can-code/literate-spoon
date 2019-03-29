@@ -3,6 +3,13 @@
   <groupId>literate-spoon</groupId>
   <artifactId>literate-spoon</artifactId>
   <version>0.0.1-SNAPSHOT</version>
+  <dependencies>
+    <dependency>
+	<groupId>org.openjfx</groupId>
+	<artifactId>javafx-controls</artifactId>
+	<version>11.0.2</version>
+    </dependency>
+  </dependencies>
   <build>
     <sourceDirectory>src</sourceDirectory>
     <resources>
@@ -19,9 +26,25 @@
         <version>3.8.0</version>
         <configuration>
           <source>1.8</source>
-          <target>1.8</target>
-        </configuration>
+	  <target>1.8</target>
+	</configuration>
       </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.6.0</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>java</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <mainClass>engine.Window</mainClass>
+        </configuration>
+</plugin>
+	
     </plugins>
   </build>
 </project>
